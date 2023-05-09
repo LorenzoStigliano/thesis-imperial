@@ -1,0 +1,4 @@
+data/
+data_unprocessed/
+model_data/
+__pycache__/
