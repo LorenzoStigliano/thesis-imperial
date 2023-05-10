@@ -1,4 +1,5 @@
 data/
 data_unprocessed/
 model_data/
+figures/
 __pycache__/
