@@ -96,18 +96,21 @@ def gnn_scores(rep_dict, tt, save_fig=False):
     # title
     dataname = rep_dict['dataset']
     fig.suptitle('Overall reproducibility matrix for '+dataname+' dataset \n with ' + tt +' training', fontsize=24)
+    plt.show()
     return rep_sum
 
-datasets= ['Demo']
+datasets= ['gender_data']
 #datasets= ['RH_ADLMCI']
 for dataset_i in datasets:
     rep_data = dataset_i + '_cv.pickle'
     with open(rep_data,'rb') as f:
         rep_dict = pickle.load(f)
     gnn_scores(rep_dict, 'CV', save_fig=True)
-    
+
+"""
 for dataset_i in datasets:
     rep_data = dataset_i + '_fs.pickle'
     with open(rep_data,'rb') as f:
         rep_dict = pickle.load(f)
     gnn_scores(rep_dict, 'FS', save_fig=True)
+"""  

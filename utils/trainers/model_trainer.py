@@ -5,8 +5,11 @@ import random
 import numpy as np
 import sklearn.metrics as metrics
 from torch.autograd import Variable
+import torch.nn.functional as F
 
 from models.gcn import GCN
+from models.gcn_student import GCN_STUDENT
+from models.mlp import MLP
 from models.gat import GAT
 import models.diffpool as DIFFPOOL
 
@@ -61,6 +64,9 @@ def evaluate(dataset, model, model_args, threshold_value, model_name):
             assign_input = torch.unsqueeze(assign_input, 0)
             ypred= model(features, adj, batch_num_nodes, assign_x=assign_input)
         
+        elif model_args["model_name"] == "mlp":
+            features = torch.mean(features, axis=1)
+            ypred = model(features)[1]
         else:
             ypred = model(features, adj)
 
@@ -141,12 +147,17 @@ def train(model_args, train_dataset, val_dataset, model, threshold_value, model_
                 assign_input = Variable(torch.from_numpy(assign_input).float(), requires_grad=False).to(device)
                 assign_input = torch.unsqueeze(assign_input, 0)
                 ypred= model(features, adj, batch_num_nodes, assign_x=assign_input)
+            elif model_args["model_name"] == "mlp":
+                features = torch.mean(features, axis=1)
+                ypred = model(features)[1]
             else:
                 ypred= model(features, adj)
 
+            
             _, indices = torch.max(ypred, 1)
             preds.append(indices.cpu().data.numpy())
             labels.append(data['label'].long().numpy())
+            
             loss = model.loss(ypred, label)
             
             model.zero_grad()
@@ -239,7 +250,9 @@ def cv_benchmark(model_args, G_list, model_name, cv_number, view):
                 nclass = num_classes,
                 dropout = model_args["dropout"]
             ).to(device)
-        
+            pytorch_total_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
+            print("NUMBER OF PARAMS:", pytorch_total_params)
+
         elif model_args["model_name"]=='gat':
             model = GAT(
                 nfeat=num_nodes, 
@@ -248,6 +261,23 @@ def cv_benchmark(model_args, G_list, model_name, cv_number, view):
                 dropout=model_args['dropout'], 
                 nheads=model_args['nb_heads'], 
                 alpha=model_args['alpha']).to(device)   
+        
+        elif model_args["model_name"] == "gcn_student":
+            model = GCN_STUDENT(
+                nfeat = num_nodes,
+                nhid = model_args["hidden_dim"],
+                nclass = num_classes,
+                dropout = model_args["dropout"]
+            ).to(device) 
+        
+        elif model_args["model_name"] == "mlp":
+            model = MLP(
+                num_layers=model_args["num_layers"], 
+                input_dim=num_nodes, 
+                hidden_dim=model_args["hidden_dim"], 
+                output_dim=2, 
+                dropout_ratio=model_args["dropout_ratio"]
+                )  
 
         test_acc = train(model_args, train_dataset, val_dataset, model, threshold_value, model_name+"_CV_"+str(i)+"_view_"+str(view))
         test_accs.append(test_acc)

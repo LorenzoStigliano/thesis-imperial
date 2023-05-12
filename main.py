@@ -45,6 +45,12 @@ def train_main_model(dataset,model,view, cv_number):
     if model=='gcn':
         test_scores(gcn_args, G_list, view, model_name, cv_number)
     
+    elif model=='gcn_student':
+        test_scores(gcn_student_args, G_list, view, model_name, cv_number)
+    
+    elif model=='mlp':
+        test_scores(mlp_args, G_list, view, model_name, cv_number)
+    
     elif model=='gat':
         test_scores(gat_args, G_list, view, model_name, cv_number)
     
@@ -115,14 +121,14 @@ if __name__ == '__main__':
         Training GNN Models with datasets of data directory.
         '''
         datasets_asdnc = ['gender_data']
-        
-        views = [1]
+        views = [3, 4, 5] #0, 1, 2, 3, 4, 5
         for dataset_i in datasets_asdnc:
             for view_i in views:
-                models = ["sag"]
+                models = ["gcn_student", "gcn"]
                 for model in models:
-                    train_main_model(dataset_i, model, view_i, 3)
-                    #two_shot_train(dataset_i, model, view_i, num_shots)
+                    for cv in [3,5,10]:
+                        train_main_model(dataset_i, model, view_i, cv)
+                        #two_shot_train(dataset_i, model, view_i, num_shots)
                    
             print("All GNN architectures are trained with dataset: "+dataset_i)
           

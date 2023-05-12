@@ -2,7 +2,7 @@ from sklearn import preprocessing
 from torch_geometric import utils
 from torch_geometric.data import Data
 
-from config import SAVE_DIR_DATA
+from utils.config import SAVE_DIR_DATA
 
 import pickle
 import torch

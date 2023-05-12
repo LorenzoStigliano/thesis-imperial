@@ -118,30 +118,30 @@ def plot_bar_chart(dataset, views, models, folds, metric, save_fig=False):
         plt.title(title)
         plt.legend()
 
-    if save_fig:
-        if not os.path.exists(SAVE_DIR_FIGS+"results/"):
-            os.makedirs(SAVE_DIR_FIGS+"results/")
+        if save_fig:
+            if not os.path.exists(SAVE_DIR_FIGS+"results/"):
+                os.makedirs(SAVE_DIR_FIGS+"results/")
+            
+            plt.savefig(SAVE_DIR_FIGS+"results/"+title+".png", dpi=150)
+            plt.clf()
         
-        plt.savefig(SAVE_DIR_FIGS+"results/"+title+".png", dpi=150)
-        plt.clf()
-    
-    else:
-        plt.show()
-        plt.clf()     
+        else:
+            plt.show()
+            plt.clf()     
 
 ################################ PLOT DATA ################################
 
 np.random.seed(0)
 random.seed(0)
 
-plot_bar_chart(dataset="gender_data", views=[1], models=[ "gcn", "gat", "diffpool", "gunet", "sag"], folds=3, metric="acc", save_fig=True)
-plot_bar_chart(dataset="gender_data", views=[1], models=[ "gcn", "gat", "diffpool", "gunet", "sag"], folds=3, metric="prec", save_fig=True)
-plot_bar_chart(dataset="gender_data", views=[1], models=[ "gcn", "gat", "diffpool", "gunet", "sag"], folds=3, metric="recall", save_fig=True)
-plot_bar_chart(dataset="gender_data", views=[1], models=[ "gcn", "gat", "diffpool", "gunet", "sag"], folds=3, metric="F1", save_fig=True)
+plot_bar_chart(dataset="gender_data", views=[0, 1], models=[ "gcn", "gat", "diffpool", "gunet", "sag"], folds=3, metric="acc", save_fig=True)
+plot_bar_chart(dataset="gender_data", views=[0, 1], models=[ "gcn", "gat", "diffpool", "gunet", "sag"], folds=3, metric="prec", save_fig=True)
+plot_bar_chart(dataset="gender_data", views=[0, 1], models=[ "gcn", "gat", "diffpool", "gunet", "sag"], folds=3, metric="recall", save_fig=True)
+plot_bar_chart(dataset="gender_data", views=[0, 1], models=[ "gcn", "gat", "diffpool", "gunet", "sag"], folds=3, metric="F1", save_fig=True)
 
 for model in [ "gcn", "gat", "diffpool", "gunet", "sag"]:
-    plot_learning_curves(dataset="gender_data", views=[1], model=model, folds=3, save_fig=True)
+    plot_learning_curves(dataset="gender_data", views=[0, 1], model=model, folds=3, save_fig=True)
 
-plot_random_sample("gender_data", [1,4], True)
-plot_random_sample("gender_data", [1,4], True)
-plot_random_sample("gender_data", [1,4], True)
+plot_random_sample("gender_data", [0,1], True)
+plot_random_sample("gender_data", [0,1], True)
+plot_random_sample("gender_data", [0,1], True)

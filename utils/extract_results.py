@@ -14,13 +14,11 @@ import seaborn as sns
 import matplotlib
 import torch
 
+from config import SAVE_DIR_MODEL_DATA
+
 def extract_weights_single(dataset, view, model, training_type, shot_n, cv_n):
-    if model == 'sag':
-        fs_path = '{}/weights/W_{}_{}_{}_view_{}_{}.pickle'.format(model, training_type, dataset, model, view, shot_n)
-        cv_path = '{}/weights/W_MainModel_{}_{}_{}_view_{}_CV_{}.pickle'.format(model,training_type, dataset, model, view, cv_n)
-    else:
-        fs_path = '{}/weights/W_{}_{}_{}{}_view_{}.pickle'.format(model, training_type, dataset, model, shot_n, view)
-        cv_path = '{}/weights/W_MainModel_{}_{}_{}_CV_{}_view_{}.pickle'.format(model,training_type, dataset, model, cv_n, view)
+    fs_path = SAVE_DIR_MODEL_DATA+'{}/weights/W_{}_{}_{}{}_view_{}.pickle'.format(model, training_type, dataset, model, shot_n, view)
+    cv_path = SAVE_DIR_MODEL_DATA+'{}/weights/W_MainModel_{}_{}_{}_CV_{}_view_{}.pickle'.format(model,training_type, dataset, model, cv_n, view)
     if training_type == 'Few_Shot':
         x_path = fs_path
     else: 
@@ -46,6 +44,8 @@ def extract_weights(dataset, view, model, training_type):
             runs.append(extract_weights_single(dataset, view, model, training_type, shot_i, 0))
     if training_type == '3Fold':
         for cv_i in range(3):
+            print("EXTRACT WEIGHTS")
+            print(dataset, view, model, training_type)
             runs.append(extract_weights_single(dataset, view, model, training_type, 0, cv_i))
     if training_type == '5Fold':
         for cv_i in range(5):
@@ -101,8 +101,9 @@ def sim_respective_weighted(rank1, rank2, strength1, strength2): # ongoing
         return weighted_intersection 
     else:
         print('nodes vectors are not caompatible')
-        
-def view_specific_rep(dataset,view,training_type, models):
+
+#OVER ONE VIEW        
+def view_specific_rep(dataset, view, training_type, models):
     #models = ['diffpool', 'gat', 'gcn', 'gunet', 'sag']
     Ks = [5, 10, 15, 20]
     rep = np.zeros([len(models), len(models), len(Ks)])
@@ -124,14 +125,17 @@ def view_specific_rep(dataset,view,training_type, models):
     rep_dict['training_type'] = training_type
     return rep_dict
 
+#OVER ALL VIEWS for EACH MODEL (model x model x views)
 def overall_avg_rep_cv_fixed(data_dict, training_type):
     dataset = data_dict['dataset']
     views = data_dict['views']
     models = data_dict['models']
     rep = np.zeros([len(models), len(models), len(views)])
+    i = 0
     for view in views:
         rep_dict = view_specific_rep(dataset,view,training_type,models)
-        rep[:,:,view] = rep_dict['matrix']
+        rep[:,:,i] = rep_dict['matrix']
+        i+=1
     rep_mean = np.mean(rep, axis=2)
     rep_dict = {}
     rep_dict['matrix'] = rep_mean
@@ -139,7 +143,8 @@ def overall_avg_rep_cv_fixed(data_dict, training_type):
     rep_dict['dataset'] = dataset
     rep_dict['training_type'] = training_type
     return rep_dict
-        
+
+#GET THE views average matrix        
 def overall_avg_rep(data_dict):
     models = data_dict['models']
     dataset = data_dict['dataset']
@@ -168,7 +173,8 @@ def overall_avg_rep_plot(rep_dict, save_fig=False):
         plt.savefig("./imgs/Rep_"+ rep_dict['dataset'] + '_avg'+".png")
     plt.show()
     plt.close()
-    
+
+# get the reproducability matrix for all views (view x view x thresholds) for a model    
 def GNN_specific_rep_vect(dataset,views,training_type, model):
     #models = ['diffpool', 'gat', 'gcn', 'gunet', 'sag']
     Ks = [5, 10, 15, 20]
@@ -186,13 +192,14 @@ def GNN_specific_rep_vect(dataset,views,training_type, model):
     rep_vec = np.sum(rep_mean, axis=1)
     rep_dict = {}
     rep_dict['strength_vector'] = rep_vec
-    rep_dict['rank_vector'] = rep_vec.argsort()[::-1].argsort() # verified
+    rep_dict['rank_vector'] = rep_vec.argsort()[::-1].argsort() # verified (RANK VECOTR USED FOR COEFFICIENT IS JUST THE SUM OVER THE VIEWS SO SIZE views x 1)
     rep_dict['dataset'] = dataset
     rep_dict['views'] = views
     rep_dict['model'] = model
     rep_dict['training_type'] = training_type
     return rep_dict
 
+# rank correlation matrix for one training type (fixed)
 def overall_corr_rep_cv_fixed(data_dict, training_type):
     dataset = data_dict['dataset']
     views = data_dict['views']
@@ -207,7 +214,7 @@ def overall_corr_rep_cv_fixed(data_dict, training_type):
             rep_vect_j = GNN_specific_rep_vect(dataset,views,training_type, models[j])
             rep_rank_j = rep_vect_j['rank_vector']
             rep_strength_j = rep_vect_j['strength_vector']
-            corr_rank = np.corrcoef(rep_rank_i, rep_rank_j)
+            corr_rank = np.corrcoef(rep_rank_i, rep_rank_j) #CORRELATION COEFFICIENT
             corr_strength = np.corrcoef(rep_strength_i, rep_strength_j)
             rep_rank[i,j] = corr_rank[0,1]
             rep_strength[i,j] = corr_strength[0,1] 
@@ -220,6 +227,7 @@ def overall_corr_rep_cv_fixed(data_dict, training_type):
     rep_dict['training_type'] = training_type
     return rep_dict
 
+# rank correlation matrix for average over all the training types OUTPUT models x models (rank_matrix)
 def overall_corr_rep(data_dict):
     models = data_dict['models']
     dataset = data_dict['dataset']
@@ -252,7 +260,7 @@ def overall_corr_rep_plot(rep_dict, corr_type='rank', save_fig=False):
     plt.show()
     plt.close()  
     
-def GNN_specific_rep_accumulated_vect(dataset,views,training_type, model):
+def GNN_specific_rep_accumulated_vect(dataset, views, training_type, model):
     #models = ['diffpool', 'gat', 'gcn', 'gunet', 'sag']
     Ks = [5, 10, 15, 20]
     rep = np.zeros([len(views), len(views), len(Ks)])
@@ -266,7 +274,7 @@ def GNN_specific_rep_accumulated_vect(dataset,views,training_type, model):
                 top_bio_j = top_biomarkers(weights_j, Ks[k])
                 rep[i,j,k] = sim(top_bio_i, top_bio_j)
     rep_ranks_ks = np.zeros(len(views) * len(Ks))
-    
+
     for k in range(rep.shape[2]):
         rep_k = rep[:,:,k]
         rep_vec_k = np.sum(rep_k, axis=1)
@@ -443,8 +451,8 @@ overall_corr_rep_plot(rep_corr, corr_type='strength', save_fig = True) '''
 #overall_rep_accumulated_plot(aa)
 
 data_dict={}
-data_dict['dataset'] = 'Demo' # 'LH_ADLMCI'
-data_dict['views'] = [0, 1, 2, 3] #number of views 
+data_dict['dataset'] = 'gender_data' # 'LH_ADLMCI'
+data_dict['views'] = [0,1] #number of views 
 data_dict['models'] = ['diffpool', 'gat', 'gcn', 'gunet', 'sag']
 data_dict['training_types'] = ['3Fold'] #'Few_Shot'
 
@@ -453,9 +461,10 @@ name = data_dict['dataset'] + '_cv.pickle'
 with open(name, 'wb') as f:
     pickle.dump(rep_dict, f)
 
+"""
 data_dict={}
 data_dict['dataset'] = 'Demo' # 'LH_ADLMCI'
-data_dict['views'] = [0, 1, 2, 3] #number of views 
+data_dict['views'] = [1] #number of views 
 data_dict['models'] = ['diffpool', 'gat', 'gcn', 'gunet', 'sag']
 data_dict['training_types'] = ['Few_Shot'] #'Few_Shot'
 
@@ -463,6 +472,8 @@ rep_dict = manage_all_reps(data_dict)
 name = data_dict['dataset'] + '_fs.pickle'
 with open(name, 'wb') as f:
     pickle.dump(rep_dict, f)
+"""
+
 
 
 

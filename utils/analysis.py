@@ -5,7 +5,6 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sn
 import matplotlib
-from utils.config import SAVE_DIR_MODEL_DATA
 
 ## This variable used to check if the models are trained.
 is_trained = False
