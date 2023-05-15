@@ -10,18 +10,6 @@ from utils.builders import new_folder
 from utils.loaders import load_data
 
 def train_main_model(dataset,model,view, cv_number):
-    """
-    Parameters
-    ----------
-    dataset : dataset
-    model : GNN model (diffpool, gat, gcn, gunet or sag)
-    view : index of cortical morphological network. 
-    
-    Description
-    ----------
-    This method trains selected GNN model with 5-Fold Cross Validation.
-    
-    """    
     torch.manual_seed(0)
     np.random.seed(0)
     random.seed(0)   

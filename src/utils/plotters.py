@@ -202,14 +202,14 @@ plot_random_sample("gender_data", [0,1], True)
 plot_random_sample("gender_data", [0,1], True)
 """
 
-#plot_bar_chart(dataset="gender_data", views=[0,1,2,3,4,5], models=["gcn", "gcn_student", "gcn_student_teacher"], folds=3, metric="acc", save_fig=False)
+#plot_bar_chart(dataset="gender_data", views=[5], models=["gcn", "gcn_student", "gcn_student_teacher"], folds=3, metric="acc", save_fig=False)
 
 """
-for cv in [3,5, 10]:
+for cv in [3, 5, 10]:
     plot_bar_chart(dataset="gender_data", views=[0,1,2,3,4,5], models=["gcn", "gcn_student"], folds=cv, metric="acc", save_fig=True)
 
 plot_bar_chart_rep(dataset="gender_data", views=[0,1,2,3,4,5], models=["gcn", "gcn_student", "gcn_student_teacher"], CV=["3Fold", "5Fold", "10Fold"], save_fig=False)
 
 """
 
-plot_bar_chart_rep(dataset="gender_data", views=[0, 1, 2, 3, 4, 5], models=["gcn", "gcn_student", "gcn_student_teacher"], CV=["3Fold", "5Fold", "10Fold"], save_fig=True)
+plot_bar_chart_rep(dataset="gender_data", views=[0, 1, 2, 3, 4, 5], models=["gcn", "gcn_student", "gcn_student_teacher"], CV=["3Fold", "5Fold", "10Fold"], save_fig=False)
