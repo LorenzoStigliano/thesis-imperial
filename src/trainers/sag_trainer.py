@@ -9,7 +9,7 @@ import pickle
 import utils.analysis as analysis
 import random
 import numpy as np
-from utils.config import SAVE_DIR_MODEL_DATA, SAVE_DIR_TWO_SHOT_PROCESSED, SAVE_DIR_CV_PROCESSED
+from config import SAVE_DIR_MODEL_DATA, SAVE_DIR_TWO_SHOT_PROCESSED, SAVE_DIR_CV_PROCESSED
 
 device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 

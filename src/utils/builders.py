@@ -1,7 +1,7 @@
 import os 
 import scipy.io as sio
 import pickle
-from utils.config import DATA_DIR, SAVE_DIR_DATA, DATASET, SAVE_DIR_MODEL_DATA
+from config import DATA_DIR, SAVE_DIR_DATA, DATASET, SAVE_DIR_MODEL_DATA
 
 def dump_data(data_dir, save_dir, dataset):
 

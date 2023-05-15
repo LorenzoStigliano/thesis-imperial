@@ -4,9 +4,9 @@ import random
 import argparse
 import numpy as np
 
-from utils.trainers.model_trainer import test_scores, two_shot_trainer
-import utils.trainers.gunet_trainer as gunet_trainer
-import utils.trainers.sag_trainer as sag_trainer
+from trainers.model_trainer import test_scores, two_shot_trainer
+import trainers.gunet_trainer as gunet_trainer
+import trainers.sag_trainer as sag_trainer
 
 from models.model_config import * 
 
@@ -124,7 +124,7 @@ if __name__ == '__main__':
         views = [3, 4, 5] #0, 1, 2, 3, 4, 5
         for dataset_i in datasets_asdnc:
             for view_i in views:
-                models = ["gcn_student", "gcn"]
+                models = ["gcn", "gcn_student"]
                 for model in models:
                     for cv in [3,5,10]:
                         train_main_model(dataset_i, model, view_i, cv)
@@ -142,4 +142,3 @@ if __name__ == '__main__':
             Rep_heatmap(dataset, view)
             print("Reproducibility Histogram of dataset "+dataset+" is saved into results file.")
         '''
- 

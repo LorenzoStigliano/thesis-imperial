@@ -56,6 +56,7 @@ class GCN(nn.Module):
         self.gc1 = GraphConvolution(nfeat, nhid)
         self.gc2 = GraphConvolution(nhid, nclass)
         self.dropout = dropout
+        #for each class we get a score and then softmax over the classes 
         self.LinearLayer = nn.Linear(nfeat,1)
         self.is_trained = False
 

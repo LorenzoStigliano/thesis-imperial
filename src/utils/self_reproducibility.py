@@ -11,8 +11,12 @@ from config import SAVE_DIR_MODEL_DATA
 
 
 def extract_weights_single(dataset, view, model, training_type, shot_n, cv_n):
-    fs_path = SAVE_DIR_MODEL_DATA+'{}/weights/W_{}_{}_{}{}_view_{}.pickle'.format(model, training_type, dataset, model, shot_n, view)
-    cv_path = SAVE_DIR_MODEL_DATA+'{}/weights/W_MainModel_{}_{}_{}_CV_{}_view_{}.pickle'.format(model,training_type, dataset, model, cv_n, view)
+    if "teacher" in model:
+        model = "_".join(model.split("_")[:2]) 
+        cv_path = SAVE_DIR_MODEL_DATA+'{}/weights/W_MainModel_{}_{}_{}_CV_{}_view_{}_teacher.pickle'.format(model, training_type, dataset, model, cv_n, view)
+    else:
+        fs_path = SAVE_DIR_MODEL_DATA+'{}/weights/W_{}_{}_{}{}_view_{}.pickle'.format(model, training_type, dataset, model, shot_n, view)
+        cv_path = SAVE_DIR_MODEL_DATA+'{}/weights/W_MainModel_{}_{}_{}_CV_{}_view_{}.pickle'.format(model,training_type, dataset, model, cv_n, view)
     if training_type == 'Few_Shot':
         x_path = fs_path
     else: 
@@ -85,8 +89,8 @@ def view_specific_rep(dataset, view, model, CV):
                 top_bio_j = top_biomarkers(weights_j, Ks[k])
                 rep[i,j,k] = sim(top_bio_i, top_bio_j)
     
-    rep_mean = np.mean(rep, axis=2)
     
+    rep_mean = np.mean(rep, axis=2)
     # Get the elements above the diagonal
     elements_above_diagonal = np.where(np.triu(np.ones_like(rep_mean), k=1), rep_mean, np.nan)
 
@@ -95,13 +99,15 @@ def view_specific_rep(dataset, view, model, CV):
     
     return average
 
+####### USAGE #######
+"""
+
 CV = ["3Fold", "5Fold", "10Fold"]
 views = [0, 1, 2, 3, 4, 5]
 
 for view in views: 
+    gcn_rep_score             = view_specific_rep(dataset="gender_data", view=view, model="gcn", CV=CV)
+    gcn_student_score         = view_specific_rep(dataset="gender_data", view=view, model="gcn_student", CV=CV)
+    gcn_student_teacher_score = view_specific_rep(dataset="gender_data", view=view, model="gcn_student_teacher", CV=CV)
 
-    gcn_rep_score     = view_specific_rep(dataset="gender_data", view=view, model="gcn", CV=CV)
-    gcn_student_score = view_specific_rep(dataset="gender_data", view=view, model="gcn_student", CV=CV)
-    
-    print("View:{}, Teacher network score:{}, Student network score:{}".format(view, gcn_rep_score, gcn_student_score))
-
+"""

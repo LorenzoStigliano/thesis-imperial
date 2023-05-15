@@ -15,13 +15,12 @@ import models.diffpool as DIFFPOOL
 
 
 from utils.helpers import *
-from utils.config import SAVE_DIR_MODEL_DATA, SAVE_DIR_TWO_SHOT_VIEWS
+from config import SAVE_DIR_MODEL_DATA, SAVE_DIR_TWO_SHOT_VIEWS
 
 torch.manual_seed(0)
 np.random.seed(0)
 random.seed(0)
 
-device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 
 def evaluate(dataset, model, model_args, threshold_value, model_name):
     """
@@ -92,6 +91,7 @@ def evaluate(dataset, model, model_args, threshold_value, model_name):
     if model_args["evaluation_method"] == 'model selection':
         name = 'Validation'
     print(name, " accuracy:", result['acc'])
+    
     return result['acc']
 
 def train(model_args, train_dataset, val_dataset, model, threshold_value, model_name):
@@ -116,7 +116,6 @@ def train(model_args, train_dataset, val_dataset, model, threshold_value, model_
     optimizer = torch.optim.Adam(params, lr=model_args["lr"], weight_decay=model_args['weight_decay'])
     test_accs = []
     train_loss=[]
-    val_acc=[]
     
 
     for epoch in range(model_args["num_epochs"]):
@@ -153,7 +152,6 @@ def train(model_args, train_dataset, val_dataset, model, threshold_value, model_
             else:
                 ypred= model(features, adj)
 
-            
             _, indices = torch.max(ypred, 1)
             preds.append(indices.cpu().data.numpy())
             labels.append(data['label'].long().numpy())
@@ -175,7 +173,6 @@ def train(model_args, train_dataset, val_dataset, model, threshold_value, model_
         labels = np.hstack(labels)
         print("Train accuracy : ", np.mean( preds == labels ))
         test_acc = evaluate(val_dataset, model, model_args, threshold_value, model_name)
-        val_acc.append(test_acc)
         print('Avg loss: ', avg_loss, '; epoch time: ', total_time)
         test_accs.append(test_acc)
         train_loss.append(avg_loss)
@@ -217,8 +214,6 @@ def cv_benchmark(model_args, G_list, model_name, cv_number, view):
     """
     test_accs = []
     folds = stratify_splits(G_list, cv_number)
-    
-    print(len(folds[0]))
     
     [random.shuffle(folds[i]) for i in range(len(folds))]
     
