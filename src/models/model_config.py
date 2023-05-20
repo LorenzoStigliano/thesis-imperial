@@ -7,7 +7,7 @@ gcn_args = {
     "dropout":0,
     "threshold":"median", # Threshold the graph adjacency matrix. Possible values: no_threshold, median, mean
     "model_name":"gcn",
-    "evaluation_method": "model assessment" # model selection or model assessment
+    "evaluation_method": "model_assessment" # model selection or model assessment
 }
 
 gcn_student_args = {
@@ -18,7 +18,7 @@ gcn_student_args = {
     "dropout":0,
     "threshold":"median", # Threshold the graph adjacency matrix. Possible values: no_threshold, median, mean
     "model_name":"gcn_student",
-    "evaluation_method": "model assessment" # model selection or model assessment
+    "evaluation_method": "model_assessment" # model selection or model assessment
 }
 
 mlp_args = {

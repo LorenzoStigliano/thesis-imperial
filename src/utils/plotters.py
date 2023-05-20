@@ -212,4 +212,4 @@ plot_bar_chart_rep(dataset="gender_data", views=[0,1,2,3,4,5], models=["gcn", "g
 
 """
 
-plot_bar_chart_rep(dataset="gender_data", views=[0, 1, 2, 3, 4, 5], models=["gcn", "gcn_student", "gcn_student_teacher"], CV=["3Fold", "5Fold", "10Fold"], save_fig=False)
+plot_bar_chart_rep(dataset="gender_data", views=[0], models=["gcn", "gcn_student"], CV=["3Fold", "5Fold", "10Fold"], save_fig=False)

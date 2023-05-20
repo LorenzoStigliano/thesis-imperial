@@ -9,28 +9,36 @@ import torch
 
 from config import SAVE_DIR_MODEL_DATA
 
-
 def extract_weights_single(dataset, view, model, training_type, shot_n, cv_n):
     if "teacher" in model:
         model = "_".join(model.split("_")[:2]) 
-        cv_path = SAVE_DIR_MODEL_DATA+'{}/weights/W_MainModel_{}_{}_{}_CV_{}_view_{}_teacher.pickle'.format(model, training_type, dataset, model, cv_n, view)
+        cv_path = SAVE_DIR_MODEL_DATA+'model_assessment/{}/weights/W_MainModel_{}_{}_{}_run_0_CV_{}_view_{}_with_teacher.pickle'.format(model, training_type, dataset, model, cv_n, view)
+        #cv_path_2 = SAVE_DIR_MODEL_DATA+'{}/weights/W_MainModel_{}_{}_{}_CV_{}_view_{}_with_teacher.pickle'.format(model, training_type, dataset, model, cv_n, view)
     else:
-        fs_path = SAVE_DIR_MODEL_DATA+'{}/weights/W_{}_{}_{}{}_view_{}.pickle'.format(model, training_type, dataset, model, shot_n, view)
-        cv_path = SAVE_DIR_MODEL_DATA+'{}/weights/W_MainModel_{}_{}_{}_CV_{}_view_{}.pickle'.format(model,training_type, dataset, model, cv_n, view)
+        cv_path = SAVE_DIR_MODEL_DATA+'model_assessment/{}/weights/W_MainModel_{}_{}_{}_run_0_CV_{}_view_{}.pickle'.format(model,training_type, dataset, model, cv_n, view)
+        #cv_path_2 = SAVE_DIR_MODEL_DATA+'{}/weights/W_MainModel_{}_{}_{}_CV_{}_view_{}.pickle'.format(model, training_type, dataset, model, cv_n, view)
+
     if training_type == 'Few_Shot':
         x_path = fs_path
     else: 
         x_path = cv_path 
     with open(x_path,'rb') as f:
         weights = pickle.load(f)
+    #with open(cv_path_2,'rb') as f:
+    #    weights2 = pickle.load(f)
+
     if model == 'sag':
         weights_vector = torch.mean(weights['w'], 1).detach().numpy()
     if model == 'diffpool':
         weights_vector = torch.mean(weights['w'], 1).detach().numpy()
     if model == 'gcn':
         weights_vector = weights['w'].squeeze().detach().numpy()
+        #weights_vector2 = weights2['w'].squeeze().detach().numpy()
+        #print(weights_vector==weights_vector2)
     if model == 'gcn_student':
         weights_vector = weights['w'].squeeze().detach().numpy()
+        #weights_vector2 = weights2['w'].squeeze().detach().numpy()
+        #print(weights_vector==weights_vector2)
     if model == 'gat':
         weights_vector = weights['w'].squeeze().detach().numpy()
     if model == 'gunet':
@@ -43,6 +51,7 @@ def extract_weights(dataset, view, model, training_type):
         for shot_i in range(5):
             runs.append(extract_weights_single(dataset, view, model, training_type, shot_i, 0))
     if training_type == '3Fold':
+        #print("3FOLD")
         for cv_i in range(3):
             runs.append(extract_weights_single(dataset, view, model, training_type, 0, cv_i))
     if training_type == '5Fold':

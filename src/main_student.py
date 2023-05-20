@@ -1,4 +1,3 @@
-import time
 import argparse
 import random
 
@@ -22,18 +21,11 @@ def train_main_model(dataset,model,view, cv_number):
     new_folder(model)
     test_scores(gcn_student_args, G_list, view, model_name, cv_number)
         
-
 if __name__ == '__main__':
         
     parser = argparse.ArgumentParser()
     parser.add_argument('--mode', type=str, default='train', choices=['train', 'results'])
-    parser.add_argument('--cv_number', type=str, default=3, help='number of cross validations.')
-    parser.add_argument('--num_shots', type=str, default=5, help='number of runs for the FS learning.')
     args = parser.parse_args()
-    #view = args.v
-    #dataset = args.data
-    num_shots = args.num_shots
-    cv_number = args.cv_number
     
     if args.mode == 'train':
         '''

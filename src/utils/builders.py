@@ -1,7 +1,7 @@
 import os 
 import scipy.io as sio
 import pickle
-from config import DATA_DIR, SAVE_DIR_DATA, DATASET, SAVE_DIR_MODEL_DATA
+from config import SAVE_DIR_MODEL_DATA
 
 def dump_data(data_dir, save_dir, dataset):
 
@@ -28,7 +28,7 @@ def dump_data(data_dir, save_dir, dataset):
   with open(save_dir + dataset +'/'+dataset+'_ages', 'wb') as f:
     pickle.dump(ages, f)
 
-def new_folder(model):
+def new_folder(model, evaluation_method):
     """
     Parameters
     ----------
@@ -38,11 +38,11 @@ def new_folder(model):
     ----------
     Creates GNN directories if not exist.
     """
-    if not os.path.exists(SAVE_DIR_MODEL_DATA+model):
-        os.makedirs(SAVE_DIR_MODEL_DATA+model)
-        os.makedirs(SAVE_DIR_MODEL_DATA+model+"/weights")
-        os.makedirs(SAVE_DIR_MODEL_DATA+model+"/training_loss")
-        os.makedirs(SAVE_DIR_MODEL_DATA+model+"/models")
-        os.makedirs(SAVE_DIR_MODEL_DATA+model+"/labels_and_preds")
-
-dump_data(DATA_DIR, SAVE_DIR_DATA, DATASET)
+    if not os.path.exists(SAVE_DIR_MODEL_DATA+evaluation_method+"/"+model):
+        os.makedirs(SAVE_DIR_MODEL_DATA+evaluation_method+"/"+model)
+        os.makedirs(SAVE_DIR_MODEL_DATA+evaluation_method+"/"+model+"/weights")
+        os.makedirs(SAVE_DIR_MODEL_DATA+evaluation_method+"/"+model+"/training_loss")
+        os.makedirs(SAVE_DIR_MODEL_DATA+evaluation_method+"/"+model+"/validation_loss")
+        os.makedirs(SAVE_DIR_MODEL_DATA+evaluation_method+"/"+model+"/models")
+        os.makedirs(SAVE_DIR_MODEL_DATA+evaluation_method+"/"+model+"/labels_and_preds")
+        os.makedirs(SAVE_DIR_MODEL_DATA+evaluation_method+"/"+model+"/metrics")
