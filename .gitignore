@@ -3,4 +3,4 @@ data_unprocessed/
 model_data/
 figures/
 __pycache__/
-src/to_depreciate/
+to_depreciate/

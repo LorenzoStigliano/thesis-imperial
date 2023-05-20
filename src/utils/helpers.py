@@ -136,28 +136,3 @@ def get_stats(list_train):
     train_median = np.median(train_features)
     
     return train_mean, train_median
-
-def two_shot_loader(train, test, args):
-    print('Num training graphs: ', len(train), 
-          '; Num test graphs: ', len(test))
-    
-    # minibatch
-    dataset_sampler = GraphSampler(train)
-    train_dataset_loader = torch.utils.data.DataLoader(
-            dataset_sampler, 
-            batch_size = 1,  
-            shuffle = False)  
-
-    dataset_sampler = GraphSampler(test)
-    val_dataset_loader = torch.utils.data.DataLoader(
-            dataset_sampler, 
-            batch_size = 1,  
-            shuffle = False) 
-    train_mean, train_median = get_stats(train)
-    if(args['threshold'] == 'median'):
-        threshold_value = train_median
-    elif(args['threshold'] == 'mean'):
-        threshold_value = train_mean
-    else:
-        threshold_value = 0.0
-    return train_dataset_loader, val_dataset_loader, threshold_value

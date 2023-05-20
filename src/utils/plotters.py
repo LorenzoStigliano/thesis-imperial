@@ -8,7 +8,7 @@ import pickle
 
 from loaders import load_data
 from config import SAVE_DIR_FIGS, SAVE_DIR_MODEL_DATA
-from self_reproducibility import view_specific_rep
+from analysis import view_specific_rep
 
 def plot_random_sample(dataset, views, save_fig=False):
     """
@@ -35,41 +35,144 @@ def plot_random_sample(dataset, views, save_fig=False):
             plt.show()
             plt.clf()    
 
-def plot_learning_curves(dataset, views, model, folds, save_fig=False):
-    
-    for view in views:
-        for fold in range(folds):
-            with open('{}{}/training_loss/Training_loss_MainModel_{}Fold_{}_{}_CV_{}_view_{}.pickle'.format(SAVE_DIR_MODEL_DATA,
-                                                                                                            model,
-                                                                                                            folds,
-                                                                                                            dataset,
-                                                                                                            model,
-                                                                                                            fold,
-                                                                                                            view),'rb') as f:
-                losses = pickle.load(f)  
-            epochs = range(len(losses['loss']))
-            if isinstance(losses['loss'][0], float):
-                losses = losses['loss']
-            else:
-                losses = [i.item() for i in (losses['loss'])]
-                
-            plt.plot(epochs, losses, label='CV {}'.format(fold))
-        
-        title = "Dataset:{}, Model:{}, View:{}".format(dataset, model, view)
-        plt.title(title)
-        plt.legend()
+def plot_learning_curves(dataset, views, model, evaluation_method, folds, with_teacher=False, save_fig=False, run=0):
 
-        if save_fig:
+    for view in views:
+        if folds == 3:
+            fig, ax = plt.subplots(1,3, figsize=(40,10))
+        if folds == 5:
+            fig, ax = plt.subplots(1,5, figsize=(40,10))
+
+        for fold in range(folds):
+            if evaluation_method=="model_selection":
+                if with_teacher:
+                    directory_train_losses = f'{SAVE_DIR_MODEL_DATA}{evaluation_method}/{model}/training_loss/training_loss_MainModel_{folds}Fold_{dataset}_{model}_CV_{fold}_view_{view}_with_teacher.pickle'
+                    directory_validation_losses =  f'{SAVE_DIR_MODEL_DATA}{evaluation_method}/{model}/validation_loss/validation_loss_MainModel_{folds}Fold_{dataset}_{model}_CV_{fold}_view_{view}_with_teacher.pickle'
+                else:
+                    directory_train_losses = f'{SAVE_DIR_MODEL_DATA}{evaluation_method}/{model}/training_loss/training_loss_MainModel_{folds}Fold_{dataset}_{model}_CV_{fold}_view_{view}.pickle'
+                    directory_validation_losses =  f'{SAVE_DIR_MODEL_DATA}{evaluation_method}/{model}/validation_loss/validation_loss_MainModel_{folds}Fold_{dataset}_{model}_CV_{fold}_view_{view}.pickle'
+
+            else:
+                if with_teacher:
+                    directory_train_losses = f'{SAVE_DIR_MODEL_DATA}{evaluation_method}/{model}/training_loss/training_loss_MainModel_{folds}Fold_{dataset}_{model}_run_{run}_CV_{fold}_view_{view}_with_teacher.pickle'
+                    directory_validation_losses = f'{SAVE_DIR_MODEL_DATA}{evaluation_method}/{model}/validation_loss/validation_loss_MainModel_{folds}Fold_{dataset}_{model}_run_{run}_CV_{fold}_view_{view}_with_teacher.pickle'
+                else:
+                    directory_train_losses = f'{SAVE_DIR_MODEL_DATA}{evaluation_method}/{model}/training_loss/training_loss_MainModel_{folds}Fold_{dataset}_{model}_run_{run}_CV_{fold}_view_{view}.pickle'
+                    directory_validation_losses = f'{SAVE_DIR_MODEL_DATA}{evaluation_method}/{model}/validation_loss/validation_loss_MainModel_{folds}Fold_{dataset}_{model}_run_{run}_CV_{fold}_view_{view}=.pickle'
+
+
+            with open(directory_train_losses,'rb') as f:
+                train_losses = pickle.load(f)  
+    
+            with open(directory_validation_losses,'rb') as f:
+                val_losses = pickle.load(f)  
+                
+            epochs = range(len(train_losses['loss']))
+            if isinstance(train_losses['loss'][0], float):
+                train_losses = train_losses['loss']
+            else:
+                train_losses = [i.item() for i in (train_losses['loss'])]
+            if isinstance(val_losses['loss'][0], float):
+                val_losses = val_losses['loss']
+            else:
+                val_losses = [i.item() for i in (val_losses['loss'])]
+                
+            ax[fold].plot(epochs, train_losses, label='Train')
+            ax[fold].plot(epochs, val_losses  , label='Val')
+            ax[fold].legend()
+
+        if with_teacher:
+            title = "Dataset:{}, Model:{}_with_teacher, View:{}, CV:{}, Epochs:{}".format(dataset, model, view, folds, len(train_losses))
+        else:
+            title = "Dataset:{}, Model:{}, View:{}, CV:{}, Epochs:{}".format(dataset, model, view, folds, len(train_losses))
+        
+        if save_fig: 
+            fig.suptitle(title)
             if not os.path.exists(SAVE_DIR_FIGS+"loss_curves/"):
                 os.makedirs(SAVE_DIR_FIGS+"loss_curves/")
             
-            plt.savefig(SAVE_DIR_FIGS+"loss_curves/"+title+".png", dpi=150)
+            fig.savefig(SAVE_DIR_FIGS+"loss_curves/"+title+".png", dpi=150)
             plt.clf()
         
         else:
+            fig.suptitle(title)
             plt.show()
             plt.clf()     
+
+def plot_metric_curves(dataset, views, model, evaluation_method, folds, metric, with_teacher=False, save_fig=False):
+    
+    for view in views:
+        if folds == 3:
+            fig, ax = plt.subplots(1,3, figsize=(15,10))
+        if folds == 5:
+            fig, ax = plt.subplots(1,5, figsize=(15,10))
+    
+        for fold in range(folds):
+            if with_teacher:
+                with open('{}{}/{}/metrics/MainModel_{}Fold_{}_{}_CV_{}_view_{}_with_teacher_train_{}.pickle'.format(SAVE_DIR_MODEL_DATA,
+                                                                                                    evaluation_method,
+                                                                                                    model,
+                                                                                                    folds,
+                                                                                                    dataset,
+                                                                                                    model,
+                                                                                                    fold,
+                                                                                                    view,
+                                                                                                    metric),'rb') as f:
+                    train_metric = pickle.load(f)  
+                with open('{}{}/{}/metrics/MainModel_{}Fold_{}_{}_CV_{}_view_{}_with_teacher_val_{}.pickle'.format(SAVE_DIR_MODEL_DATA,
+                                                                                                    evaluation_method,
+                                                                                                    model,
+                                                                                                    folds,
+                                                                                                    dataset,
+                                                                                                    model,
+                                                                                                    fold,
+                                                                                                    view,
+                                                                                                    metric),'rb') as f:
+                    val_metric = pickle.load(f)  
+            else:
+                with open('{}{}/{}/metrics/MainModel_{}Fold_{}_{}_CV_{}_view_{}_train_{}.pickle'.format(SAVE_DIR_MODEL_DATA,
+                                                                                                    evaluation_method,
+                                                                                                    model,
+                                                                                                    folds,
+                                                                                                    dataset,
+                                                                                                    model,
+                                                                                                    fold,
+                                                                                                    view,
+                                                                                                    metric),'rb') as f:
+                    train_metric = pickle.load(f)  
+                with open('{}{}/{}/metrics/MainModel_{}Fold_{}_{}_CV_{}_view_{}_val_{}.pickle'.format(SAVE_DIR_MODEL_DATA,
+                                                                                                    evaluation_method,
+                                                                                                    model,
+                                                                                                    folds,
+                                                                                                    dataset,
+                                                                                                    model,
+                                                                                                    fold,
+                                                                                                    view,
+                                                                                                    metric),'rb') as f:
+                    val_metric = pickle.load(f)  
+                
+            epochs = range(len(train_metric))
+            ax[fold].plot(epochs, train_metric, label='Train')
+            ax[fold].plot(epochs, val_metric  , label='Val')
+            ax[fold].legend()
+        if with_teacher:
+            title = "Metric:{} Dataset:{}, Model:{}_with_teacher, View:{}, CV:{}, Epochs:{}".format(metric, dataset, model, view, folds, len(val_metric))
+        else:
+            title = "Metric:{} Dataset:{}, Model:{}, View:{}, CV:{}, Epochs:{}".format(metric, dataset, model, view, folds, len(val_metric))
         
+        if save_fig: 
+            fig.suptitle(title)
+            if not os.path.exists(SAVE_DIR_FIGS+"metric_curves/"):
+                os.makedirs(SAVE_DIR_FIGS+"metric_curves/")
+            
+            fig.savefig(SAVE_DIR_FIGS+"metric_curves/"+title+".png", dpi=150)
+            plt.clf()
+        
+        else:
+            fig.suptitle(title)
+            plt.show()
+            plt.clf()  
+
 def plot_bar_chart(dataset, views, models, folds, metric, save_fig=False):
 
     for view in views:
@@ -166,7 +269,7 @@ def plot_bar_chart_rep(dataset, views, models, CV, save_fig=False):
     title = "Reproducibility Score for Dataset:{}".format(dataset)
     
     plt.ylabel("Reproducibility Score")
-    x_ticks = ["View {}".format(i) for i in range(len(views))]
+    x_ticks = ["View {}".format(i) for i in views]
     
     plt.xticks([r + barWidth for r in range(len(views))], x_ticks)
     plt.title(title)
@@ -189,6 +292,26 @@ np.random.seed(0)
 random.seed(0)
 
 """
+plot_learning_curves(dataset="gender_data", evaluation_method='model_selection', views=[0, 2, 4, 5], model="gcn", folds=3, save_fig=True)
+plot_learning_curves(dataset="gender_data", evaluation_method='model_selection', views=[0, 2, 4, 5], model="gcn", folds=3, save_fig=True)
+plot_metric_curves(dataset="gender_data", evaluation_method='model_selection', views=[0, 2, 4, 5], model="gcn", folds=3, metric='f1', save_fig=True)
+plot_metric_curves(dataset="gender_data", evaluation_method='model_selection', views=[0, 2, 4, 5], model="gcn", folds=3, metric='recall', save_fig=True)
+plot_metric_curves(dataset="gender_data", evaluation_method='model_selection', views=[0, 2, 4, 5], model="gcn", folds=3, metric='precision', save_fig=True)
+
+plot_learning_curves(dataset="gender_data", evaluation_method='model_selection', views=[0, 2, 4, 5], model="gcn_student", folds=3, save_fig=True)
+plot_metric_curves(dataset="gender_data", evaluation_method='model_selection', views=[0, 2, 4, 5], model="gcn_student", folds=3, metric='acc', save_fig=True)
+plot_metric_curves(dataset="gender_data", evaluation_method='model_selection', views=[0, 2, 4, 5], model="gcn_student", folds=3, metric='f1', save_fig=True)
+plot_metric_curves(dataset="gender_data", evaluation_method='model_selection', views=[0, 2, 4, 5], model="gcn_student", folds=3, metric='recall', save_fig=True)
+plot_metric_curves(dataset="gender_data", evaluation_method='model_selection', views=[0, 2, 4, 5], model="gcn_student", folds=3, metric='precision', save_fig=True)
+
+plot_learning_curves(dataset="gender_data", evaluation_method='model_selection', views=[0, 2, 4, 5], model="gcn_student", folds=3, with_teacher=True, save_fig=True)
+plot_metric_curves(dataset="gender_data", evaluation_method='model_selection', views=[0, 2, 4, 5], model="gcn_student", folds=3, metric='acc', with_teacher=True, save_fig=True)
+plot_metric_curves(dataset="gender_data", evaluation_method='model_selection', views=[0, 2, 4, 5], model="gcn_student", folds=3, metric='f1', with_teacher=True, save_fig=True)
+plot_metric_curves(dataset="gender_data", evaluation_method='model_selection', views=[0, 2, 4, 5], model="gcn_student", folds=3, metric='recall', with_teacher=True, save_fig=True)
+plot_metric_curves(dataset="gender_data", evaluation_method='model_selection', views=[0, 2, 4, 5], model="gcn_student", folds=3, metric='precision', with_teacher=True, save_fig=True)
+"""
+
+"""
 plot_bar_chart(dataset="gender_data", views=[0, 1], models=[ "gcn", "gat", "diffpool", "gunet", "sag"], folds=3, metric="acc", save_fig=True)
 plot_bar_chart(dataset="gender_data", views=[0, 1], models=[ "gcn", "gat", "diffpool", "gunet", "sag"], folds=3, metric="prec", save_fig=True)
 plot_bar_chart(dataset="gender_data", views=[0, 1], models=[ "gcn", "gat", "diffpool", "gunet", "sag"], folds=3, metric="recall", save_fig=True)
@@ -202,14 +325,9 @@ plot_random_sample("gender_data", [0,1], True)
 plot_random_sample("gender_data", [0,1], True)
 """
 
-#plot_bar_chart(dataset="gender_data", views=[5], models=["gcn", "gcn_student", "gcn_student_teacher"], folds=3, metric="acc", save_fig=False)
-
 """
 for cv in [3, 5, 10]:
-    plot_bar_chart(dataset="gender_data", views=[0,1,2,3,4,5], models=["gcn", "gcn_student"], folds=cv, metric="acc", save_fig=True)
-
-plot_bar_chart_rep(dataset="gender_data", views=[0,1,2,3,4,5], models=["gcn", "gcn_student", "gcn_student_teacher"], CV=["3Fold", "5Fold", "10Fold"], save_fig=False)
-
+    plot_bar_chart(dataset="gender_data", views=[0], models=["gcn", "gcn_student", "gcn_student_teacher"], folds=cv, metric="acc", save_fig=False)
 """
 
-plot_bar_chart_rep(dataset="gender_data", views=[0], models=["gcn", "gcn_student"], CV=["3Fold", "5Fold", "10Fold"], save_fig=False)
+plot_bar_chart_rep(dataset="gender_data", views=[0,2,4,5], models=["gcn", "gcn_student", "gcn_student_teacher"], CV=["3Fold", "5Fold", "10Fold"], save_fig=False)

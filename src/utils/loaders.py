@@ -83,3 +83,48 @@ def minmax_sc(x):
     min_max_scaler = preprocessing.MinMaxScaler()
     x = min_max_scaler.fit_transform(x)
     return x
+
+class GraphSampler(torch.utils.data.Dataset):
+    
+    def __init__(self, G_list):
+        self.adj_all = []
+        self.label_all = []
+        self.id_all = []
+        
+        for i in range(len(G_list)):
+            self.adj_all.append(G_list[i]['adj'])
+            self.label_all.append(G_list[i]['label'])
+            self.id_all.append(G_list[i]['id'])
+
+    def __len__(self):
+        return len(self.adj_all)
+
+    def __getitem__(self, idx):
+        return {'adj':self.adj_all[idx],
+                'label':self.label_all[idx],
+                'id':self.id_all[idx]}
+
+def two_shot_loader(train, test, args):
+    print('Num training graphs: ', len(train), 
+          '; Num test graphs: ', len(test))
+    
+    # minibatch
+    dataset_sampler = GraphSampler(train)
+    train_dataset_loader = torch.utils.data.DataLoader(
+            dataset_sampler, 
+            batch_size = 1,  
+            shuffle = False)  
+
+    dataset_sampler = GraphSampler(test)
+    val_dataset_loader = torch.utils.data.DataLoader(
+            dataset_sampler, 
+            batch_size = 1,  
+            shuffle = False) 
+    train_mean, train_median = get_stats(train)
+    if(args['threshold'] == 'median'):
+        threshold_value = train_median
+    elif(args['threshold'] == 'mean'):
+        threshold_value = train_mean
+    else:
+        threshold_value = 0.0
+    return train_dataset_loader, val_dataset_loader, threshold_value
