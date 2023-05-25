@@ -69,7 +69,7 @@ if __name__ == '__main__':
         '''
         Training GNN Models with datasets of data directory.
         '''
-        runs = [1,2] #1 ,2
+        runs = [2, 3, 4] # 5, 6, 7, 8, 9
         datasets_asdnc = ['gender_data']
         views = [0, 2, 4, 5] #0, 2, 4, 5
         for run in runs:
@@ -79,6 +79,5 @@ if __name__ == '__main__':
                     for model in models:
                         for cv in [3, 5, 10]:
                             train_main_model(dataset_i, model, view_i, cv, run)
-                            #two_shot_train(dataset_i, model, view_i, num_shots)
                    
             print("All GNN architectures are trained with dataset: "+dataset_i)

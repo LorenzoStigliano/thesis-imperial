@@ -14,6 +14,7 @@ import sklearn.metrics as metrics
 from models.gcn_student import GCN_STUDENT
 from models.model_config import * 
 from utils.helpers import *
+from utils.analysis import * 
 from config import SAVE_DIR_MODEL_DATA
 
 device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
@@ -32,12 +33,12 @@ class CrossEntropyLossForSoftTarget(nn.Module):
     
 def weight_similarity_loss(w_teacher, w_student):
     """
-    Compute the mean squared error (MSE) loss between the weights of the last layer
+    Compute the KL loss between the weights of the last layer
     of two networks.
     """    
-    # Concatenate and compute the mean squared error
-    mse_loss = nn.MSELoss()
-    return mse_loss(w_teacher, w_student)
+    # Concatenate and compute the cosine similarity
+    loss = nn.CosineSimilarity()
+    return 1 - loss(w_student, w_teacher).abs()
 
 def cross_validation(model_args, G_list, view, model_name, cv_number, run=0):
     start = time.time() 
@@ -59,7 +60,12 @@ def cross_validation(model_args, G_list, view, model_name, cv_number, run=0):
             train_dataset, val_dataset, threshold_value = model_assessment_split(train_set, validation_set, test_set, model_args)
         
         print(f"CV : {cv}")
-        name = model_name+"_CV_"+str(cv)+"_view_"+str(view)+"_with_teacher"
+        if model_args["alpha_weight"] != 0:
+          #TODO add save parameter with differetn alpha_weight value
+          name = model_name+"_CV_"+str(cv)+"_view_"+str(view)+"_with_teacher_weight_matching"
+        else:
+          name = model_name+"_CV_"+str(cv)+"_view_"+str(view)+"_with_teacher"
+        
         print(name)
 
         train_set, validation_set, test_set = datasets_splits(folds, model_args, cv)
@@ -106,19 +112,27 @@ def train(model_args, train_dataset, val_dataset, student_model, threshold_value
     # Load teacher model
     if model_args['evaluation_method'] == "model_selection":
        teacher_model = torch.load(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+f"/gcn/models/gcn_MainModel_{cv_number}Fold_gender_data_gcn_CV_{cv}_view_{view}.pt")
+       teacher_weights_path = SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+f"/gcn/weights/W_MainModel_{cv_number}Fold_gender_data_gcn_CV_{cv}_view_{view}.pickle"
+       with open(teacher_weights_path,'rb') as f:
+          teacher_weights = pickle.load(f)
     else:
        teacher_model = torch.load(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+f"/gcn/models/gcn_MainModel_{cv_number}Fold_gender_data_gcn_run_{run}_CV_{cv}_view_{view}.pt")
+       teacher_weights_path = SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+f"/gcn/weights/W_MainModel_{cv_number}Fold_gender_data_gcn_run_{run}_CV_{cv}_view_{view}.pickle"
+       with open(teacher_weights_path,'rb') as f:
+          teacher_weights = pickle.load(f)
     
     teacher_model.is_trained = False
     teacher_model.eval()
 
+    #Extract teacher weights
+    teacher_weights = teacher_weights['w'].detach()
     # Transfer
     teacher_model.to(device)
     student_model.to(device)
 
     # Define Loss
     criterion = nn.CrossEntropyLoss(reduction='mean')
-    criterion_soft = CrossEntropyLossForSoftTarget()
+    criterion_soft = CrossEntropyLossForSoftTarget(T=model_args["T"], alpha=model_args["alpha_soft_ce"])
 
     # Define optimizer
     optimizer = optim.Adam(student_model.parameters(), lr=model_args["lr"], weight_decay=model_args['weight_decay'])
@@ -128,6 +142,7 @@ def train(model_args, train_dataset, val_dataset, student_model, threshold_value
     train_acc=[]
     train_ce_loss=[]
     train_soft_ce_loss=[]
+    train_weight_loss=[]
     train_f1=[]
     train_recall=[]
     train_precision=[]
@@ -135,12 +150,13 @@ def train(model_args, train_dataset, val_dataset, student_model, threshold_value
     validation_loss=[]
     validation_ce_loss=[]
     validation_soft_ce_loss=[]
+    validation_weight_loss=[]
     validation_acc=[]
     validation_f1=[]
     validation_recall=[]
     validation_precision=[]
     
-    print(f"Size of Training Set: {str(len(val_dataset))}")
+    print(f"Size of Training Set: {str(len(train_dataset))}")
     print(f"Size of Validation Set: {str(len(val_dataset))}")
     
     for epoch in range(model_args["num_epochs"]):
@@ -150,6 +166,7 @@ def train(model_args, train_dataset, val_dataset, student_model, threshold_value
         total_loss = 0
         ce_loss = 0
         soft_ce_loss = 0
+        weight_loss = 0
         
         preds = []
         labels = []
@@ -171,6 +188,9 @@ def train(model_args, train_dataset, val_dataset, student_model, threshold_value
             if model_args["threshold"] in ["median", "mean"]:
                 adj = torch.where(adj > threshold_value, torch.tensor([1.0]).to(device), torch.tensor([0.0]).to(device))
             
+            # extract student weight
+            student_weights = student_model.LinearLayer.weight
+
             y_gt = label.to(device)
 
             # Compute soft label
@@ -180,7 +200,7 @@ def train(model_args, train_dataset, val_dataset, student_model, threshold_value
             ypred = student_model(features, adj)
 
             # Compute loss (foward propagation)
-            loss = criterion(ypred, y_gt) + criterion_soft(ypred, y_soft)
+            loss = model_args["alpha_ce"]*criterion(ypred, y_gt) + criterion_soft(ypred, y_soft) + model_args["alpha_weight"]*weight_similarity_loss(teacher_weights, student_weights)
 
             _, indices = torch.max(ypred, 1)
             preds.append(indices.cpu().data.numpy())
@@ -195,6 +215,7 @@ def train(model_args, train_dataset, val_dataset, student_model, threshold_value
             total_loss += loss.item()
             ce_loss += criterion(ypred, y_gt).item()
             soft_ce_loss += criterion_soft(ypred, y_soft).item()
+            weight_loss += weight_similarity_loss(teacher_weights, student_weights).item()
 
             elapsed = time.time() - begin_time
             total_time += elapsed
@@ -216,25 +237,27 @@ def train(model_args, train_dataset, val_dataset, student_model, threshold_value
         print(f"Time taken for epoch {epoch}: {total_time}")
         print(f"Train accuracy: {result['acc']}")
         print(f"Train loss: {total_loss / len(train_dataset)}")
+        print(f"Train weight loss: {weight_loss / len(train_dataset)}")
 
         
         train_loss.append(total_loss / len(train_dataset))
         train_ce_loss.append(ce_loss / len(train_dataset))
         train_soft_ce_loss.append(soft_ce_loss / len(train_dataset))
+        train_weight_loss.append(weight_loss / len(train_dataset))
         train_acc.append(result['acc'])
         train_f1.append(result['F1'])
         train_recall.append(result['recall'])
         train_precision.append(result['prec'])
         
-        val_loss, val_ce_loss, val_soft_ce_loss, val_acc, val_precision, val_recall, val_f1 = validate(val_dataset, student_model, model_args, threshold_value, model_name, teacher_model, alpha)
+        val_loss, val_ce_loss, val_soft_ce_loss, val_weight_loss, val_acc, val_precision, val_recall, val_f1 = validate(val_dataset, student_model, model_args, threshold_value, model_name, teacher_model, teacher_weights)
         validation_loss.append(val_loss)
         validation_ce_loss.append(val_ce_loss)
         validation_soft_ce_loss.append(val_soft_ce_loss)
+        validation_weight_loss.append(val_weight_loss)
         validation_acc.append(val_acc)
         validation_f1.append(val_f1)
         validation_recall.append(val_recall)
         validation_precision.append(val_precision)
-        
     #Save train metrics
     with open(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+"/"+model_args["model_name"]+"/metrics/"+model_name+"_train_acc.pickle", 'wb') as f:
       pickle.dump(train_acc, f)
@@ -270,16 +293,22 @@ def train(model_args, train_dataset, val_dataset, student_model, threshold_value
     los_p = {'loss':train_soft_ce_loss}
     with open(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+"/"+model_args['model_name']+"/training_loss/training_loss_soft_ce_"+model_name+".pickle", 'wb') as f:
       pickle.dump(los_p, f)
+    los_p = {'loss':train_weight_loss}
+    with open(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+"/"+model_args['model_name']+"/training_loss/training_loss_weight_"+model_name+".pickle", 'wb') as f:
+      pickle.dump(los_p, f)
     
     # Save validation loss of GNN model
     los_p = {'loss':validation_loss}
     with open(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+"/"+model_args['model_name']+"/validation_loss/validation_loss_"+model_name+".pickle", 'wb') as f:
       pickle.dump(los_p, f)
     los_p = {'loss':validation_ce_loss}
-    with open(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+"/"+model_args['model_name']+"/training_loss/training_loss_ce_"+model_name+".pickle", 'wb') as f:
+    with open(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+"/"+model_args['model_name']+"/validation_loss/validation_loss_ce_"+model_name+".pickle", 'wb') as f:
       pickle.dump(los_p, f)
     los_p = {'loss':validation_soft_ce_loss}
-    with open(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+"/"+model_args['model_name']+"/training_loss/training_loss_soft_ce_"+model_name+".pickle", 'wb') as f:
+    with open(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+"/"+model_args['model_name']+"/validation_loss/validation_loss_soft_ce_"+model_name+".pickle", 'wb') as f:
+      pickle.dump(los_p, f)
+    los_p = {'loss':validation_weight_loss}
+    with open(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+"/"+model_args['model_name']+"/validation_loss/validation_loss_weight_"+model_name+".pickle", 'wb') as f:
       pickle.dump(los_p, f)
     
     # Save Model
@@ -297,8 +326,18 @@ def train(model_args, train_dataset, val_dataset, student_model, threshold_value
             os.remove(path)
 
         os.rename(model_args['model_name']+'_W.pickle'.format(),path)
+    
+    Ks = [5, 10, 15, 20]
+    teacher_weights = teacher_weights.squeeze().detach().numpy()
+    student_weights = student_weights.squeeze().detach().numpy()
+    for k in Ks:
+      top_bio_i = top_biomarkers(teacher_weights, k)
+      top_bio_j = top_biomarkers(student_weights, k)
+      print(top_bio_i)
+      print(top_bio_j)
+      print(sim(top_bio_i, top_bio_j))
 
-def validate(dataset, model, model_args, threshold_value, model_name, teacher_model, alpha):
+def validate(dataset, model, model_args, threshold_value, model_name, teacher_model, teacher_weights):
     """
     Parameters
     ----------
@@ -321,9 +360,11 @@ def validate(dataset, model, model_args, threshold_value, model_name, teacher_mo
     total_loss = 0
     ce_loss = 0
     soft_ce_loss = 0
+    weight_loss = 0
+    student_weights = model.LinearLayer.weight
 
     criterion = nn.CrossEntropyLoss(reduction='mean')
-    criterion_soft = CrossEntropyLossForSoftTarget()
+    criterion_soft = CrossEntropyLossForSoftTarget(T=model_args["T"], alpha=model_args["alpha_soft_ce"])
 
     for _, data in enumerate(dataset):
         adj = Variable(data['adj'].float(), requires_grad=False).to(device)
@@ -357,11 +398,13 @@ def validate(dataset, model, model_args, threshold_value, model_name, teacher_mo
         y_gt = label.to(device)
         # Compute soft label
         y_soft = teacher_model(features, adj)
-        loss = criterion(ypred, y_gt) + alpha*criterion_soft(ypred, y_soft)
+
+        loss = model_args["alpha_ce"]*criterion(ypred, y_gt) + criterion_soft(ypred, y_soft) + model_args["alpha_weight"]*weight_similarity_loss(teacher_weights, student_weights)
         
         total_loss += loss.item()
         ce_loss += criterion(ypred, y_gt).item()
         soft_ce_loss += criterion_soft(ypred, y_soft).item()
+        weight_loss += weight_similarity_loss(teacher_weights, student_weights).item()
 
         _, indices = torch.max(ypred, 1)
         preds.append(indices.cpu().data.numpy())
@@ -384,10 +427,11 @@ def validate(dataset, model, model_args, threshold_value, model_name, teacher_mo
     val_total_loss = total_loss / len(dataset)
     val_ce_loss = ce_loss / len(dataset)
     val_soft_ce_loss = soft_ce_loss / len(dataset)
+    val_weight_loss = weight_loss / len(dataset)
     print(f"Validation accuracy: {result['acc']}")
     print(f"Validation Loss: {val_total_loss}")
 
-    return val_total_loss, val_ce_loss, val_soft_ce_loss, result['acc'], result['prec'], result['recall'], result['F1']
+    return val_total_loss, val_ce_loss, val_soft_ce_loss, val_weight_loss, result['acc'], result['prec'], result['recall'], result['F1']
 
 def test(dataset, model, model_args, threshold_value, model_name):
     """

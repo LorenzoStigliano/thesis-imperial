@@ -39,9 +39,9 @@ def plot_learning_curves(dataset, views, model, evaluation_method, folds, with_t
 
     for view in views:
         if folds == 3:
-            fig, ax = plt.subplots(1,3, figsize=(40,10))
+            fig, ax = plt.subplots(1,3, figsize=(30,10))
         if folds == 5:
-            fig, ax = plt.subplots(1,5, figsize=(40,10))
+            fig, ax = plt.subplots(1,5, figsize=(30,10))
 
         for fold in range(folds):
             if evaluation_method=="model_selection":
@@ -80,6 +80,7 @@ def plot_learning_curves(dataset, views, model, evaluation_method, folds, with_t
             ax[fold].plot(epochs, train_losses, label='Train')
             ax[fold].plot(epochs, val_losses  , label='Val')
             ax[fold].legend()
+            ax[fold].grid()    
 
         if with_teacher:
             title = "Dataset:{}, Model:{}_with_teacher, View:{}, CV:{}, Epochs:{}".format(dataset, model, view, folds, len(train_losses))
@@ -155,6 +156,8 @@ def plot_metric_curves(dataset, views, model, evaluation_method, folds, metric, 
             ax[fold].plot(epochs, train_metric, label='Train')
             ax[fold].plot(epochs, val_metric  , label='Val')
             ax[fold].legend()
+            ax[fold].grid()
+        
         if with_teacher:
             title = "Metric:{} Dataset:{}, Model:{}_with_teacher, View:{}, CV:{}, Epochs:{}".format(metric, dataset, model, view, folds, len(val_metric))
         else:
@@ -172,6 +175,7 @@ def plot_metric_curves(dataset, views, model, evaluation_method, folds, metric, 
             fig.suptitle(title)
             plt.show()
             plt.clf()  
+            
 
 def plot_bar_chart(dataset, views, models, folds, metric, save_fig=False):
 
@@ -216,8 +220,6 @@ def plot_bar_chart(dataset, views, models, folds, metric, save_fig=False):
         
         fold_data.append(np.mean(fold_data, axis=0))
         fold_data = np.array(fold_data).T
-
-        
         X = np.arange(folds+1)
         sep = 0.00
         for i, fold_d in enumerate(fold_data):
@@ -244,8 +246,10 @@ def plot_bar_chart(dataset, views, models, folds, metric, save_fig=False):
             plt.show()
             plt.clf()     
 
-def plot_bar_chart_rep(dataset, views, models, CV, save_fig=False):
+def plot_bar_chart_rep(dataset, views, models, CV, run, save_fig=False):
     
+    plt.rcParams["figure.figsize"] = (10,5)
+
     view_data = []
     
     for view in views:
@@ -254,26 +258,33 @@ def plot_bar_chart_rep(dataset, views, models, CV, save_fig=False):
         model_result = []
         
         for model in models:
-            rep_score = view_specific_rep(dataset=dataset, view=view, model=model, CV=CV)
+            rep_score, std = view_specific_rep(dataset=dataset, view=view, model=model, run=run, CV=CV)
             model_result.append(rep_score)
         
         view_data.append(model_result)
 
+    view_data.append(list(np.mean(view_data, axis=0)))
     view_data = np.array(view_data).T
-    X = np.arange(len(views))
+
+    X = np.arange(len(models)+1)
     sep = 0.00
     for i, view_d in enumerate(view_data):
         plt.bar(X + sep, view_d, width = barWidth, edgecolor ='grey', label=models[i])
         sep += barWidth
-        
+    
+    max_y_lim = np.amax(view_data) + 0.01
+    min_y_lim = np.amin(view_data) - 0.01
+    plt.ylim(min_y_lim, max_y_lim)
+    
     title = "Reproducibility Score for Dataset:{}".format(dataset)
     
     plt.ylabel("Reproducibility Score")
-    x_ticks = ["View {}".format(i) for i in views]
+    x_ticks = ["View {}".format(i) for i in views]+ ["Average"]
     
-    plt.xticks([r + barWidth for r in range(len(views))], x_ticks)
+    plt.xticks([r + barWidth for r in range(len(view_data[0]))], x_ticks)
     plt.title(title)
     plt.legend()
+    
 
     if save_fig:
         if not os.path.exists(SAVE_DIR_FIGS+"reproducibility/"):
@@ -293,7 +304,7 @@ random.seed(0)
 
 """
 plot_learning_curves(dataset="gender_data", evaluation_method='model_selection', views=[0, 2, 4, 5], model="gcn", folds=3, save_fig=True)
-plot_learning_curves(dataset="gender_data", evaluation_method='model_selection', views=[0, 2, 4, 5], model="gcn", folds=3, save_fig=True)
+plot_metric_curves(dataset="gender_data", evaluation_method='model_selection', views=[0, 2, 4, 5], model="gcn", folds=3, metric='acc', save_fig=True)
 plot_metric_curves(dataset="gender_data", evaluation_method='model_selection', views=[0, 2, 4, 5], model="gcn", folds=3, metric='f1', save_fig=True)
 plot_metric_curves(dataset="gender_data", evaluation_method='model_selection', views=[0, 2, 4, 5], model="gcn", folds=3, metric='recall', save_fig=True)
 plot_metric_curves(dataset="gender_data", evaluation_method='model_selection', views=[0, 2, 4, 5], model="gcn", folds=3, metric='precision', save_fig=True)
@@ -330,4 +341,4 @@ for cv in [3, 5, 10]:
     plot_bar_chart(dataset="gender_data", views=[0], models=["gcn", "gcn_student", "gcn_student_teacher"], folds=cv, metric="acc", save_fig=False)
 """
 
-plot_bar_chart_rep(dataset="gender_data", views=[0,2,4,5], models=["gcn", "gcn_student", "gcn_student_teacher"], CV=["3Fold", "5Fold", "10Fold"], save_fig=False)
+plot_bar_chart_rep(dataset="gender_data", views=[0, 2, 4, 5], models=["gcn", "gcn_student", "gcn_student_teacher", "gcn_student_teacher_weight"], CV=["3Fold", "5Fold", "10Fold"], run=2, save_fig=False)
