@@ -66,7 +66,8 @@ def cross_validation(model_args, G_list, view, model_name, cv_number, run=0):
                 nfeat = num_nodes,
                 nhid = model_args["hidden_dim"],
                 nclass = num_classes,
-                dropout = model_args["dropout"]
+                dropout = model_args["dropout"],
+                run = run
             ).to(device)
 
         elif model_args["model_name"]=='gat':
@@ -83,7 +84,8 @@ def cross_validation(model_args, G_list, view, model_name, cv_number, run=0):
                 nfeat = num_nodes,
                 nhid = model_args["hidden_dim"],
                 nclass = num_classes,
-                dropout = model_args["dropout"]
+                dropout = model_args["dropout"],
+                run = run
             ).to(device) 
         
         elif model_args["model_name"] == "mlp":
@@ -105,11 +107,11 @@ def cross_validation(model_args, G_list, view, model_name, cv_number, run=0):
             test(test_dataset, model, model_args, threshold_value, model_name+"_CV_"+str(i)+"_view_"+str(view))
             
         if model_args["evaluation_method"] =='model_assessment': 
-          train(model_args, train_dataset, val_dataset, model, threshold_value, model_name+"_CV_"+str(i)+"_view_"+str(view))
+          train(model_args, train_dataset, val_dataset, model, threshold_value, model_name+"_CV_"+str(i)+"_view_"+str(view), run)
     
     print('Time taken', time.time()-start)
 
-def train(model_args, train_dataset, val_dataset, model, threshold_value, model_name):
+def train(model_args, train_dataset, val_dataset, model, threshold_value, model_name, run):
     """
     Parameters
     ----------
@@ -268,7 +270,7 @@ def train(model_args, train_dataset, val_dataset, model, threshold_value, model_
         if os.path.exists(path):
             os.remove(path)
 
-        os.rename(model_args['model_name']+'_W.pickle', path)
+        os.rename(model_args['model_name']+"_"+str(run)+'_W.pickle', path)
 
 def validate(dataset, model, model_args, threshold_value, model_name):
     """

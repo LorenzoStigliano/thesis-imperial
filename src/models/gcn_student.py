@@ -51,7 +51,7 @@ class GraphConvolution(Module):
 
 
 class GCN_STUDENT(nn.Module):
-    def __init__(self, nfeat, nhid, nclass, dropout):
+    def __init__(self, nfeat, nhid, nclass, dropout, run):
         torch.manual_seed(0)
         super(GCN_STUDENT, self).__init__()
         self.gc1 = GraphConvolution(nfeat, nclass)
@@ -59,6 +59,7 @@ class GCN_STUDENT(nn.Module):
         #self.dropout = dropout
         self.LinearLayer = nn.Linear(nfeat,1)
         self.is_trained = False
+        self.run = run
 
     def forward(self, x, adj):
         x = F.relu(self.gc1(x, adj))
@@ -69,7 +70,7 @@ class GCN_STUDENT(nn.Module):
         
         if self.is_trained:
           w_dict = {"w": self.LinearLayer.weight}
-          with open("gcn_student_W.pickle", 'wb') as f:
+          with open("gcn_student_"+str(self.run)+"_W.pickle", 'wb') as f:
             pickle.dump(w_dict, f)
           self.is_trained = False
           print("GCN Weights are saved:")
