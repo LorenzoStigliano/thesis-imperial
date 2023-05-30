@@ -27,7 +27,7 @@ gcn_student_args = {
 
 gcn_student_weight_args = {
     "num_epochs":50, 
-    "lr": 0.0001, # 0.0001 when training without teacher
+    "lr": 0.0001, # 0.0001 when training without teache
     "weight_decay":5e-4, 
     "hidden_dim":64,
     "dropout":0,
@@ -40,18 +40,32 @@ gcn_student_weight_args = {
     "alpha_weight": 2 
 }
 
+gcn_student_ensamble_args = {
+    "num_epochs":50, 
+    "lr": 0.0001, # 0.0001 when training without teacher
+    "weight_decay":5e-4, 
+    "hidden_dim":64,
+    "dropout":0,
+    "threshold":"median", # Threshold the graph adjacency matrix. Possible values: no_threshold, median, mean
+    "model_name":"gcn_student",
+    "evaluation_method": "model_assessment", # model selection or model assessment
+    "alpha_ce": 1, 
+    "alpha_soft_ce": 2, 
+    "T": 3, 
+}
+
 mlp_args = {
-    "num_epochs":25, 
+    "num_epochs":50, 
     "lr": 0.001,
     "weight_decay":5e-4, 
-    "num_layers":1, 
-    "input_dim":35,
-    "hidden_dim":64,
+    "num_layers":2, 
+    "input_dim":595,
+    "hidden_dim":35,
     "output_dim":2, 
     "threshold":"median", # Threshold the graph adjacency matrix. Possible values: no_threshold, median, mean
     "dropout_ratio":0,
     "model_name":"mlp",
-    "evaluation_method": "model assessment" # model selection or model assessment
+    "evaluation_method": "model_assessment" # model selection or model assessment
 }
 
 gat_args = {

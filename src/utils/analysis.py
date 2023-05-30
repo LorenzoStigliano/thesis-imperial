@@ -1,8 +1,15 @@
 import torch
 import pickle
 import numpy as np
+import io
 
 from config import SAVE_DIR_MODEL_DATA
+
+class CPU_Unpickler(pickle.Unpickler):
+    def find_class(self, module, name):
+        if module == 'torch.storage' and name == '_load_from_bytes':
+            return lambda b: torch.load(io.BytesIO(b), map_location='cpu')
+        else: return super().find_class(module, name)
 
 def extract_weights_single(dataset, view, model, training_type, shot_n, cv_n, run):
     if "teacher" in model:
@@ -17,7 +24,7 @@ def extract_weights_single(dataset, view, model, training_type, shot_n, cv_n, ru
 
     if training_type == 'Few_Shot':
         x_path = fs_path
-    else: 
+    else:
         x_path = cv_path 
     with open(x_path,'rb') as f:
         weights = pickle.load(f)
@@ -95,6 +102,7 @@ def view_specific_rep(dataset, view, model, CV, run):
     
     return average, std
 
+
 ####### USAGE #######
 """
 for view in views: 
@@ -136,15 +144,14 @@ cv_path_1 = SAVE_DIR_MODEL_DATA+'model_assessment/gcn_student/weights/W_MainMode
 cv_path_2 = '/Users/lorenzostigliano/Documents/University/Imperial/Summer Term/model_data_STABLE/model_assessment/gcn_student/weights/W_MainModel_3Fold_gender_data_gcn_student_run_0_CV_0_view_0_with_teacher_weight_matching.pickle'
 
 with open(cv_path_1,'rb') as f:
-    weights_1 = pickle.load(f)
+    weights_1 = CPU_Unpickler(f).load()
 
 with open(cv_path_2,'rb') as f:
-    weights_2 = pickle.load(f)
+    weights_2 = CPU_Unpickler(f).load()
 
 print(weights_1)
 print(weights_2)
-"""
-"""
+
 Ks = [5, 10, 15, 20]
 teacher_weights = weights_1["w"].squeeze().detach().numpy()
 student_weight = weights_2["w"].squeeze().detach().numpy()

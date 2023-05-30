@@ -22,6 +22,8 @@ def get_labels_and_preds(dataset, model, analysis_type, training_type, cv_n, vie
 
     return labels_and_preds
 
+############ GETTERS FOR METRICS OF MODELS ############
+
 def extract_metrics(dataset, model, analysis_type, training_type, view, run, dataset_split, metric):
     metrics = []
     if training_type == '3Fold':

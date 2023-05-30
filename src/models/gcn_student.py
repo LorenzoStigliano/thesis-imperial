@@ -52,6 +52,7 @@ class GraphConvolution(Module):
 
 class GCN_STUDENT(nn.Module):
     def __init__(self, nfeat, nhid, nclass, dropout):
+        torch.manual_seed(0)
         super(GCN_STUDENT, self).__init__()
         self.gc1 = GraphConvolution(nfeat, nclass)
         #self.gc2 = GraphConvolution(nhid, nclass)
