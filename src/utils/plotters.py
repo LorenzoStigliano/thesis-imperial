@@ -8,12 +8,14 @@ import pickle
 
 from loaders import load_data
 from config import SAVE_DIR_FIGS, SAVE_DIR_MODEL_DATA
-from analysis import view_specific_rep
-from getters import * 
+from analysis import view_specific_rep, view_reproducibility_analysis, view_metric_analysis
 
 def plot_random_sample(dataset, views, save_fig=False):
     """
     Function to plot a random sample on a specified dataset and view
+
+    USAGE:
+    plot_random_sample("gender_data", [0,1], True)
     """
 
     sample_index = random.choice(range(len(load_data(dataset, 1, False))))
@@ -37,7 +39,13 @@ def plot_random_sample(dataset, views, save_fig=False):
             plt.clf()    
 
 def plot_learning_curves(dataset, views, model, evaluation_method, folds, with_teacher=False, save_fig=False, run=0):
+    """
+    USAGE:
+    plot_learning_curves(dataset="gender_data", evaluation_method='model_selection', views=[0, 2, 4, 5], model="gcn", folds=3, save_fig=True)
 
+    for model in [ "gcn", "gat", "diffpool", "gunet", "sag"]:
+        plot_learning_curves(dataset="gender_data", views=[0, 1], model=model, folds=3, save_fig=True)
+    """
     for view in views:
         if folds == 3:
             fig, ax = plt.subplots(1,3, figsize=(30,10))
@@ -102,7 +110,10 @@ def plot_learning_curves(dataset, views, model, evaluation_method, folds, with_t
             plt.clf()     
 
 def plot_metric_curves(dataset, views, model, evaluation_method, folds, metric, with_teacher=False, save_fig=False):
-    
+    """
+    USAGE: 
+    plot_metric_curves(dataset="gender_data", evaluation_method='model_selection', views=[0, 2, 4, 5], model="gcn", folds=3, metric='acc', save_fig=True)
+    """
     for view in views:
         if folds == 3:
             fig, ax = plt.subplots(1,3, figsize=(15,10))
@@ -177,9 +188,12 @@ def plot_metric_curves(dataset, views, model, evaluation_method, folds, metric, 
             plt.show()
             plt.clf()  
             
-
 def plot_bar_chart(dataset, views, models, folds, metric, save_fig=False):
+    """
+    USAGE:
 
+    plot_bar_chart(dataset="gender_data", views=[0, 1], models=[ "gcn", "gat", "diffpool", "gunet", "sag"], folds=3, metric="acc", save_fig=True)
+    """
     for view in views:
         
         barWidth = 1/(len(models)+1)
@@ -248,7 +262,10 @@ def plot_bar_chart(dataset, views, models, folds, metric, save_fig=False):
             plt.clf()     
 
 def plot_bar_chart_rep(dataset, views, models, CV, run, save_fig=False):
-    
+    """
+    USAGE:
+    plot_bar_chart_rep(dataset="gender_data", views=[0, 2, 4, 5], models=["gcn", "gcn_student","gcn_student_teacher",  "gcn_student_teacher_weight"], CV=["3Fold", "5Fold", "10Fold"], run=5, save_fig=False)
+    """
     plt.rcParams["figure.figsize"] = (10,5)
 
     view_data = []
@@ -270,7 +287,10 @@ def plot_bar_chart_rep(dataset, views, models, CV, run, save_fig=False):
     X = np.arange(len(views)+1)
     sep = 0.00
     for i, view_d in enumerate(view_data):
-        plt.bar(X + sep, view_d, width = barWidth, edgecolor ='grey', label=models[i])
+        if model[i] == "gcn":
+            plt.bar(X + sep, view_d, width = barWidth, edgecolor ='grey', label=models[i]+"_teacher")
+        else:
+            plt.bar(X + sep, view_d, width = barWidth, edgecolor ='grey', label=models[i])
         sep += barWidth
     
     max_y_lim = np.amax(view_data) + 0.01
@@ -299,41 +319,18 @@ def plot_bar_chart_rep(dataset, views, models, CV, run, save_fig=False):
         plt.clf()    
 
 def plot_bar_chart_reproducibility_mulitple_runs(dataset, views, models, CV, runs, save_fig=False):
-    
-    def view_reproducibility_analysis(models, CV, views, run):
+    """
+    USAGE:
+    plot_bar_chart_reproducibility_mulitple_runs(dataset="gender_data", views=[0, 2, 4, 5], models=["gcn", "gcn_student","gcn_student_teacher"], CV=["3Fold", "5Fold", "10Fold"], runs=[i for i in range(10)], save_fig=True)
+    """
+    plt.rcParams["figure.figsize"] = (15,5)
 
-        view_data_mean = []
-        view_data_std = []
-
-        for view in views:
-            
-            barWidth = 1/(len(models)+1)
-            model_result_mean = []
-            model_result_std = []
-            
-            for model in models:
-                rep_score, std = view_specific_rep(dataset=dataset, view=view, model=model, run=run, CV=CV)
-                model_result_mean.append(rep_score)
-                model_result_std.append(std)
-            
-            view_data_mean.append(model_result_mean)
-            view_data_std.append(model_result_std)
-
-        view_data_std.append(list(np.std(view_data_mean, axis=0)))
-        view_data_std = np.array(view_data_std).T
-
-        view_data_mean.append(list(np.mean(view_data_mean, axis=0)))
-
-        view_data_mean = np.array(view_data_mean).T
-        
-        return view_data_mean, view_data_std 
-    
     barWidth = 1/(len(models)+1)
 
     mean_all_runs = []
     
     for run in runs:
-        view_data_mean, view_data_std = view_reproducibility_analysis(models, CV, views, run)
+        view_data_mean, _ = view_reproducibility_analysis(dataset, models, CV, views, run)
         mean_all_runs.append(view_data_mean)
 
     mean_all_std = np.std(mean_all_runs, axis=0)
@@ -342,14 +339,18 @@ def plot_bar_chart_reproducibility_mulitple_runs(dataset, views, models, CV, run
     X = np.arange(len(views)+1)
     sep = 0.00
     for i, view_d in enumerate(mean_all_runs):
-        plt.bar(X + sep, view_d, yerr=mean_all_std[i], capsize=4, width = barWidth, edgecolor ='grey', label=models[i], alpha=0.5)
+        if models[i] == "gcn":
+            plt.bar(X + sep, view_d, yerr=mean_all_std[i], capsize=4, width = barWidth, edgecolor ='grey', label=models[i]+"_teacher", alpha=0.5)
+        else:
+            plt.bar(X + sep, view_d, yerr=mean_all_std[i], capsize=4, width = barWidth, edgecolor ='grey', label=models[i], alpha=0.5)
+        
         sep += barWidth
     
-    max_y_lim = np.amax(mean_all_runs) + 0.01
-    min_y_lim = np.amin(mean_all_runs) - 0.01
+    max_y_lim = 1 if np.amax(mean_all_runs) + np.max(mean_all_std) > 1 else np.amax(mean_all_runs) + np.max(mean_all_std)
+    min_y_lim = 0 if np.amin(mean_all_runs) - np.max(mean_all_std) - 0.01 < 0 else np.amin(mean_all_runs) - np.max(mean_all_std) - 0.01
     plt.ylim(min_y_lim, max_y_lim)
     
-    title = f"Reproducibility Score for Dataset:{dataset} across {len(runs)} different seeds."
+    title = f"Reproducibility Score for Dataset:{dataset} across {len(runs)} different seeds"
     
     plt.ylabel("Reproducibility Score")
     x_ticks = ["View {}".format(i) for i in views]+ ["Average"]
@@ -359,7 +360,6 @@ def plot_bar_chart_reproducibility_mulitple_runs(dataset, views, models, CV, run
     plt.grid(axis = 'y')
     plt.legend()
     
-
     if save_fig:
         if not os.path.exists(SAVE_DIR_FIGS+"reproducibility/"):
             os.makedirs(SAVE_DIR_FIGS+"reproducibility/")
@@ -372,50 +372,16 @@ def plot_bar_chart_reproducibility_mulitple_runs(dataset, views, models, CV, run
         plt.clf()    
 
 def plot_bar_chart_metric_multiple_runs(dataset, view, models, CV, runs, metric, dataset_split, analysis_type, save_fig=False):
-    
-    def metric_and_view_analysis(models, CV, analysis_type, view, run, dataset_split, dataset, metric):
-        """
-        Mean of metric for a specific CV -> 3, 5 or 10
-        """
+    """
+    USAGE:
 
-        all_data_mean = []
-        all_data_std = []
-        
-        for model in models:
-            
-            model_results_mean = []
-            model_results_std = []
-        
-            for training_type in CV:
-                metrics = extract_metrics(dataset=dataset, model=model, analysis_type=analysis_type, training_type=training_type, view=view, run=run, dataset_split=dataset_split, metric=metric)
-                mean = np.mean([metric[-1] for metric in metrics])
-                std = np.std([metric[-1] for metric in metrics])
-                model_results_mean.append(mean)
-                model_results_std.append(std)
-            
-            all_data_mean.append(model_results_mean)
-            all_data_std.append(model_results_std)
-        
-        return all_data_mean, all_data_std
-    
-    def view_metric_analysis(models, CV, view, run, metric, dataset, dataset_split, analysis_type):
-
-        view_data_mean = []
-        view_data_std = []
-
-        mean, std = metric_and_view_analysis(models=models, 
-                                        CV=CV, 
-                                        analysis_type=analysis_type, 
-                                        view=view, 
-                                        run=run, 
-                                        dataset= dataset,
-                                        dataset_split=dataset_split, 
-                                        metric=metric)
-        view_data_mean.append(mean)
-        view_data_std.append(std)
-        
-        return view_data_mean, view_data_std 
-    
+    ["acc", "f1", "recall", "precision"]
+    for view in [0,2,4,5]:
+        plot_bar_chart_metric_multiple_runs(dataset="gender_data", view=view, models=["gcn", "gcn_student","gcn_student_teacher"], CV=["3Fold", "5Fold", "10Fold"], runs=[i for i in range(10)], metric="acc", dataset_split="val", analysis_type="model_assessment", save_fig=True)
+        plot_bar_chart_metric_multiple_runs(dataset="gender_data", view=view, models=["gcn", "gcn_student","gcn_student_teacher",  "gcn_student_teacher_weight"], CV=["3Fold", "5Fold", "10Fold"], runs=[i for i in range(10)], metric="f1", dataset_split="val", analysis_type="model_assessment", save_fig=True)
+        plot_bar_chart_metric_multiple_runs(dataset="gender_data", view=view, models=["gcn", "gcn_student","gcn_student_teacher",  "gcn_student_teacher_weight"], CV=["3Fold", "5Fold", "10Fold"], runs=[i for i in range(10)], metric="recall", dataset_split="val", analysis_type="model_assessment", save_fig=True)
+        plot_bar_chart_metric_multiple_runs(dataset="gender_data", view=view, models=["gcn", "gcn_student","gcn_student_teacher",  "gcn_student_teacher_weight"], CV=["3Fold", "5Fold", "10Fold"], runs=[i for i in range(10)], metric="precision", dataset_split="val", analysis_type="model_assessment", save_fig=True)    
+    """
     barWidth = 1/(len(models)+1)
 
     mean_all_runs = []
@@ -429,90 +395,38 @@ def plot_bar_chart_metric_multiple_runs(dataset, view, models, CV, runs, metric,
     #GET MEAN AND STD ACROSS MEAN OF RUNS
     mean_all_runs = np.c_[ mean_all_runs, np.mean(mean_all_runs, axis=1)]     
     mean_all_std = np.c_[ mean_all_std, np.std(mean_all_runs, axis=1)]  
-
-    mean_all_runs, mean_all_std
-
-    mean_all_std = np.std(mean_all_runs, axis=0)
-    mean_all_runs = np.mean(mean_all_runs, axis=0)
-
     X = np.arange(len(CV)+1)
     sep = 0.00
     for i, view_d in enumerate(mean_all_runs):
-        plt.bar(X + sep, view_d, yerr=mean_all_std[i], capsize=4, width = barWidth, edgecolor ='grey', label=models[i], alpha=0.5)
+        if models[i] == "gcn":
+             plt.bar(X + sep, view_d, yerr=mean_all_std[i], capsize=4, width = barWidth, edgecolor ='grey', label=models[i]+"_teacher", alpha=0.5)
+        else:
+            plt.bar(X + sep, view_d, yerr=mean_all_std[i], capsize=4, width = barWidth, edgecolor ='grey', label=models[i], alpha=0.5)
         sep += barWidth
     
     max_y_lim = np.amax(mean_all_runs) + 0.05
     min_y_lim = np.amin(mean_all_runs) - 0.05
     plt.ylim(min_y_lim, max_y_lim)
     
-    title = f"Dataset:{dataset}, Metric:{metric}, View:{view}, Across: {len(runs)} seeds"
+    #title = f"Dataset:{dataset}, Metric:{metric}, View:{view}, Across: {len(runs)} seeds with fixed init"
+    title = f"Accuracy across view {view} for 3, 5 and 10-Fold CV"
     
     plt.ylabel(f"Metric: {metric}")
-    x_ticks = ["CV {}".format(i) for i in CV]+ ["Average"]
+    x_ticks = [i for i in CV]+ ["Average"]
     
-    plt.xticks([r + barWidth for r in range(len(mean_all_runs))], x_ticks)
+    plt.xticks([r + barWidth for r in range(len(models)+1)], x_ticks)
     plt.title(title)
     plt.grid(axis = 'y')
     plt.legend()
     
 
     if save_fig:
-        if not os.path.exists(SAVE_DIR_FIGS+"reproducibility/"):
-            os.makedirs(SAVE_DIR_FIGS+"reproducibility/")
+        if not os.path.exists(SAVE_DIR_FIGS+"metric_results/"):
+            os.makedirs(SAVE_DIR_FIGS+"metric_results/")
         
-        plt.savefig(SAVE_DIR_FIGS+"reproducibility/"+title+".png", dpi=150)
+        plt.savefig(SAVE_DIR_FIGS+"metric_results/"+title+".png", dpi=150)
         plt.clf()
     
     else:
         plt.show()
         plt.clf()   
-################################ PLOT DATA ################################
-
-np.random.seed(0)
-random.seed(0)
-
-"""
-plot_learning_curves(dataset="gender_data", evaluation_method='model_selection', views=[0, 2, 4, 5], model="gcn", folds=3, save_fig=True)
-plot_metric_curves(dataset="gender_data", evaluation_method='model_selection', views=[0, 2, 4, 5], model="gcn", folds=3, metric='acc', save_fig=True)
-plot_metric_curves(dataset="gender_data", evaluation_method='model_selection', views=[0, 2, 4, 5], model="gcn", folds=3, metric='f1', save_fig=True)
-plot_metric_curves(dataset="gender_data", evaluation_method='model_selection', views=[0, 2, 4, 5], model="gcn", folds=3, metric='recall', save_fig=True)
-plot_metric_curves(dataset="gender_data", evaluation_method='model_selection', views=[0, 2, 4, 5], model="gcn", folds=3, metric='precision', save_fig=True)
-
-plot_learning_curves(dataset="gender_data", evaluation_method='model_selection', views=[0, 2, 4, 5], model="gcn_student", folds=3, save_fig=True)
-plot_metric_curves(dataset="gender_data", evaluation_method='model_selection', views=[0, 2, 4, 5], model="gcn_student", folds=3, metric='acc', save_fig=True)
-plot_metric_curves(dataset="gender_data", evaluation_method='model_selection', views=[0, 2, 4, 5], model="gcn_student", folds=3, metric='f1', save_fig=True)
-plot_metric_curves(dataset="gender_data", evaluation_method='model_selection', views=[0, 2, 4, 5], model="gcn_student", folds=3, metric='recall', save_fig=True)
-plot_metric_curves(dataset="gender_data", evaluation_method='model_selection', views=[0, 2, 4, 5], model="gcn_student", folds=3, metric='precision', save_fig=True)
-
-plot_learning_curves(dataset="gender_data", evaluation_method='model_selection', views=[0, 2, 4, 5], model="gcn_student", folds=3, with_teacher=True, save_fig=True)
-plot_metric_curves(dataset="gender_data", evaluation_method='model_selection', views=[0, 2, 4, 5], model="gcn_student", folds=3, metric='acc', with_teacher=True, save_fig=True)
-plot_metric_curves(dataset="gender_data", evaluation_method='model_selection', views=[0, 2, 4, 5], model="gcn_student", folds=3, metric='f1', with_teacher=True, save_fig=True)
-plot_metric_curves(dataset="gender_data", evaluation_method='model_selection', views=[0, 2, 4, 5], model="gcn_student", folds=3, metric='recall', with_teacher=True, save_fig=True)
-plot_metric_curves(dataset="gender_data", evaluation_method='model_selection', views=[0, 2, 4, 5], model="gcn_student", folds=3, metric='precision', with_teacher=True, save_fig=True)
-"""
-
-"""
-plot_bar_chart(dataset="gender_data", views=[0, 1], models=[ "gcn", "gat", "diffpool", "gunet", "sag"], folds=3, metric="acc", save_fig=True)
-plot_bar_chart(dataset="gender_data", views=[0, 1], models=[ "gcn", "gat", "diffpool", "gunet", "sag"], folds=3, metric="prec", save_fig=True)
-plot_bar_chart(dataset="gender_data", views=[0, 1], models=[ "gcn", "gat", "diffpool", "gunet", "sag"], folds=3, metric="recall", save_fig=True)
-plot_bar_chart(dataset="gender_data", views=[0, 1], models=[ "gcn", "gat", "diffpool", "gunet", "sag"], folds=3, metric="F1", save_fig=True)
-
-for model in [ "gcn", "gat", "diffpool", "gunet", "sag"]:
-    plot_learning_curves(dataset="gender_data", views=[0, 1], model=model, folds=3, save_fig=True)
-
-plot_random_sample("gender_data", [0,1], True)
-plot_random_sample("gender_data", [0,1], True)
-plot_random_sample("gender_data", [0,1], True)
-"""
-
-"""
-for cv in [3, 5, 10]:
-    plot_bar_chart(dataset="gender_data", views=[0], models=["gcn", "gcn_student", "gcn_student_teacher"], folds=cv, metric="acc", save_fig=False) "gcn_student_teacher", "gcn_student_teacher_weight"
-"""
-"""
-"""
-#plot_bar_chart_rep(dataset="gender_data", views=[0, 2, 4, 5], models=["gcn", "gcn_student","gcn_student_teacher",  "gcn_student_teacher_weight"], CV=["3Fold", "5Fold", "10Fold"], run=5, save_fig=False)
-
-plot_bar_chart_reproducibility_mulitple_runs(dataset="gender_data", views=[0, 2, 4, 5], models=["gcn", "gcn_student","gcn_student_teacher",  "gcn_student_teacher_weight"], CV=["3Fold", "5Fold", "10Fold"], runs=[i for i in range(10)], save_fig=False)
-
-#plot_bar_chart_metric_multiple_runs(dataset="gender_data", view=0, models=["gcn", "gcn_student","gcn_student_teacher",  "gcn_student_teacher_weight"], CV=["3Fold", "5Fold", "10Fold"], runs=[i for i in range(10)], metric="acc", dataset_split="val", analysis_type="model_assessment")

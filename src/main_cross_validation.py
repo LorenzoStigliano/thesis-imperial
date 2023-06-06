@@ -55,6 +55,7 @@ def train_main_model(dataset, model, view, cv_number, run=0):
         cross_validation(mlp_args, G_list, view, model_name, cv_number, run)
     
 def parrallel_run(run):
+    print(run)
     datasets_asdnc = ['gender_data']
     views = [0, 2, 4, 5] #0, 2, 4, 5
     for dataset_i in datasets_asdnc:
@@ -75,6 +76,6 @@ if __name__ == '__main__':
         Training GNN Models with datasets of data directory.
         '''
         runs = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9] # 0, 1, 2, 3, 4, 5, 6, 7, 8, 9
-        Parallel(n_jobs=joblib.cpu_count())(delayed(parrallel_run)(run) for run in runs)
+        #joblib.cpu_count()
+        Parallel(n_jobs=1)(delayed(parrallel_run)(run) for run in runs)
         
-                  

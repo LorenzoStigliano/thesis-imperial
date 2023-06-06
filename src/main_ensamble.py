@@ -15,15 +15,16 @@ def train_main_model(dataset, model, view, cv_number, run=0):
     random.seed(run)   
 
     cv_name = str(cv_number)+"Fold"
-    model_name = "MainModel_"+cv_name+"_"+dataset+"_"+model
+    model_name = "MainModel_"+cv_name+"_"+dataset+"_"+model+"_"+gcn_student_ensamble_args["model_name"]
 
     G_list = load_data(dataset, view, NormalizeInputGraphs=False)
 
-    new_folder(model, gcn_student_args["evaluation_method"])
+    new_folder(gcn_student_ensamble_args["model_name"], gcn_student_ensamble_args["evaluation_method"])
     
     if gcn_args["evaluation_method"] == "model_assessment":
-            model_name += f"_run_{run}"
+            model_name += f"_run_{run}_fixed_init"
     
+    print(model_name)
     if model == "gcn_student_ensamble":
         cross_validation(gcn_student_ensamble_args, G_list, view, model_name, cv_number, n_students=3)
 

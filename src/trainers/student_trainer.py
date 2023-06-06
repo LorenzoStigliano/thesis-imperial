@@ -75,7 +75,8 @@ def cross_validation(model_args, G_list, view, model_name, cv_number, run=0):
             nfeat = num_nodes,
             nhid = model_args["hidden_dim"],
             nclass = num_classes,
-            dropout = model_args["dropout"]
+            dropout = model_args["dropout"],
+            run = run
         ).to(device) 
 
         if model_args["evaluation_method"] =='model_selection':
@@ -116,8 +117,8 @@ def train(model_args, train_dataset, val_dataset, student_model, threshold_value
        with open(teacher_weights_path,'rb') as f:
           teacher_weights = pickle.load(f)
     else:
-       teacher_model = torch.load(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+f"/gcn/models/gcn_MainModel_{cv_number}Fold_gender_data_gcn_run_{run}_CV_{cv}_view_{view}.pt")
-       teacher_weights_path = SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+f"/gcn/weights/W_MainModel_{cv_number}Fold_gender_data_gcn_run_{run}_CV_{cv}_view_{view}.pickle"
+       teacher_model = torch.load(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+f"/gcn/models/gcn_MainModel_{cv_number}Fold_gender_data_gcn_run_{run}_fixed_init_CV_{cv}_view_{view}.pt")
+       teacher_weights_path = SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+f"/gcn/weights/W_MainModel_{cv_number}Fold_gender_data_gcn_run_{run}_fixed_init_CV_{cv}_view_{view}.pickle"
        with open(teacher_weights_path,'rb') as f:
           teacher_weights = pickle.load(f)
     
@@ -325,7 +326,7 @@ def train(model_args, train_dataset, val_dataset, student_model, threshold_value
         if os.path.exists(path):
             os.remove(path)
 
-        os.rename(model_args['model_name']+'_W.pickle'.format(),path)
+        os.rename(model_args['model_name']+"_"+str(run)+'_W.pickle'.format(),path)
     
     Ks = [5, 10, 15, 20]
     teacher_weights = teacher_weights.squeeze().detach().numpy()

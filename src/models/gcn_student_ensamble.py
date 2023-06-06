@@ -49,14 +49,16 @@ class GraphConvolution(Module):
                + str(self.in_features) + ' -> ' \
                + str(self.out_features) + ')'
 
-
 class GCN_STUDENT_ENSAMBLE(nn.Module):
-    def __init__(self, nfeat, nhid, nclass, dropout, seed):
-        torch.manual_seed(seed)
+    def __init__(self, nfeat, nhid, nclass, dropout, seed, run, number, total_number):
+        torch.manual_seed(seed*10+number)
         super(GCN_STUDENT_ENSAMBLE, self).__init__()
         self.gc1 = GraphConvolution(nfeat, nclass)
         self.LinearLayer = nn.Linear(nfeat,1)
         self.is_trained = False
+        self.number = number
+        self.run = run
+        self.total_number=total_number
 
     def forward(self, x, adj):
         x = F.relu(self.gc1(x, adj))
@@ -67,7 +69,7 @@ class GCN_STUDENT_ENSAMBLE(nn.Module):
         
         if self.is_trained:
           w_dict = {"w": self.LinearLayer.weight}
-          with open("gcn_student_ensamble_W.pickle", 'wb') as f:
+          with open(f"gcn_student_ensamble_{self.total_number}_number_{self.number}_run_{self.run}_W.pickle", 'wb') as f:
             pickle.dump(w_dict, f)
           self.is_trained = False
           print("GCN Weights are saved:")

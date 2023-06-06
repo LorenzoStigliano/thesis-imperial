@@ -1,65 +1,7 @@
-import torch
-import pickle
 import numpy as np
-import io
+from getters import *
 
-from config import SAVE_DIR_MODEL_DATA
-
-class CPU_Unpickler(pickle.Unpickler):
-    def find_class(self, module, name):
-        if module == 'torch.storage' and name == '_load_from_bytes':
-            return lambda b: torch.load(io.BytesIO(b), map_location='cpu')
-        else: return super().find_class(module, name)
-
-def extract_weights_single(dataset, view, model, training_type, shot_n, cv_n, run):
-    if "teacher" in model:
-        if "weight" in model:
-            model = "_".join(model.split("_")[:2]) 
-            cv_path = SAVE_DIR_MODEL_DATA+'model_assessment/{}/weights/W_MainModel_{}_{}_{}_run_{}_CV_{}_view_{}_with_teacher_weight_matching.pickle'.format(model, training_type, dataset, model, run, cv_n, view)
-        else:
-            model = "_".join(model.split("_")[:2]) 
-            cv_path = SAVE_DIR_MODEL_DATA+'model_assessment/{}/weights/W_MainModel_{}_{}_{}_run_{}_CV_{}_view_{}_with_teacher.pickle'.format(model, training_type, dataset, model, run, cv_n, view)        
-    else:
-        cv_path = SAVE_DIR_MODEL_DATA+'model_assessment/{}/weights/W_MainModel_{}_{}_{}_run_{}_CV_{}_view_{}.pickle'.format(model,training_type, dataset, model, run, cv_n, view)
-
-    if training_type == 'Few_Shot':
-        x_path = fs_path
-    else:
-        x_path = cv_path 
-    with open(x_path,'rb') as f:
-        weights = pickle.load(f)
-
-    if model == 'sag':
-        weights_vector = torch.mean(weights['w'], 1).detach().numpy()
-    if model == 'diffpool':
-        weights_vector = torch.mean(weights['w'], 1).detach().numpy()
-    if model == 'gcn':
-        weights_vector = weights['w'].squeeze().detach().numpy()
-    if model == 'gcn_student':
-        weights_vector = weights['w'].squeeze().detach().numpy()
-    if model == 'gat':
-        weights_vector = weights['w'].squeeze().detach().numpy()
-    if model == 'gunet':
-        weights_vector = torch.mean(weights['w'], 0).detach().numpy()    
-    return weights_vector
-
-def extract_weights(dataset, view, model, training_type, run):
-    runs = []
-    if training_type == 'Few_Shot':
-        for shot_i in range(5):
-            runs.append(extract_weights_single(dataset, view, model, training_type, shot_i, 0, run))
-    if training_type == '3Fold':
-        for cv_i in range(3):
-            runs.append(extract_weights_single(dataset, view, model, training_type, 0, cv_i, run))
-    if training_type == '5Fold':
-        for cv_i in range(5):
-            runs.append(extract_weights_single(dataset, view, model, training_type, 0, cv_i, run))
-    if training_type == '10Fold':
-        for cv_i in range(10):
-            runs.append(extract_weights_single(dataset, view, model, training_type, 0, cv_i, run))
-    runs = np.array(runs)
-    weights = np.mean(runs, axis=0)
-    return weights
+############ ANALYSIS OF REPRODUCIBILITY FOR MODELS ############
 
 def top_biomarkers(weights, K_i):
     weights_normalized = np.abs(weights)
@@ -78,21 +20,30 @@ def sim(nodes1, nodes2):
         print('nodes vectors are not compatible')
 
 def view_specific_rep(dataset, view, model, CV, run):
+    """
+    USAGE:
+    CV = ["3Fold", "5Fold", "10Fold"]
+    views = [0,1,4,5]
+
+    for view in views: 
+        gcn_rep_score             = view_specific_rep(dataset="gender_data", view=view, model="gcn", CV=CV)
+        gcn_student_score         = view_specific_rep(dataset="gender_data", view=view, model="gcn_student", CV=CV)
+        gcn_student_teacher_score = view_specific_rep(dataset="gender_data", view=view, model="gcn_student_teacher", CV=CV)
+    """
 
     Ks = [5, 10, 15, 20]
-    rep = np.zeros([len(CV), len(CV), len(Ks)])
+    rep = np.zeros([len(Ks), len(CV), len(CV)])
 
-    for i in range(rep.shape[0]):
-        for j in range(rep.shape[1]):
-            weights_i = extract_weights(dataset, view, model, CV[i], run)
-            weights_j = extract_weights(dataset, view, model, CV[j], run)
-            
-            for k in range(rep.shape[2]):
+    for k in range(rep.shape[0]):
+        for i in range(rep.shape[1]):
+            for j in range(rep.shape[2]):
+                weights_i = extract_weights(dataset, view, model, CV[i], run)
+                weights_j = extract_weights(dataset, view, model, CV[j], run)
                 top_bio_i = top_biomarkers(weights_i, Ks[k])
                 top_bio_j = top_biomarkers(weights_j, Ks[k])
-                rep[i,j,k] = sim(top_bio_i, top_bio_j)
-                
-    rep_mean = np.mean(rep, axis=2)
+                rep[k,i,j] = sim(top_bio_i, top_bio_j)
+
+    rep_mean = np.mean(rep, axis=0)
     # Get the elements above the diagonal
     elements_above_diagonal = np.where(np.triu(np.ones_like(rep_mean), k=1), rep_mean, np.nan)
 
@@ -102,15 +53,84 @@ def view_specific_rep(dataset, view, model, CV, run):
     
     return average, std
 
+def view_reproducibility_analysis(dataset, models, CV, views, run):
+    """
+    Reproducibility analysis for a single run
+    """
+
+    view_data_mean = []
+    view_data_std = []
+
+    for view in views:
+        
+        model_result_mean = []
+        model_result_std = []
+        
+        for model in models:
+            rep_score, std = view_specific_rep(dataset=dataset, view=view, model=model, run=run, CV=CV)
+            model_result_mean.append(rep_score)
+            model_result_std.append(std)
+        
+        view_data_mean.append(model_result_mean)
+        view_data_std.append(model_result_std)
+
+    view_data_std.append(list(np.std(view_data_mean, axis=0)))
+    view_data_std = np.array(view_data_std).T
+
+    view_data_mean.append(list(np.mean(view_data_mean, axis=0)))
+
+    view_data_mean = np.array(view_data_mean).T
+    
+    return view_data_mean, view_data_std 
+
+############ ANALYSIS OF METIRC FOR MODELS ############
+
+def metric_and_view_analysis(models, CV, analysis_type, view, run, dataset_split, dataset, metric):
+    """
+    Mean of metric for a specific CV -> 3, 5 or 10
+    """
+
+    all_data_mean = []
+    all_data_std = []
+    
+    for model in models:
+        
+        model_results_mean = []
+        model_results_std = []
+    
+        for training_type in CV:
+            metrics = extract_metrics(dataset=dataset, model=model, analysis_type=analysis_type, training_type=training_type, view=view, run=run, dataset_split=dataset_split, metric=metric)
+            mean = np.mean([metric[-1] for metric in metrics])
+            std = np.std([metric[-1] for metric in metrics])
+            model_results_mean.append(mean)
+            model_results_std.append(std)
+        
+        all_data_mean.append(model_results_mean)
+        all_data_std.append(model_results_std)
+    
+    return all_data_mean, all_data_std
+
+def view_metric_analysis(models, CV, view, run, metric, dataset, dataset_split, analysis_type):
+    """
+    Getting all the means across for a run
+    """
+    view_data_mean = []
+    view_data_std = []
+
+    mean, std = metric_and_view_analysis(models=models, 
+                                    CV=CV, 
+                                    analysis_type=analysis_type, 
+                                    view=view, 
+                                    run=run, 
+                                    dataset= dataset,
+                                    dataset_split=dataset_split, 
+                                    metric=metric)
+    view_data_mean.append(mean)
+    view_data_std.append(std)
+    
+    return view_data_mean, view_data_std 
 
 ####### USAGE #######
-"""
-for view in views: 
-    gcn_rep_score             = view_specific_rep(dataset="gender_data", view=view, model="gcn", CV=CV)
-    gcn_student_score         = view_specific_rep(dataset="gender_data", view=view, model="gcn_student", CV=CV)
-    gcn_student_teacher_score = view_specific_rep(dataset="gender_data", view=view, model="gcn_student_teacher", CV=CV)
-"""
-
 """
 CV = ["3Fold", "5Fold", "10Fold"]
 views = [0, 2, 4, 5]

@@ -63,9 +63,10 @@ def cross_validation(model_args, G_list, view, model_name, cv_number, n_students
         print(f"CV : {cv}")
 
         for i in range(n_students):
-            name = model_name+f"_student_{str(i)}_CV_"+str(cv)+"_view_"+str(view)+"_ensamble"
+            name = model_name+f"_student_{str(i)}"+"_CV_"+str(cv)+"_view_"+str(view)
             student_names.append(name)
         
+        print(model_name)
         print(student_names)
 
         train_set, validation_set, test_set = datasets_splits(folds, model_args, cv)
@@ -77,28 +78,31 @@ def cross_validation(model_args, G_list, view, model_name, cv_number, n_students
                 nhid = model_args["hidden_dim"],
                 nclass = num_classes,
                 dropout = model_args["dropout"],
-                seed = i
+                seed = i,
+                run = run, 
+                number = i,
+                total_number = model_args["n_students"]
             ).to(device)
             students.append(student_model)
 
         if model_args["evaluation_method"] =='model_selection':
             #Here we leave out the test set since we are not evaluating we can see the performance on the test set after training
-            train(model_args, train_dataset, val_dataset, student_model, threshold_value, name,cv, view, cv_number)
+            train(model_args, train_dataset, val_dataset, student_model, threshold_value, model_name, cv, view, cv_number)
             #See performance on the held-out test set 
             dataset_sampler = GraphSampler(test_set)
             test_dataset = torch.utils.data.DataLoader(
                 dataset_sampler, 
                 batch_size = 1,  
                 shuffle = False) 
-            test(test_dataset, students, model_args, threshold_value, name)
+            test(test_dataset, students, model_args, threshold_value, model_name)
 
         if model_args["evaluation_method"] =='model_assessment':
             #Here we join the train and validation dataset
-            train(model_args, train_dataset, val_dataset, students, threshold_value, name,  cv, view, cv_number, run)
+            train(model_args, train_dataset, val_dataset, students, student_names, threshold_value, model_name,  cv, view, cv_number, run)
     
     print('Time taken', time.time()-start)
 
-def train(model_args, train_dataset, val_dataset, students, threshold_value, model_name, cv, view, cv_number, run=0, alpha=2):
+def train(model_args, train_dataset, val_dataset, students, student_names, threshold_value, model_name, cv, view, cv_number, run=0):
     """
     Parameters
     ----------
@@ -112,6 +116,8 @@ def train(model_args, train_dataset, val_dataset, students, threshold_value, mod
     ----------
     This methods performs the training of the model on train dataset and calls evaluate() method for evaluation.
     """
+    print("In training")
+    print(model_name)
     # Load teacher model
     if model_args['evaluation_method'] == "model_selection":
        teacher_model = torch.load(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+f"/gcn/models/gcn_MainModel_{cv_number}Fold_gender_data_gcn_CV_{cv}_view_{view}.pt")
@@ -119,8 +125,8 @@ def train(model_args, train_dataset, val_dataset, students, threshold_value, mod
        with open(teacher_weights_path,'rb') as f:
           teacher_weights = pickle.load(f)
     else:
-       teacher_model = torch.load(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+f"/gcn/models/gcn_MainModel_{cv_number}Fold_gender_data_gcn_run_{run}_CV_{cv}_view_{view}.pt")
-       teacher_weights_path = SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+f"/gcn/weights/W_MainModel_{cv_number}Fold_gender_data_gcn_run_{run}_CV_{cv}_view_{view}.pickle"
+       teacher_model = torch.load(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+f"/gcn/models/gcn_MainModel_{cv_number}Fold_gender_data_gcn_run_{run}_fixed_init_CV_{cv}_view_{view}.pt")
+       teacher_weights_path = SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+f"/gcn/weights/W_MainModel_{cv_number}Fold_gender_data_gcn_run_{run}_fixed_init_CV_{cv}_view_{view}.pickle"
        with open(teacher_weights_path,'rb') as f:
           teacher_weights = pickle.load(f)
     
@@ -134,7 +140,6 @@ def train(model_args, train_dataset, val_dataset, students, threshold_value, mod
     student_model_1 = students[0].to(device)
     student_model_2 = students[1].to(device)
     student_model_3 = students[2].to(device)
-
 
     # Define Loss
     criterion = nn.CrossEntropyLoss(reduction='mean')
@@ -152,7 +157,7 @@ def train(model_args, train_dataset, val_dataset, students, threshold_value, mod
     train_loss_1, train_loss_2, train_loss_3 = [], [], []
     # performance accuracy of each student
     train_acc_1, train_acc_2, train_acc_3 = [], [], []
-    # cumulartive loss of teacher and student soft-ce
+    # cumulative loss of teacher and student soft-ce
     train_loss_teacher_student = []
     # ensamble loss
     train_loss_ensamble_ce = []
@@ -160,19 +165,16 @@ def train(model_args, train_dataset, val_dataset, students, threshold_value, mod
     train_ensamble_soft_ce_loss=[]
     # loss of weights within the students 
     train_loss_within_student=[]
-    # ensamble metrics 
-    train_ensamble_f1=[]
-    train_ensamble_recall=[]
-    train_ensamble_precision=[]
+    # ensamble accuracy 
+    train_ensamble_acc = []
 
-    validation_loss=[]
-    validation_ce_loss=[]
-    validation_soft_ce_loss=[]
-    validation_weight_loss=[]
-    validation_acc=[]
-    validation_f1=[]
-    validation_recall=[]
-    validation_precision=[]
+    # Validation losses
+    validation_total_loss = []
+    validation_loss_1, validation_loss_2, validation_loss_3 = [], [], []
+    validation_loss_teacher_student = []
+    validation_loss_ensamble_ce = []
+    validation_ensamble_soft_ce_loss = []
+    validation_loss_within_student = []
     
     print(f"Size of Training Set: {str(len(train_dataset))}")
     print(f"Size of Validation Set: {str(len(val_dataset))}")
@@ -199,7 +201,7 @@ def train(model_args, train_dataset, val_dataset, students, threshold_value, mod
         for _, data in enumerate(train_dataset):
             begin_time = time.time()
             
-            # Initialize gradients with 0
+            # Initialize gradients
             optimizer_1.zero_grad()
             optimizer_2.zero_grad()
             optimizer_3.zero_grad()
@@ -291,16 +293,17 @@ def train(model_args, train_dataset, val_dataset, students, threshold_value, mod
             'acc': metrics.accuracy_score(labels_ensamble, preds_ensamble),
             'F1': metrics.f1_score(labels_ensamble, preds_ensamble)
         }
-        train_acc_1 = metrics.accuracy_score(np.hstack(labels_1), np.hstack(preds_1))
-        train_acc_2 = metrics.accuracy_score(np.hstack(labels_2), np.hstack(preds_2))
-        train_acc_3 = metrics.accuracy_score(np.hstack(labels_3), np.hstack(preds_3))
+        train_acc_1.append(metrics.accuracy_score(np.hstack(labels_1), np.hstack(preds_1)))
+        train_acc_2.append(metrics.accuracy_score(np.hstack(labels_2), np.hstack(preds_2)))
+        train_acc_3.append(metrics.accuracy_score(np.hstack(labels_3), np.hstack(preds_3)))
+        train_ensamble_acc.append(result['acc'])
               
         print("---------------------------------")
         print(f"Time taken for epoch {epoch}: {total_time}")
         print(f"Train ensamble accuracy: {result['acc']}")
-        print(f"Train model 1 accuracy: {train_acc_1}")
-        print(f"Train model 2 accuracy: {train_acc_2}")
-        print(f"Train model 3 accuracy: {train_acc_3}")
+        print(f"Train model 1 accuracy: {train_acc_1[-1]}")
+        print(f"Train model 2 accuracy: {train_acc_2[-1]}")
+        print(f"Train model 3 accuracy: {train_acc_3[-1]}")
         print(f"Train total loss: {total_loss / len(train_dataset)}")
         print(f"Train teacher and student loss: {t_loss_teacher_student / len(train_dataset)}")
         print(f"Train within student loss for weights: {t_loss_within_student / len(train_dataset)}")
@@ -315,109 +318,117 @@ def train(model_args, train_dataset, val_dataset, students, threshold_value, mod
         train_ensamble_soft_ce_loss.append(t_ensamble_soft_ce_loss / len(train_dataset)) 
         # loss of weights within the students 
         train_loss_within_student.append(t_loss_within_student / len(train_dataset)) 
-        validate(val_dataset, students, model_args, threshold_value, model_name, teacher_model, teacher_weights)
-        """
-        train_soft_ce_loss.append(soft_ce_loss / len(train_dataset))
-        train_weight_loss.append(weight_loss / len(train_dataset))
-        train_acc.append(result['acc'])
-        train_f1.append(result['F1'])
-        train_recall.append(result['recall'])
-        train_precision.append(result['prec'])
-
-        val_loss, val_ce_loss, val_soft_ce_loss, val_weight_loss, val_acc, val_precision, val_recall, val_f1 = validate(val_dataset, students, model_args, threshold_value, model_name, teacher_model, teacher_weights)
-        validation_loss.append(val_loss)
-        validation_ce_loss.append(val_ce_loss)
-        validation_soft_ce_loss.append(val_soft_ce_loss)
-        validation_weight_loss.append(val_weight_loss)
-        validation_acc.append(val_acc)
-        validation_f1.append(val_f1)
-        validation_recall.append(val_recall)
-        validation_precision.append(val_precision)  
-        """
-    """
-    Ks = [5, 10, 15, 20]
-    student_weights_1 = student_weights_1.squeeze().detach().numpy()
-    student_weights_2 = student_weights_2.squeeze().detach().numpy()
-    student_weights_3 = student_weights_3.squeeze().detach().numpy()
-    for k in Ks:
-        top_bio_1 = top_biomarkers(student_weights_1, k)
-        top_bio_2 = top_biomarkers(student_weights_2, k)
-        top_bio_3 = top_biomarkers(student_weights_3, k)
-        print(sim(top_bio_1, top_bio_2))
-        print(sim(top_bio_1, top_bio_3))
-        print(sim(top_bio_2, top_bio_3))   
-    """
+        
+        val_total_loss, val_loss_1, val_loss_2, val_loss_3, val_loss_teacher_student, val_loss_ensamble_ce, val_ensamble_soft_ce_loss, val_loss_within_student = validate(val_dataset, students, model_args, threshold_value, model_name, teacher_model, teacher_weights)
+        validation_total_loss.append(val_total_loss)
+        validation_loss_1.append(val_loss_1)
+        validation_loss_2.append(val_loss_2)
+        validation_loss_3.append(val_loss_3)
+        validation_loss_teacher_student.append(val_loss_teacher_student)
+        validation_loss_ensamble_ce.append(val_loss_ensamble_ce)
+        validation_ensamble_soft_ce_loss.append(val_ensamble_soft_ce_loss)
+        validation_loss_within_student.append(val_loss_within_student)
     
-    """
-    #Save train metrics
-    with open(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+"/"+model_args["model_name"]+"/metrics/"+model_name+"_train_acc.pickle", 'wb') as f:
-      pickle.dump(train_acc, f)
-    with open(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+"/"+model_args["model_name"]+"/metrics/"+model_name+"_train_f1.pickle", 'wb') as f:
-      pickle.dump(train_f1, f)
-    with open(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+"/"+model_args["model_name"]+"/metrics/"+model_name+"_train_recall.pickle", 'wb') as f:
-      pickle.dump(train_recall, f)
-    with open(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+"/"+model_args["model_name"]+"/metrics/"+model_name+"_train_precision.pickle", 'wb') as f:
-      pickle.dump(train_precision, f)
+    
+    #Save train metrics acc
+    with open(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+"/"+model_args["model_name"]+"/metrics/"+model_name+"_train_acc_ensamble.pickle", 'wb') as f:
+      pickle.dump(train_ensamble_acc, f)
+    with open(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+"/"+model_args["model_name"]+"/metrics/"+model_name+"_train_acc_student_1.pickle", 'wb') as f:
+      pickle.dump(train_acc_1, f)
+    with open(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+"/"+model_args["model_name"]+"/metrics/"+model_name+"_train_acc_student_2.pickle", 'wb') as f:
+      pickle.dump(train_acc_2, f)
+    with open(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+"/"+model_args["model_name"]+"/metrics/"+model_name+"_train_acc_student_3.pickle", 'wb') as f:
+      pickle.dump(train_acc_3, f)
 
-    #Save validation metrics
-    with open(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+"/"+model_args["model_name"]+"/metrics/"+model_name+"_val_acc.pickle", 'wb') as f:
-      pickle.dump(validation_acc, f)
-    with open(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+"/"+model_args["model_name"]+"/metrics/"+model_name+"_val_f1.pickle", 'wb') as f:
-      pickle.dump(validation_f1, f)
-    with open(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+"/"+model_args["model_name"]+"/metrics/"+model_name+"_val_recall.pickle", 'wb') as f:
-      pickle.dump(validation_recall, f)
-    with open(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+"/"+model_args["model_name"]+"/metrics/"+model_name+"_val_precision.pickle", 'wb') as f:
-      pickle.dump(validation_precision, f)
-
-    # Save final labels and predictions of model on train set 
-    simple_r = {'labels':labels,'preds':preds}
-    with open(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+"/"+model_args["model_name"]+"/labels_and_preds/"+model_name+"_train.pickle", 'wb') as f:
+    # Save final labels and predictions of model on train set for ensamble and indiviudal students in ensamble 
+    simple_r = {'labels':labels_ensamble,'preds':preds_ensamble}
+    with open(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+"/"+model_args["model_name"]+"/labels_and_preds/"+model_name+"_train_ensemble.pickle", 'wb') as f:
       pickle.dump(simple_r, f)
     
-    # Save training loss of GNN model
-    los_p = {'loss':train_loss}
-    with open(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+"/"+model_args['model_name']+"/training_loss/training_loss_"+model_name+".pickle", 'wb') as f:
-      pickle.dump(los_p, f)
-    los_p = {'loss':train_ce_loss}
-    with open(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+"/"+model_args['model_name']+"/training_loss/training_loss_ce_"+model_name+".pickle", 'wb') as f:
-      pickle.dump(los_p, f)
-    los_p = {'loss':train_soft_ce_loss}
-    with open(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+"/"+model_args['model_name']+"/training_loss/training_loss_soft_ce_"+model_name+".pickle", 'wb') as f:
-      pickle.dump(los_p, f)
-    los_p = {'loss':train_weight_loss}
-    with open(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+"/"+model_args['model_name']+"/training_loss/training_loss_weight_"+model_name+".pickle", 'wb') as f:
-      pickle.dump(los_p, f)
+    simple_r = {'labels':np.hstack(labels_1),'preds':np.hstack(preds_1)}
+    with open(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+"/"+model_args["model_name"]+"/labels_and_preds/"+model_name+"_train_student_1.pickle", 'wb') as f:
+      pickle.dump(simple_r, f)
     
+    simple_r = {'labels':np.hstack(labels_2),'preds':np.hstack(preds_2)}
+    with open(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+"/"+model_args["model_name"]+"/labels_and_preds/"+model_name+"_train_student_2.pickle", 'wb') as f:
+      pickle.dump(simple_r, f)
+    
+    simple_r = {'labels':np.hstack(labels_3),'preds':np.hstack(preds_3)}
+    with open(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+"/"+model_args["model_name"]+"/labels_and_preds/"+model_name+"_train_student_3.pickle", 'wb') as f:
+      pickle.dump(simple_r, f)    
+    
+    # Save training loss of GNN model
+    los_p = {'loss':total_train_loss}
+    with open(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+"/"+model_args['model_name']+"/training_loss/training_loss_ensemble_"+model_name+".pickle", 'wb') as f:
+      pickle.dump(los_p, f)
+    los_p = {'loss':train_loss_1}
+    with open(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+"/"+model_args['model_name']+"/training_loss/training_loss_student_1_"+model_name+".pickle", 'wb') as f:
+      pickle.dump(los_p, f)
+    los_p = {'loss':train_loss_2}
+    with open(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+"/"+model_args['model_name']+"/training_loss/training_loss_student_2_"+model_name+".pickle", 'wb') as f:
+      pickle.dump(los_p, f)
+    los_p = {'loss':train_loss_3}
+    with open(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+"/"+model_args['model_name']+"/training_loss/training_loss_student_3_"+model_name+".pickle", 'wb') as f:
+      pickle.dump(los_p, f)
+    los_p = {'loss':train_loss_teacher_student}
+    with open(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+"/"+model_args['model_name']+"/training_loss/training_loss_teacher_student_"+model_name+".pickle", 'wb') as f:
+      pickle.dump(los_p, f)
+    los_p = {'loss':train_loss_ensamble_ce}
+    with open(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+"/"+model_args['model_name']+"/training_loss/training_loss_ensamble_ce_"+model_name+".pickle", 'wb') as f:
+      pickle.dump(los_p, f)
+    los_p = {'loss':train_ensamble_soft_ce_loss}
+    with open(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+"/"+model_args['model_name']+"/training_loss/training_loss_ensamble_soft_ce_"+model_name+".pickle", 'wb') as f:
+      pickle.dump(los_p, f)
+    los_p = {'loss':train_loss_within_student}
+    with open(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+"/"+model_args['model_name']+"/training_loss/training_loss_within_student_"+model_name+".pickle", 'wb') as f:
+      pickle.dump(los_p, f)
+
     # Save validation loss of GNN model
-    los_p = {'loss':validation_loss}
-    with open(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+"/"+model_args['model_name']+"/validation_loss/validation_loss_"+model_name+".pickle", 'wb') as f:
+    los_p = {'loss':validation_total_loss}
+    with open(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+"/"+model_args['model_name']+"/validation_loss/validation_loss_ensemble_"+model_name+".pickle", 'wb') as f:
       pickle.dump(los_p, f)
-    los_p = {'loss':validation_ce_loss}
-    with open(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+"/"+model_args['model_name']+"/validation_loss/validation_loss_ce_"+model_name+".pickle", 'wb') as f:
+    los_p = {'loss':validation_loss_1}
+    with open(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+"/"+model_args['model_name']+"/validation_loss/validation_loss_student_1_"+model_name+".pickle", 'wb') as f:
       pickle.dump(los_p, f)
-    los_p = {'loss':validation_soft_ce_loss}
-    with open(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+"/"+model_args['model_name']+"/validation_loss/validation_loss_soft_ce_"+model_name+".pickle", 'wb') as f:
+    los_p = {'loss':validation_loss_2}
+    with open(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+"/"+model_args['model_name']+"/validation_loss/validation_loss_student_2_"+model_name+".pickle", 'wb') as f:
       pickle.dump(los_p, f)
-    los_p = {'loss':validation_weight_loss}
-    with open(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+"/"+model_args['model_name']+"/validation_loss/validation_loss_weight_"+model_name+".pickle", 'wb') as f:
+    los_p = {'loss':validation_loss_3}
+    with open(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+"/"+model_args['model_name']+"/validation_loss/validation_loss_student_3_"+model_name+".pickle", 'wb') as f:
       pickle.dump(los_p, f)
+    los_p = {'loss':validation_loss_teacher_student}
+    with open(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+"/"+model_args['model_name']+"/validation_loss/validation_loss_teacher_student_"+model_name+".pickle", 'wb') as f:
+      pickle.dump(los_p, f)
+    los_p = {'loss':validation_loss_ensamble_ce}
+    with open(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+"/"+model_args['model_name']+"/validation_loss/validation_loss_ensamble_ce_"+model_name+".pickle", 'wb') as f:
+      pickle.dump(los_p, f)
+    los_p = {'loss':validation_ensamble_soft_ce_loss}
+    with open(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+"/"+model_args['model_name']+"/validation_loss/validation_loss_ensamble_soft_ce_"+model_name+".pickle", 'wb') as f:
+      pickle.dump(los_p, f)
+    los_p = {'loss':validation_loss_within_student}
+    with open(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+"/"+model_args['model_name']+"/validation_loss/validation_loss_within_student_"+model_name+".pickle", 'wb') as f:
+      pickle.dump(los_p, f)    
     
     # Save Model
-    torch.save(student_model, SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+"/"+model_args['model_name']+"/models/"+model_args['model_name']+"_"+model_name+".pt")
+    number = 0
+    for student_name, student_model in zip(student_names, [student_model_1, student_model_2, student_model_3]):
+      torch.save(student_model, SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+"/"+model_args['model_name']+"/models/"+student_name+".pt")
     
-    # Save weights
-    if model_args['model_name'] == "diffpool":
-        w_dict = {"w": student_model.state_dict()["assign_conv_first_modules.0.weight"]}
-        with open(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+"/"+model_args['model_name']+'/weights/W_'+model_name+'.pickle', 'wb') as f:
-            pickle.dump(w_dict, f)
-    else:
-        path = SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+"/"+model_args['model_name']+'/weights/W_'+model_name+'.pickle'
-        
-        if os.path.exists(path):
-            os.remove(path)
+      # Save weights
+      if model_args['model_name'] == "diffpool":
+          w_dict = {"w": student_model.state_dict()["assign_conv_first_modules.0.weight"]}
+          with open(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+"/"+model_args['model_name']+'/weights/W_'+student_name+'.pickle', 'wb') as f:
+              pickle.dump(w_dict, f)
+      else:
+          path = SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+"/"+model_args['model_name']+'/weights/W_'+student_name+'.pickle'
+          
+          if os.path.exists(path):
+              os.remove(path)
 
-        os.rename(model_args['model_name']+'_W.pickle'.format(),path)
-    """
+          os.rename(model_args['model_name']+f'_number_{number}_run_{run}_W.pickle', path)  
+      
+      number+=1
+
 
 
 def validate(dataset, students, model_args, threshold_value, model_name, teacher_model, teacher_weights):
@@ -531,34 +542,39 @@ def validate(dataset, students, model_args, threshold_value, model_name, teacher
         preds_3.append(indices.cpu().data.numpy())
         labels_3.append(data['label'].long().numpy())
     
-    """
-    result = {
-        'prec': metrics.precision_score(labels, preds),
-        'recall': metrics.recall_score(labels, preds),
-        'acc': metrics.accuracy_score(labels, preds),
-        'F1': metrics.f1_score(labels, preds)
-    }  
-    """
-
-    """
-    simple_r = {'labels':labels,'preds':preds}
+    simple_r = {'labels':labels_ensamble,'preds':preds_ensamble}
     # Save labels and predictions of model on test set 
-    with open(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+"/"+model_args["model_name"]+"/labels_and_preds/"+model_name+"_val.pickle", 'wb') as f:
+    with open(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+"/"+model_args["model_name"]+"/labels_and_preds/"+model_name+"_val_ensamble.pickle", 'wb') as f:
       pickle.dump(simple_r, f)
-    """
+    
+    simple_r = {'labels':labels_2,'preds':preds_1}
+    # Save labels and predictions of model on test set 
+    with open(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+"/"+model_args["model_name"]+"/labels_and_preds/"+model_name+"_val_student_1.pickle", 'wb') as f:
+      pickle.dump(simple_r, f)   
 
+    simple_r = {'labels':labels_2,'preds':preds_2}
+    # Save labels and predictions of model on test set 
+    with open(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+"/"+model_args["model_name"]+"/labels_and_preds/"+model_name+"_val_student_2.pickle", 'wb') as f:
+      pickle.dump(simple_r, f)   
+
+    simple_r = {'labels':labels_2,'preds':preds_3}
+    # Save labels and predictions of model on test set 
+    with open(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+"/"+model_args["model_name"]+"/labels_and_preds/"+model_name+"_val_student_3.pickle", 'wb') as f:
+      pickle.dump(simple_r, f)   
 
     val_total_loss = total_loss / len(dataset)
-    #val_ce_loss = ce_loss / len(dataset)
-    #val_soft_ce_loss = soft_ce_loss / len(dataset)
-    #val_weight_loss = weight_loss / len(dataset)
+    val_loss_1, val_loss_2, val_loss_3 = t_loss_1 / len(dataset), t_loss_2 / len(dataset), t_loss_3 / len(dataset)
+    val_loss_teacher_student = t_loss_teacher_student / len(dataset)
+    val_loss_ensamble_ce = t_loss_ensamble_ce / len(dataset)
+    val_ensamble_soft_ce_loss = t_ensamble_soft_ce_loss / len(dataset)
+    val_loss_within_student = t_loss_within_student / len(dataset)
     print(f"Validation accuracy ensamble: {metrics.accuracy_score(np.hstack(labels_ensamble), np.hstack(preds_ensamble))}")
     print(f"Validation accuracy model 1: {metrics.accuracy_score(np.hstack(labels_1), np.hstack(preds_1))}")
     print(f"Validation accuracy model 2: {metrics.accuracy_score(np.hstack(labels_2), np.hstack(preds_2))}")
     print(f"Validation accuracy model 3: {metrics.accuracy_score(np.hstack(labels_3), np.hstack(preds_3))}")
     print(f"Validation Loss: {val_total_loss}")
- 
-    #return val_total_loss, val_ce_loss, val_soft_ce_loss, val_weight_loss, result['acc'], result['prec'], result['recall'], result['F1']
+
+    return val_total_loss, val_loss_1, val_loss_2, val_loss_3, val_loss_teacher_student, val_loss_ensamble_ce, val_ensamble_soft_ce_loss, val_loss_within_student
 
 def test(dataset, model, model_args, threshold_value, model_name):
     """
