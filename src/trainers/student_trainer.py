@@ -3,6 +3,7 @@ import time
 import torch
 import pickle
 import random
+import shutil 
 import numpy as np
 import torch
 import torch.nn as nn
@@ -326,7 +327,7 @@ def train(model_args, train_dataset, val_dataset, student_model, threshold_value
         if os.path.exists(path):
             os.remove(path)
 
-        os.rename(model_args['model_name']+"_"+str(run)+'_W.pickle'.format(),path)
+        shutil.move(model_args['model_name']+"_"+str(run)+'_W.pickle'.format(),path)
     
     Ks = [5, 10, 15, 20]
     teacher_weights = teacher_weights.squeeze().detach().numpy()

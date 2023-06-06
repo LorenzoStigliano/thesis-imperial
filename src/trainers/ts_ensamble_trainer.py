@@ -2,6 +2,7 @@ import time
 import torch
 import pickle
 import random
+import shutil 
 import numpy as np
 import torch
 import torch.nn as nn
@@ -424,7 +425,7 @@ def train(model_args, train_dataset, val_dataset, students, student_names, thres
           if os.path.exists(path):
               os.remove(path)
 
-          os.rename(model_args['model_name']+f'_number_{number}_run_{run}_W.pickle', path)  
+          shutil.move(model_args['model_name']+f'_number_{number}_run_{run}_W.pickle', path)  
       
       number+=1
 

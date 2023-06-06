@@ -2,6 +2,7 @@ import time
 import torch
 import pickle
 import random
+import shutil 
 import numpy as np
 import sklearn.metrics as metrics
 from torch.autograd import Variable
@@ -270,7 +271,7 @@ def train(model_args, train_dataset, val_dataset, model, threshold_value, model_
         if os.path.exists(path):
             os.remove(path)
 
-        os.rename(model_args['model_name']+"_"+str(run)+'_W.pickle', path)
+        shutil.move(model_args['model_name']+"_"+str(run)+'_W.pickle', path)
 
 def validate(dataset, model, model_args, threshold_value, model_name):
     """
