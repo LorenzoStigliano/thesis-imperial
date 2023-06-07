@@ -1,5 +1,5 @@
 import numpy as np
-from utils.getters import *
+from getters import *
 
 ############ ANALYSIS OF REPRODUCIBILITY FOR MODELS ############
 
@@ -19,7 +19,7 @@ def sim(nodes1, nodes2):
     else:
         print('nodes vectors are not compatible')
 
-def view_specific_rep(dataset, view, model, CV, run):
+def view_specific_rep(dataset, view, model, CV, run, student=0, model_args=None):
     """
     USAGE:
     CV = ["3Fold", "5Fold", "10Fold"]
@@ -37,8 +37,8 @@ def view_specific_rep(dataset, view, model, CV, run):
     for k in range(rep.shape[0]):
         for i in range(rep.shape[1]):
             for j in range(rep.shape[2]):
-                weights_i = extract_weights(dataset, view, model, CV[i], run)
-                weights_j = extract_weights(dataset, view, model, CV[j], run)
+                weights_i = extract_weights(dataset, view, model, CV[i], run, student, model_args)
+                weights_j = extract_weights(dataset, view, model, CV[j], run, student, model_args)
                 top_bio_i = top_biomarkers(weights_i, Ks[k])
                 top_bio_j = top_biomarkers(weights_j, Ks[k])
                 rep[k,i,j] = sim(top_bio_i, top_bio_j)
@@ -53,7 +53,7 @@ def view_specific_rep(dataset, view, model, CV, run):
     
     return average, std
 
-def view_reproducibility_analysis(dataset, models, CV, views, run):
+def view_reproducibility_analysis(dataset, models, CV, views, run, student=0, model_args=None):
     """
     Reproducibility analysis for a single run
     """
@@ -67,7 +67,7 @@ def view_reproducibility_analysis(dataset, models, CV, views, run):
         model_result_std = []
         
         for model in models:
-            rep_score, std = view_specific_rep(dataset=dataset, view=view, model=model, run=run, CV=CV)
+            rep_score, std = view_specific_rep(dataset=dataset, view=view, model=model, run=run, CV=CV, student=student, model_args=model_args)
             model_result_mean.append(rep_score)
             model_result_std.append(std)
         

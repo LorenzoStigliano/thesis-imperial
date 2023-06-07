@@ -105,9 +105,11 @@ def cross_validation(model_args, G_list, view, model_name, cv_number, run=0):
                 dataset_sampler, 
                 batch_size = 1,  
                 shuffle = False) 
+            #add hyperparameters here     
             test(test_dataset, model, model_args, threshold_value, model_name+"_CV_"+str(i)+"_view_"+str(view))
             
         if model_args["evaluation_method"] =='model_assessment': 
+          #add hyperparameters here     
           train(model_args, train_dataset, val_dataset, model, threshold_value, model_name+"_CV_"+str(i)+"_view_"+str(view), run)
     
     print('Time taken', time.time()-start)

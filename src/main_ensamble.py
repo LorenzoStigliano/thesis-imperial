@@ -18,7 +18,7 @@ def train_main_model(dataset, model, view, cv_number, run=0):
     random.seed(run)   
 
     cv_name = str(cv_number)+"Fold"
-    model_name = "MainModel_"+cv_name+"_"+dataset+"_"+model+"_"+gcn_student_ensamble_args["model_name"]
+    model_name = "MainModel_"+cv_name+"_"+dataset+"_"+gcn_student_ensamble_args["model_name"]
 
     G_list = load_data(dataset, view, NormalizeInputGraphs=False)
 
@@ -53,6 +53,6 @@ if __name__ == '__main__':
         '''
         Training GNN Models with datasets of data directory.
         '''
-        runs = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9] # 0, 1, 2, 3, 4, 5, 6, 7, 8, 9
+        runs = [0] # 0, 1, 2, 3, 4, 5, 6, 7, 8, 9
         #joblib.cpu_count()
-        Parallel(n_jobs=5)(delayed(parrallel_run)(run) for run in runs)
+        Parallel(n_jobs=1)(delayed(parrallel_run)(run) for run in runs)
