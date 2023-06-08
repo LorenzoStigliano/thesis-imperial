@@ -1,5 +1,5 @@
 import numpy as np
-from utils.getters import *
+from getters import *
 
 ############ ANALYSIS OF REPRODUCIBILITY FOR MODELS ############
 

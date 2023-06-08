@@ -51,9 +51,11 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--mode', type=str, default='train', choices=['train', 'results'])
     parser.add_argument('--runs', nargs='+', help='Enter a list of seeds for the runs: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9', default=[0])
+    parser.add_argument('--n_jobs', type=int, help='parrallel jobs', default=1)
 
     args = parser.parse_args()
     runs = [int(run) for run in args.runs]
+    n_jobs = int(args.n_jobs)
     
     if args.mode == 'train':
         '''
@@ -61,4 +63,4 @@ if __name__ == '__main__':
         '''
         runs = runs # 0, 1, 2, 3, 4, 5, 6, 7, 8, 9
         #joblib.cpu_count()
-        Parallel(n_jobs=5)(delayed(parrallel_run)(run) for run in runs)
+        Parallel(n_jobs=n_jobs)(delayed(parrallel_run)(run) for run in runs)

@@ -3,7 +3,6 @@ import torch.nn as nn
 import torch.nn.functional as F
 import pickle
 import numpy as np
-import utils.analysis
 
 from torch.nn import init
 from models.set2set import Set2Set

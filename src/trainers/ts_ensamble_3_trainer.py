@@ -14,7 +14,6 @@ import sklearn.metrics as metrics
 from models.gcn_student_ensamble import GCN_STUDENT_ENSAMBLE
 from models.model_config import * 
 from utils.helpers import *
-from utils.analysis import * 
 from config import SAVE_DIR_MODEL_DATA
 
 #device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
@@ -40,7 +39,7 @@ def weight_similarity_loss(w_teacher, w_student):
     loss = nn.CosineSimilarity()
     return loss(w_student, w_teacher).abs()
 
-def cross_validation(model_args, G_list, view, model_name, cv_number, n_students, run=0):
+def cross_validation_3(model_args, G_list, view, model_name, cv_number, n_students, run=0):
     start = time.time() 
     print("Run : ",run)
     print("--------------------------------------------------------------------------")
@@ -270,9 +269,9 @@ def train(model_args, train_dataset, val_dataset, students, student_names, thres
             optimizer_3.step()
 
             total_loss += loss.item()
-            t_loss_1+= criterion_soft(ypred_1, y_soft)
-            t_loss_2+= criterion_soft(ypred_2, y_soft)
-            t_loss_3+= criterion_soft(ypred_3, y_soft)
+            t_loss_1 += criterion_soft(ypred_1, y_soft)
+            t_loss_2 += criterion_soft(ypred_2, y_soft)
+            t_loss_3 += criterion_soft(ypred_3, y_soft)
             t_loss_teacher_student += loss_teacher_student
             t_loss_within_student += loss_within_student.item()
             t_ensamble_soft_ce_loss += loss_ensamble_soft_ce
@@ -549,19 +548,19 @@ def validate(dataset, students, model_args, threshold_value, model_name, teacher
     with open(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+"/"+model_args["model_name"]+"/labels_and_preds/"+model_name+"_val_ensamble.pickle", 'wb') as f:
       pickle.dump(simple_r, f)
     
-    simple_r = {'labels':labels_2,'preds':preds_1}
+    simple_r = {'labels':labels_1,'preds':preds_1}
     # Save labels and predictions of model on test set 
-    with open(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+"/"+model_args["model_name"]+"/labels_and_preds/"+model_name+"_val_student_1.pickle", 'wb') as f:
+    with open(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+"/"+model_args["model_name"]+"/labels_and_preds/"+model_name+"_val_student_0.pickle", 'wb') as f:
       pickle.dump(simple_r, f)   
 
     simple_r = {'labels':labels_2,'preds':preds_2}
     # Save labels and predictions of model on test set 
-    with open(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+"/"+model_args["model_name"]+"/labels_and_preds/"+model_name+"_val_student_2.pickle", 'wb') as f:
+    with open(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+"/"+model_args["model_name"]+"/labels_and_preds/"+model_name+"_val_student_1.pickle", 'wb') as f:
       pickle.dump(simple_r, f)   
 
-    simple_r = {'labels':labels_2,'preds':preds_3}
+    simple_r = {'labels':labels_3,'preds':preds_3}
     # Save labels and predictions of model on test set 
-    with open(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+"/"+model_args["model_name"]+"/labels_and_preds/"+model_name+"_val_student_3.pickle", 'wb') as f:
+    with open(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+"/"+model_args["model_name"]+"/labels_and_preds/"+model_name+"_val_student_2.pickle", 'wb') as f:
       pickle.dump(simple_r, f)   
 
     val_total_loss = total_loss / len(dataset)

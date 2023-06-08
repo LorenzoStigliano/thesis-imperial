@@ -15,7 +15,6 @@ import sklearn.metrics as metrics
 from models.gcn_student import GCN_STUDENT
 from models.model_config import * 
 from utils.helpers import *
-from utils.analysis import * 
 from config import SAVE_DIR_MODEL_DATA
 
 #device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
@@ -331,16 +330,6 @@ def train(model_args, train_dataset, val_dataset, student_model, threshold_value
             os.remove(path)
 
         shutil.move(model_args['model_name']+"_"+str(run)+'_W.pickle'.format(),path)
-    
-    Ks = [5, 10, 15, 20]
-    teacher_weights = teacher_weights.squeeze().detach().numpy()
-    student_weights = student_weights.squeeze().detach().numpy()
-    for k in Ks:
-      top_bio_i = top_biomarkers(teacher_weights, k)
-      top_bio_j = top_biomarkers(student_weights, k)
-      print(top_bio_i)
-      print(top_bio_j)
-      print(sim(top_bio_i, top_bio_j))
 
 def validate(dataset, model, model_args, threshold_value, model_name, teacher_model, teacher_weights):
     """

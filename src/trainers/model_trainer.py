@@ -9,6 +9,8 @@ from torch.autograd import Variable
 import torch.nn.functional as F
 
 from models.gcn import GCN
+from models.gcn_3_layers import GCN3
+from models.gcn_4_layers import GCN4
 from models.gcn_student import GCN_STUDENT
 from models.mlp import MLP
 from models.gat import GAT
@@ -65,8 +67,26 @@ def cross_validation(model_args, G_list, view, model_name, cv_number, run=0):
                 bn=model_args['bn'], dropout=model_args['dropout'], linkpred=model_args['linkpred'], args=model_args,
                 assign_input_dim=num_nodes).to(device)     
         
-        elif model_args["model_name"]=='gcn':
+        elif model_args["model_name"]=='gcn' and model_args["layers"]==2:
             model = GCN(
+                nfeat = num_nodes,
+                nhid = model_args["hidden_dim"],
+                nclass = num_classes,
+                dropout = model_args["dropout"],
+                run = run
+            ).to(device)
+        
+        elif model_args["model_name"]=='gcn'and model_args["layers"]==3:
+            model = GCN3(
+                nfeat = num_nodes,
+                nhid = model_args["hidden_dim"],
+                nclass = num_classes,
+                dropout = model_args["dropout"],
+                run = run
+            ).to(device)
+        
+        elif model_args["model_name"]=='gcn'and model_args["layers"]==4:
+            model = GCN4(
                 nfeat = num_nodes,
                 nhid = model_args["hidden_dim"],
                 nclass = num_classes,

@@ -65,7 +65,7 @@ def parrallel_run(run):
     views = [0, 2, 4, 5] #0, 2, 4, 5
     for dataset_i in datasets_asdnc:
         for view_i in views:
-            models = [gcn_3_args, gcn_4_args] # "gcn", "gcn_student" args 
+            models = [gcn_4_args] # "gcn", "gcn_student" args 
             for model in models:
                 for cv in [3, 5, 10]:
                     train_main_model(dataset_i, model["model_name"], view_i, cv, model, run)
@@ -86,5 +86,6 @@ if __name__ == '__main__':
         Training GNN Models with datasets of data directory.
         '''
         runs = runs # 0, 1, 2, 3, 4, 5, 6, 7, 8, 9
+        #joblib.cpu_count()
         Parallel(n_jobs=n_jobs)(delayed(parrallel_run)(run) for run in runs)
         
