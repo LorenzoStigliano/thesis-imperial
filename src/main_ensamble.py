@@ -32,13 +32,13 @@ def train_main_model(dataset, model, view, cv_number, model_args, run=0):
             model_name += f"_run_{run}_fixed_init"
     
     if model_args["model_name"] == "gcn_student_ensamble_2":
-        cross_validation_2(model_args, G_list, view, model_name, cv_number, n_students=2)
+        cross_validation_2(model_args, G_list, view, model_name, cv_number, n_students=2, run=run)
     if model_args["model_name"] == "gcn_student_ensamble_3":
-        cross_validation_3(model_args, G_list, view, model_name, cv_number, n_students=3)
+        cross_validation_3(model_args, G_list, view, model_name, cv_number, n_students=3, run=run)
     if model_args["model_name"] == "gcn_student_ensamble_4":
-        cross_validation_4(model_args, G_list, view, model_name, cv_number, n_students=4)
+        cross_validation_4(model_args, G_list, view, model_name, cv_number, n_students=4, run=run)
     if model_args["model_name"] == "gcn_student_ensamble_5":
-        cross_validation_5(model_args, G_list, view, model_name, cv_number, n_students=5)
+        cross_validation_5(model_args, G_list, view, model_name, cv_number, n_students=5, run=run)
 
 
 def parrallel_run(run):

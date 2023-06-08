@@ -12,7 +12,7 @@ gcn_args = {
 }
 
 gcn_3_args = {
-    "num_epochs":1, 
+    "num_epochs":50, 
     "lr": 0.0001,
     "weight_decay":5e-4, 
     "hidden_dim":64,
@@ -24,7 +24,7 @@ gcn_3_args = {
 }
 
 gcn_4_args = {
-    "num_epochs":1, 
+    "num_epochs":50, 
     "lr": 0.0001,
     "weight_decay":5e-4, 
     "hidden_dim":64,
