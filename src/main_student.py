@@ -1,10 +1,11 @@
 import argparse
 import random
+import numpy as np
+import torch
 
 from models.model_config import * 
 from trainers.student_trainer import cross_validation
 
-from utils.helpers import *
 from utils.builders import new_folder
 from utils.loaders import load_data
 
@@ -49,12 +50,15 @@ if __name__ == '__main__':
         
     parser = argparse.ArgumentParser()
     parser.add_argument('--mode', type=str, default='train', choices=['train', 'results'])
+    parser.add_argument('--runs', nargs='+', help='Enter a list of seeds for the runs: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9', default=[0])
+
     args = parser.parse_args()
+    runs = [int(run) for run in args.runs]
     
     if args.mode == 'train':
         '''
         Training GNN Models with datasets of data directory.
         '''
-        runs = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9] # 0, 1, 2, 3, 4, 5, 6, 7, 8, 9
+        runs = runs # 0, 1, 2, 3, 4, 5, 6, 7, 8, 9
         #joblib.cpu_count()
         Parallel(n_jobs=5)(delayed(parrallel_run)(run) for run in runs)
