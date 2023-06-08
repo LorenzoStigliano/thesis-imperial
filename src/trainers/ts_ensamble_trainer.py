@@ -17,7 +17,8 @@ from utils.helpers import *
 from utils.analysis import * 
 from config import SAVE_DIR_MODEL_DATA
 
-device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+#device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+device = torch.device('cpu')
 
 class CrossEntropyLossForSoftTarget(nn.Module):
     def __init__(self, T=3):

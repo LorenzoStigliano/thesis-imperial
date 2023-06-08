@@ -4,7 +4,8 @@ import torch
 import os 
 import torch.utils.data
 
-device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+#device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+device = torch.device('cpu')
 
 class GraphSampler(torch.utils.data.Dataset):
     

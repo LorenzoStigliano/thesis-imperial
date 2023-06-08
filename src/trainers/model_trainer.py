@@ -17,6 +17,9 @@ import models.diffpool as DIFFPOOL
 from utils.helpers import *
 from config import SAVE_DIR_MODEL_DATA
 
+#device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+device = torch.device('cpu')
+
 def cross_validation(model_args, G_list, view, model_name, cv_number, run=0):
     """
     Parameters
