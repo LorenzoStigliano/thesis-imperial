@@ -155,7 +155,7 @@ def train(model_args, train_dataset, val_dataset, students, student_names, thres
     # total train loss 
     total_train_loss = []
     # soft-cross entropy between students and teacher
-    train_loss_1, train_loss_2, train_loss_3 = [], [], []
+    # train_loss_1, train_loss_2, train_loss_3 = [], [], []
     # performance accuracy of each student
     train_acc_1, train_acc_2, train_acc_3 = [], [], []
     # cumulative loss of teacher and student soft-ce
@@ -188,7 +188,7 @@ def train(model_args, train_dataset, val_dataset, students, student_names, thres
 
         total_time = 0
         total_loss = 0
-        t_loss_1, t_loss_2, t_loss_3 = 0, 0, 0
+        #t_loss_1, t_loss_2, t_loss_3 = 0, 0, 0
         t_loss_teacher_student = 0
         t_loss_ensamble_ce = 0
         t_ensamble_soft_ce_loss = 0
@@ -269,9 +269,9 @@ def train(model_args, train_dataset, val_dataset, students, student_names, thres
             optimizer_3.step()
 
             total_loss += loss.item()
-            t_loss_1 += criterion_soft(ypred_1, y_soft)
-            t_loss_2 += criterion_soft(ypred_2, y_soft)
-            t_loss_3 += criterion_soft(ypred_3, y_soft)
+            #t_loss_1 += criterion_soft(ypred_1, y_soft)
+            #t_loss_2 += criterion_soft(ypred_2, y_soft)
+            #t_loss_3 += criterion_soft(ypred_3, y_soft)
             t_loss_teacher_student += loss_teacher_student
             t_loss_within_student += loss_within_student.item()
             t_ensamble_soft_ce_loss += loss_ensamble_soft_ce
@@ -310,9 +310,9 @@ def train(model_args, train_dataset, val_dataset, students, student_names, thres
         print(f"Train within student loss for weights: {t_loss_within_student / len(train_dataset)}")
 
         total_train_loss.append(total_loss / len(train_dataset))
-        train_loss_1.append( t_loss_1/ len(train_dataset))
-        train_loss_2.append( t_loss_2/ len(train_dataset))
-        train_loss_3.append( t_loss_3/ len(train_dataset))
+        #train_loss_1.append( t_loss_1/ len(train_dataset))
+        #train_loss_2.append( t_loss_2/ len(train_dataset))
+        #train_loss_3.append( t_loss_3/ len(train_dataset))
         train_loss_teacher_student.append(t_loss_teacher_student / len(train_dataset)) 
         train_loss_ensamble_ce.append(t_loss_ensamble_ce / len(train_dataset)) 
         # soft ensamble loss
@@ -322,9 +322,9 @@ def train(model_args, train_dataset, val_dataset, students, student_names, thres
         
         val_total_loss, val_loss_1, val_loss_2, val_loss_3, val_loss_teacher_student, val_loss_ensamble_ce, val_ensamble_soft_ce_loss, val_loss_within_student = validate(val_dataset, students, model_args, threshold_value, model_name, teacher_model, teacher_weights)
         validation_total_loss.append(val_total_loss)
-        validation_loss_1.append(val_loss_1)
-        validation_loss_2.append(val_loss_2)
-        validation_loss_3.append(val_loss_3)
+        #validation_loss_1.append(val_loss_1)
+        #validation_loss_2.append(val_loss_2)
+        #validation_loss_3.append(val_loss_3)
         validation_loss_teacher_student.append(val_loss_teacher_student)
         validation_loss_ensamble_ce.append(val_loss_ensamble_ce)
         validation_ensamble_soft_ce_loss.append(val_ensamble_soft_ce_loss)
@@ -361,6 +361,7 @@ def train(model_args, train_dataset, val_dataset, students, student_names, thres
     los_p = {'loss':total_train_loss}
     with open(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+"/"+model_args['model_name']+"/training_loss/training_loss_ensemble_"+model_name+".pickle", 'wb') as f:
       pickle.dump(los_p, f)
+    """
     los_p = {'loss':train_loss_1}
     with open(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+"/"+model_args['model_name']+"/training_loss/training_loss_student_0_"+model_name+".pickle", 'wb') as f:
       pickle.dump(los_p, f)
@@ -370,6 +371,7 @@ def train(model_args, train_dataset, val_dataset, students, student_names, thres
     los_p = {'loss':train_loss_3}
     with open(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+"/"+model_args['model_name']+"/training_loss/training_loss_student_2_"+model_name+".pickle", 'wb') as f:
       pickle.dump(los_p, f)
+    """
     los_p = {'loss':train_loss_teacher_student}
     with open(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+"/"+model_args['model_name']+"/training_loss/training_loss_teacher_student_"+model_name+".pickle", 'wb') as f:
       pickle.dump(los_p, f)
@@ -387,6 +389,7 @@ def train(model_args, train_dataset, val_dataset, students, student_names, thres
     los_p = {'loss':validation_total_loss}
     with open(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+"/"+model_args['model_name']+"/validation_loss/validation_loss_ensemble_"+model_name+".pickle", 'wb') as f:
       pickle.dump(los_p, f)
+    """
     los_p = {'loss':validation_loss_1}
     with open(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+"/"+model_args['model_name']+"/validation_loss/validation_loss_student_0_"+model_name+".pickle", 'wb') as f:
       pickle.dump(los_p, f)
@@ -396,6 +399,7 @@ def train(model_args, train_dataset, val_dataset, students, student_names, thres
     los_p = {'loss':validation_loss_3}
     with open(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+"/"+model_args['model_name']+"/validation_loss/validation_loss_student_2_"+model_name+".pickle", 'wb') as f:
       pickle.dump(los_p, f)
+    """
     los_p = {'loss':validation_loss_teacher_student}
     with open(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+"/"+model_args['model_name']+"/validation_loss/validation_loss_teacher_student_"+model_name+".pickle", 'wb') as f:
       pickle.dump(los_p, f)
@@ -453,7 +457,7 @@ def validate(dataset, students, model_args, threshold_value, model_name, teacher
     student_model_2 = students[1].eval()
     student_model_3 = students[2].eval()
 
-    t_loss_1, t_loss_2, t_loss_3 = 0, 0, 0
+    #t_loss_1, t_loss_2, t_loss_3 = 0, 0, 0
     t_loss_teacher_student = 0
     t_loss_ensamble_ce = 0
     t_ensamble_soft_ce_loss = 0
@@ -518,9 +522,9 @@ def validate(dataset, students, model_args, threshold_value, model_name, teacher
         loss = model_args["alpha"]*loss_ensamble_ce + model_args["beta"]*loss_ensamble_soft_ce + model_args["gamma"]*loss_teacher_student + model_args["lambda"]*loss_within_student
 
         total_loss += loss.item()
-        t_loss_1+= criterion_soft(ypred_1, y_soft)
-        t_loss_2+= criterion_soft(ypred_2, y_soft)
-        t_loss_3+= criterion_soft(ypred_3, y_soft)
+        #t_loss_1+= criterion_soft(ypred_1, y_soft)
+        #t_loss_2+= criterion_soft(ypred_2, y_soft)
+        #t_loss_3+= criterion_soft(ypred_3, y_soft)
         t_loss_teacher_student += loss_teacher_student
         t_loss_within_student += loss_within_student
         t_ensamble_soft_ce_loss += loss_ensamble_soft_ce
@@ -564,7 +568,8 @@ def validate(dataset, students, model_args, threshold_value, model_name, teacher
       pickle.dump(simple_r, f)   
 
     val_total_loss = total_loss / len(dataset)
-    val_loss_1, val_loss_2, val_loss_3 = t_loss_1 / len(dataset), t_loss_2 / len(dataset), t_loss_3 / len(dataset)
+    #val_loss_1, val_loss_2, val_loss_3 = t_loss_1 / len(dataset), t_loss_2 / len(dataset), t_loss_3 / len(dataset)
+    val_loss_1, val_loss_2, val_loss_3 = 0, 0, 0 
     val_loss_teacher_student = t_loss_teacher_student / len(dataset)
     val_loss_ensamble_ce = t_loss_ensamble_ce / len(dataset)
     val_ensamble_soft_ce_loss = t_ensamble_soft_ce_loss / len(dataset)
