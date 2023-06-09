@@ -1,9 +1,68 @@
 import os 
-import scipy.io as sio
 import pickle
+import numpy as np
+import scipy.io as sio
+import medmnist
+from medmnist import INFO
+
+import torch.utils.data as data
+import torchvision.transforms as transforms
+
 from config import SAVE_DIR_MODEL_DATA
 
-def dump_data(data_dir, save_dir, dataset):
+def dump_data_MEDMNIST(save_dir, dataset):
+    """
+    #1. download and save data all together to a directory and split labels 
+
+    USAGE:
+    dump_data_MEDMNIST(SAVE_DIR_DATA, 'BreastMNIST')
+    dump_data_MEDMNIST(SAVE_DIR_DATA, 'PneumoniaMNIST')
+    """
+    data_flag=dataset
+    download = True
+    BATCH_SIZE = 1
+    data_flag = data_flag.lower()
+    info = INFO[data_flag]
+    DataClass = getattr(medmnist, info['python_class'])
+
+    # preprocessing
+    data_transform = transforms.Compose([
+        transforms.ToTensor(),
+        transforms.Normalize(mean=[.5], std=[.5])
+    ])
+
+    # load the data
+    train_dataset = DataClass(split='train', transform=data_transform, download=download)
+    test_dataset = DataClass(split='test', transform=data_transform, download=download)
+    val_dataset = DataClass(split='val', transform=data_transform, download=download)
+
+    # encapsulate data into dataloader form
+    train_loader = data.DataLoader(dataset=train_dataset, batch_size=BATCH_SIZE, shuffle=False)
+    test_loader = data.DataLoader(dataset=test_dataset, batch_size=BATCH_SIZE, shuffle=False)
+    val_loader = data.DataLoader(dataset=val_dataset, batch_size=BATCH_SIZE, shuffle=False)
+    
+    print(train_dataset)
+    
+    images, labels = [], []
+    for image, label in train_loader: 
+        images.append(image.squeeze().numpy()) 
+        labels.append(int(label[0][0])) 
+    for image, label in test_loader: 
+        images.append(image.squeeze().numpy()) 
+        labels.append(int(label[0][0]))
+    for image, label in val_loader: 
+        images.append(image.squeeze().numpy()) 
+        labels.append(int(label[0][0]))
+
+    if not os.path.exists(save_dir + dataset):
+        os.makedirs(save_dir + dataset) 
+
+    with open(save_dir + dataset +'/'+dataset+'_images', 'wb') as f:
+        pickle.dump(images, f)
+    with open(save_dir + dataset +'/'+dataset+'_labels', 'wb') as f:
+        pickle.dump(labels, f)
+
+def dump_data_gender_data(data_dir, save_dir, dataset):
 
   adjs, ages, labels = [], [], []
 
