@@ -7,12 +7,14 @@ from config import SAVE_DIR_MODEL_DATA
 ############ GETTERS FOR LABELS OF MODELS ############
 
 def get_labels_and_preds(dataset, model, analysis_type, training_type, cv_n, view, run, dataset_split, student=0, model_args=None):
+    
     if analysis_type == "model_assessment":
-        alpha = str(model_args["alpha"])
-        beta = str(model_args["beta"])
-        gamma = str(model_args["gamma"])
-        lambda_ = str(model_args["lambda"])
+                
         if "ensamble" in model:
+            alpha = str(model_args["alpha"])
+            beta = str(model_args["beta"])
+            gamma = str(model_args["gamma"])
+            lambda_ = str(model_args["lambda"])
             if student == -1:
                 cv_path =  SAVE_DIR_MODEL_DATA+f'model_assessment/{model}/labels_and_preds/MainModel_{training_type}_{dataset}_{model}_run_{run}_fixed_init_CV_{cv_n}_view_{view}_alpha_{alpha}_beta_{beta}_gamma_{gamma}_lambda_{lambda_}_{dataset_split}_ensamble.pickle'
             else:
