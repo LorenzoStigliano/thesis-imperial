@@ -371,7 +371,7 @@ def plot_bar_chart_reproducibility_mulitple_runs(dataset, views, models, CV, run
         plt.show()
         plt.clf()    
 
-def plot_bar_chart_metric_multiple_runs(dataset, view, models, CV, runs, metric, dataset_split, analysis_type, save_fig=False):
+def plot_bar_chart_metric_multiple_runs(dataset, view, models, CV, runs, metric, dataset_split, analysis_type, model_args=None, save_fig=False):
     """
     USAGE:
 
@@ -386,7 +386,7 @@ def plot_bar_chart_metric_multiple_runs(dataset, view, models, CV, runs, metric,
 
     mean_all_runs = []
     for run in [i for i in range(10)]:
-        view_data_mean, _ = view_metric_analysis(models=models, CV=CV, view=view, run=run, metric=metric, dataset=dataset, dataset_split=dataset_split, analysis_type=analysis_type)
+        view_data_mean, _ = view_metric_analysis(models=models, CV=CV, view=view, run=run, metric=metric, dataset=dataset, dataset_split=dataset_split, analysis_type=analysis_type, model_args=model_args)
         mean_all_runs.append(view_data_mean)
 
     mean_all_std = np.std(mean_all_runs, axis=0).squeeze()

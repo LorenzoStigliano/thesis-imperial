@@ -23,18 +23,6 @@ gcn_3_args = {
     "evaluation_method": "model_assessment" # model selection or model assessment
 }
 
-gcn_4_args = {
-    "num_epochs":50, 
-    "lr": 0.0001,
-    "weight_decay":5e-4, 
-    "hidden_dim":64,
-    "dropout":0,
-    "threshold":"median", # Threshold the graph adjacency matrix. Possible values: no_threshold, median, mean
-    "model_name":"gcn",
-    "layers":4,
-    "evaluation_method": "model_assessment" # model selection or model assessment
-}
-
 gcn_student_args = {
     "num_epochs":50, 
     "lr": 0.0001, 

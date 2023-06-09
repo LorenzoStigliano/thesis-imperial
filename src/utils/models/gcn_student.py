@@ -50,32 +50,27 @@ class GraphConvolution(Module):
                + str(self.out_features) + ')'
 
 
-class GCN4(nn.Module):
+class GCN_STUDENT(nn.Module):
     def __init__(self, nfeat, nhid, nclass, dropout, run):
         torch.manual_seed(run)
-        super(GCN4, self).__init__()
-        self.gc1 = GraphConvolution(nfeat, nhid)
-        self.gc2 = GraphConvolution(nhid, nhid)
-        self.gc3 = GraphConvolution(nhid, nhid)
-        self.gc4 = GraphConvolution(nhid, nclass)
-        self.dropout = dropout
-        #for each class we get a score and then softmax over the classes 
+        super(GCN_STUDENT, self).__init__()
+        self.gc1 = GraphConvolution(nfeat, nclass)
+        #self.gc2 = GraphConvolution(nhid, nclass)
+        #self.dropout = dropout
         self.LinearLayer = nn.Linear(nfeat,1)
         self.is_trained = False
         self.run = run
 
     def forward(self, x, adj):
         x = F.relu(self.gc1(x, adj))
-        x = F.dropout(x, self.dropout, training=self.training)
-        x = F.relu(self.gc2(x, adj))
-        x = F.relu(self.gc3(x, adj))
-        x = self.gc4(x, adj)
+        #x = F.dropout(x, self.dropout, training=self.training)
+        #x = self.gc2(x, adj)
         x = F.log_softmax(x, dim=1)
         x = self.LinearLayer(torch.transpose(x,0,1))
         
         if self.is_trained:
           w_dict = {"w": self.LinearLayer.weight}
-          with open("gcn_"+str(self.run)+"_W.pickle", 'wb') as f:
+          with open("gcn_student_"+str(self.run)+"_W.pickle", 'wb') as f:
             pickle.dump(w_dict, f)
           self.is_trained = False
           print("GCN Weights are saved:")

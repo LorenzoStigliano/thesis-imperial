@@ -30,7 +30,6 @@ def view_specific_rep(dataset, view, model, CV, run, student=0, model_args=None)
         gcn_student_score         = view_specific_rep(dataset="gender_data", view=view, model="gcn_student", CV=CV)
         gcn_student_teacher_score = view_specific_rep(dataset="gender_data", view=view, model="gcn_student_teacher", CV=CV)
     """
-
     Ks = [5, 10, 15, 20]
     rep = np.zeros([len(Ks), len(CV), len(CV)])
 
@@ -65,11 +64,20 @@ def view_reproducibility_analysis(dataset, models, CV, views, run, student=0, mo
         
         model_result_mean = []
         model_result_std = []
+
+        if model_args==None:
         
-        for model in models:
-            rep_score, std = view_specific_rep(dataset=dataset, view=view, model=model, run=run, CV=CV, student=student, model_args=model_args)
-            model_result_mean.append(rep_score)
-            model_result_std.append(std)
+            for model in models:
+                rep_score, std = view_specific_rep(dataset=dataset, view=view, model=model, run=run, CV=CV, student=student, model_args=model_args)
+                model_result_mean.append(rep_score)
+                model_result_std.append(std)
+        
+        else:
+            
+            for i, model in enumerate(models):
+                rep_score, std = view_specific_rep(dataset=dataset, view=view, model=model, run=run, CV=CV, student=student, model_args=model_args[i])
+                model_result_mean.append(rep_score)
+                model_result_std.append(std)
         
         view_data_mean.append(model_result_mean)
         view_data_std.append(model_result_std)
@@ -85,7 +93,7 @@ def view_reproducibility_analysis(dataset, models, CV, views, run, student=0, mo
 
 ############ ANALYSIS OF METIRC FOR MODELS ############
 
-def metric_and_view_analysis(models, CV, analysis_type, view, run, dataset_split, dataset, metric):
+def metric_and_view_analysis(models, CV, analysis_type, view, run, dataset_split, dataset, metric, model_args=None):
     """
     Mean of metric for a specific CV -> 3, 5 or 10
     """
@@ -93,24 +101,56 @@ def metric_and_view_analysis(models, CV, analysis_type, view, run, dataset_split
     all_data_mean = []
     all_data_std = []
     
-    for model in models:
+    if model_args == None:
+        for model in models:
+            
+            model_results_mean = []
+            model_results_std = []
         
-        model_results_mean = []
-        model_results_std = []
-    
-        for training_type in CV:
-            metrics = extract_metrics(dataset=dataset, model=model, analysis_type=analysis_type, training_type=training_type, view=view, run=run, dataset_split=dataset_split, metric=metric)
-            mean = np.mean([metric[-1] for metric in metrics])
-            std = np.std([metric[-1] for metric in metrics])
-            model_results_mean.append(mean)
-            model_results_std.append(std)
+            for training_type in CV:
+                metrics = extract_metrics(dataset=dataset, 
+                                        model=model, 
+                                        analysis_type=analysis_type, 
+                                        training_type=training_type, 
+                                        view=view, 
+                                        run=run, 
+                                        dataset_split=dataset_split, 
+                                        metric=metric,
+                                        model_args=model_args)
+                mean = np.mean([metric[-1] for metric in metrics])
+                std = np.std([metric[-1] for metric in metrics])
+                model_results_mean.append(mean)
+                model_results_std.append(std)
+            
+            all_data_mean.append(model_results_mean)
+            all_data_std.append(model_results_std)
+    else:
+        for i, model in enumerate(models):
+            
+            model_results_mean = []
+            model_results_std = []
         
-        all_data_mean.append(model_results_mean)
-        all_data_std.append(model_results_std)
+            for training_type in CV:
+                metrics = extract_metrics(dataset=dataset, 
+                                        model=model, 
+                                        analysis_type=analysis_type, 
+                                        training_type=training_type, 
+                                        view=view, 
+                                        run=run, 
+                                        dataset_split=dataset_split, 
+                                        metric=metric,
+                                        model_args=model_args[i])
+                mean = np.mean([metric[-1] for metric in metrics])
+                std = np.std([metric[-1] for metric in metrics])
+                model_results_mean.append(mean)
+                model_results_std.append(std)
+            
+            all_data_mean.append(model_results_mean)
+            all_data_std.append(model_results_std)        
     
     return all_data_mean, all_data_std
 
-def view_metric_analysis(models, CV, view, run, metric, dataset, dataset_split, analysis_type):
+def view_metric_analysis(models, CV, view, run, metric, dataset, dataset_split, analysis_type,model_args=None):
     """
     Getting all the means across for a run
     """
@@ -124,7 +164,8 @@ def view_metric_analysis(models, CV, view, run, metric, dataset, dataset_split, 
                                     run=run, 
                                     dataset= dataset,
                                     dataset_split=dataset_split, 
-                                    metric=metric)
+                                    metric=metric, 
+                                    model_args=model_args)
     view_data_mean.append(mean)
     view_data_std.append(std)
     
