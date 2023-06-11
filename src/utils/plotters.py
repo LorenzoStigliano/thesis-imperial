@@ -318,7 +318,7 @@ def plot_bar_chart_rep(dataset, views, models, CV, run, save_fig=False):
         plt.show()
         plt.clf()    
 
-def plot_bar_chart_reproducibility_mulitple_runs(dataset, views, models, CV, runs, student=0, model_args=None, save_fig=False):
+def plot_bar_chart_reproducibility_mulitple_runs(dataset, views, models, CV, runs, students=0, model_args=None, save_fig=False):
     """
     USAGE:
     plot_bar_chart_reproducibility_mulitple_runs(dataset="gender_data", views=[0, 2, 4, 5], models=["gcn", "gcn_student","gcn_student_teacher"], CV=["3Fold", "5Fold", "10Fold"], runs=[i for i in range(10)], save_fig=True)
@@ -330,7 +330,7 @@ def plot_bar_chart_reproducibility_mulitple_runs(dataset, views, models, CV, run
     mean_all_runs = []
     
     for run in runs:
-        view_data_mean, _ = view_reproducibility_analysis(dataset, models, CV, views, run, student, model_args)
+        view_data_mean, _ = view_reproducibility_analysis(dataset, models, CV, views, run, students, model_args)
         mean_all_runs.append(view_data_mean)
 
     mean_all_std = np.std(mean_all_runs, axis=0)

@@ -52,7 +52,7 @@ def view_specific_rep(dataset, view, model, CV, run, student=0, model_args=None)
     
     return average, std
 
-def view_reproducibility_analysis(dataset, models, CV, views, run, student=0, model_args=None):
+def view_reproducibility_analysis(dataset, models, CV, views, run, students=0, model_args=None):
     """
     Reproducibility analysis for a single run
     """
@@ -68,14 +68,14 @@ def view_reproducibility_analysis(dataset, models, CV, views, run, student=0, mo
         if model_args==None:
         
             for model in models:
-                rep_score, std = view_specific_rep(dataset=dataset, view=view, model=model, run=run, CV=CV, student=student, model_args=model_args)
+                rep_score, std = view_specific_rep(dataset=dataset, view=view, model=model, run=run, CV=CV, student=students, model_args=model_args)
                 model_result_mean.append(rep_score)
                 model_result_std.append(std)
         
         else:
             
             for i, model in enumerate(models):
-                rep_score, std = view_specific_rep(dataset=dataset, view=view, model=model, run=run, CV=CV, student=student, model_args=model_args[i])
+                rep_score, std = view_specific_rep(dataset=dataset, view=view, model=model, run=run, CV=CV, student=students[i], model_args=model_args[i])
                 model_result_mean.append(rep_score)
                 model_result_std.append(std)
         
@@ -95,7 +95,7 @@ def view_reproducibility_analysis(dataset, models, CV, views, run, student=0, mo
 
 def metric_and_view_analysis(models, CV, analysis_type, view, run, dataset_split, dataset, metric, model_args=None):
     """
-    Mean of metric for a specific CV -> 3, 5 or 10
+    Mean of metric for a specific CV -> 3, 5 or 10 for a specific run 
     """
 
     all_data_mean = []
