@@ -10,7 +10,6 @@ import torch.nn.functional as F
 
 from models.gcn import GCN
 from models.gcn_3_layers import GCN3
-from models.gcn_4_layers import GCN4
 from models.gcn_student import GCN_STUDENT
 from models.mlp import MLP
 from models.gat import GAT
@@ -85,15 +84,6 @@ def cross_validation(model_args, G_list, view, model_name, cv_number, run=0):
                 run = run
             ).to(device)
         
-        elif model_args["model_name"]=='gcn'and model_args["layers"]==4:
-            model = GCN4(
-                nfeat = num_nodes,
-                nhid = model_args["hidden_dim"],
-                nclass = num_classes,
-                dropout = model_args["dropout"],
-                run = run
-            ).to(device)
-
         elif model_args["model_name"]=='gat':
             model = GAT(
                 nfeat=num_nodes, 
@@ -117,8 +107,9 @@ def cross_validation(model_args, G_list, view, model_name, cv_number, run=0):
                 num_layers=model_args["num_layers"], 
                 input_dim=num_nodes, 
                 hidden_dim=model_args["hidden_dim"], 
-                output_dim=2, 
-                dropout_ratio=model_args["dropout_ratio"]
+                output_dim=model_args["output_dim"], 
+                dropout_ratio=model_args["dropout_ratio"],
+                run = run
                 )
         if model_args["evaluation_method"] =='model_selection': 
             train(model_args, train_dataset, val_dataset, model, threshold_value, model_name+"_CV_"+str(i)+"_view_"+str(view))
@@ -197,14 +188,21 @@ def train(model_args, train_dataset, val_dataset, model, threshold_value, model_
               assign_input = torch.unsqueeze(assign_input, 0)
               ypred= model(features, adj, batch_num_nodes, assign_x=assign_input)
           elif model_args["model_name"] == "mlp":
-              features = torch.mean(features, axis=1)
-              ypred = model(features)[1]
+              features = torch.mean(adj, axis=1)
+              logits = model(features)[1]
+              ypred = torch.sigmoid(logits)[0]
           else:
               ypred= model(features, adj)
+          
+          if model_args["model_name"] == "mlp":
+            pred_label = 1 if  ypred >= 0.5 else 0
+            preds.append(np.array(pred_label))
+            labels.append(data['label'].long().numpy())
+          else:
+            _, indices = torch.max(ypred, 1)
+            preds.append(indices.cpu().data.numpy())
+            labels.append(data['label'].long().numpy())        
 
-          _, indices = torch.max(ypred, 1)
-          preds.append(indices.cpu().data.numpy())
-          labels.append(data['label'].long().numpy())
           loss = model.loss(ypred, label)
           
           model.zero_grad()
@@ -343,14 +341,20 @@ def validate(dataset, model, model_args, threshold_value, model_name):
             ypred= model(features, adj, batch_num_nodes, assign_x=assign_input)
         
         elif model_args["model_name"] == "mlp":
-            features = torch.mean(features, axis=1)
-            ypred = model(features)[1]
+            features = torch.mean(adj, axis=1)
+            logits = model(features)[1]
+            ypred = torch.sigmoid(logits)[0]
         else:
             ypred = model(features, adj)
         
         total_loss += model.loss(ypred, label).item()
-        _, indices = torch.max(ypred, 1)
-        preds.append(indices.cpu().data.numpy())
+    
+        if model_args["model_name"] == "mlp":
+            pred_label = 1 if  ypred >= 0.5 else 0
+            preds.append(np.array(pred_label))
+        else:
+            _, indices = torch.max(ypred, 1)
+            preds.append(indices.cpu().data.numpy())
 
     labels = np.hstack(labels)
     preds = np.hstack(preds)

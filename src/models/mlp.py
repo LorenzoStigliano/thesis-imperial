@@ -1,4 +1,5 @@
 import torch
+import pickle
 import torch.nn as nn
 import torch.nn.functional as F
 
@@ -10,6 +11,7 @@ class MLP(nn.Module):
         hidden_dim,
         output_dim,
         dropout_ratio,
+        run,
         norm_type="none",
     ):
         super(MLP, self).__init__()
@@ -18,6 +20,8 @@ class MLP(nn.Module):
         self.dropout = nn.Dropout(dropout_ratio)
         self.layers = nn.ModuleList()
         self.norms = nn.ModuleList()
+        self.is_trained = False
+        self.run = run
 
         if num_layers == 1:
             self.layers.append(nn.Linear(input_dim, output_dim))
@@ -48,9 +52,16 @@ class MLP(nn.Module):
                     h = self.norms[l](h)
                 h = F.relu(h)
                 h = self.dropout(h)
-        h = torch.reshape(h, (1, 2)) 
-        h = F.log_softmax(h, dim=1)
+        h = torch.reshape(h, (1, 1)) 
+        if self.is_trained:
+          linear_layer = self.layers[0]
+          w_dict = {"w": linear_layer.weight}
+          with open("mlp_"+str(self.run)+"_W.pickle", 'wb') as f:
+            pickle.dump(w_dict, f)
+          self.is_trained = False
+          print("MLP Weights are saved:")
+          print(linear_layer.weight)
         return h_list, h
     
     def loss(self, pred, label, type='softmax'):
-        return F.cross_entropy(pred, label, reduction='mean')
+        return F.binary_cross_entropy(pred.float(), label.float(), reduction='mean')

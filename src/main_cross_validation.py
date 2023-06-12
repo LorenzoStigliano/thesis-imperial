@@ -61,11 +61,11 @@ def train_main_model(dataset, model, view, cv_number, model_args, run=0):
     
 def parrallel_run(run):
     print(run)
-    datasets = ['PneumoniaMNIST']
+    datasets = ['gender_data']
     views = [0, 2, 4, 5] #0, 2, 4, 5
     for dataset_i in datasets:
         for view_i in views:
-            models = [gcn_args] # "gcn", "gcn_student" args 
+            models = [mlp_args] # "gcn", "gcn_student" args 
             for model in models:
                 for cv in [3, 5, 10]:
                     train_main_model(dataset_i, model["model_name"], view_i, cv, model, run)

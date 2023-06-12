@@ -125,10 +125,10 @@ mlp_args = {
     "num_epochs":50, 
     "lr": 0.001,
     "weight_decay":5e-4, 
-    "num_layers":2, 
-    "input_dim":595,
+    "num_layers":1, 
+    "input_dim":35,
     "hidden_dim":35,
-    "output_dim":2, 
+    "output_dim":1, 
     "threshold":"median", # Threshold the graph adjacency matrix. Possible values: no_threshold, median, mean
     "dropout_ratio":0,
     "model_name":"mlp",
