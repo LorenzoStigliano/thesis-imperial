@@ -67,7 +67,7 @@ gcn_student_ensamble_2_args = {
     "gamma": 2, # sum of student ce loss
     "lambda":1, # disentanglement loss
     "T": 3, #Temperature parameter for soft logit target 
-    "n_students":3 # TOTAL number of students in ensamble 
+    "n_students":2 # TOTAL number of students in ensamble 
 }
 
 gcn_student_ensamble_3_args = {
@@ -101,7 +101,7 @@ gcn_student_ensamble_4_args = {
     "gamma": 2, # sum of student ce loss
     "lambda":1, # disentanglement loss
     "T": 3, #Temperature parameter for soft logit target 
-    "n_students":3 # TOTAL number of students in ensamble 
+    "n_students":4 # TOTAL number of students in ensamble 
 }
 
 gcn_student_ensamble_5_args = {
@@ -118,7 +118,7 @@ gcn_student_ensamble_5_args = {
     "gamma": 2, # sum of student ce loss
     "lambda":1, # disentanglement loss
     "T": 3, #Temperature parameter for soft logit target 
-    "n_students":3 # TOTAL number of students in ensamble 
+    "n_students":5 # TOTAL number of students in ensamble 
 }
 
 mlp_args = {
