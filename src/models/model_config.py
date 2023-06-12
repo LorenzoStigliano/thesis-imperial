@@ -123,7 +123,7 @@ gcn_student_ensamble_5_args = {
 
 mlp_args = {
     "num_epochs":50, 
-    "lr": 0.001,
+    "lr": 0.001, 
     "weight_decay":5e-4, 
     "num_layers":1, 
     "input_dim":35,
@@ -132,7 +132,11 @@ mlp_args = {
     "threshold":"median", # Threshold the graph adjacency matrix. Possible values: no_threshold, median, mean
     "dropout_ratio":0,
     "model_name":"mlp",
-    "evaluation_method": "model_assessment" # model selection or model assessment
+    "evaluation_method": "model_assessment", # model selection or model assessment
+    "alpha_ce": 1, 
+    "T": 3, 
+    "alpha_soft_ce": 2,
+    "alpha_weight": 0
 }
 
 gat_args = {

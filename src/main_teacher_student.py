@@ -4,7 +4,7 @@ import numpy as np
 import torch
 
 from models.model_config import * 
-from trainers.student_trainer import cross_validation
+from trainers.teacher_student_trainer import cross_validation
 
 from utils.builders import new_folder
 from utils.loaders import load_data
@@ -35,13 +35,16 @@ def train_main_model(dataset, model, view, cv_number, run=0):
     if model == "gcn_student_teacher_weight":
         cross_validation(gcn_student_weight_args, G_list, view, model_name, cv_number, run)
 
+    if model == "mlp":
+        cross_validation(mlp_args, G_list, view, model_name, cv_number, run)
+
 def parrallel_run(run):
     print(run)
     datasets_asdnc = ['gender_data']
     views = [0, 2, 4, 5] #0, 2, 4, 5
     for dataset_i in datasets_asdnc:
         for view_i in views:
-            models = ["gcn_student", "gcn_student_teacher_weight"]
+            models = ["gcn_student"] #"gcn_student", "gcn_student_teacher_weight"
             for model in models:
                 for cv in [3, 5, 10]:
                     train_main_model(dataset_i, model, view_i, cv, run)

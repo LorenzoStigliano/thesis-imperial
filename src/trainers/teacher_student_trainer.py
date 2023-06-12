@@ -13,6 +13,7 @@ from torch.autograd import Variable
 import sklearn.metrics as metrics
 
 from models.gcn_student import GCN_STUDENT
+from models.mlp import MLP
 from models.model_config import * 
 from utils.helpers import *
 from config import SAVE_DIR_MODEL_DATA
@@ -74,13 +75,25 @@ def cross_validation(model_args, G_list, view, model_name, cv_number, run=0):
         train_set, validation_set, test_set = datasets_splits(folds, model_args, cv)
         num_nodes = G_list[0]['adj'].shape[0]
         num_classes = 2 
-        student_model = GCN_STUDENT(
-            nfeat = num_nodes,
-            nhid = model_args["hidden_dim"],
-            nclass = num_classes,
-            dropout = model_args["dropout"],
-            run = run
-        ).to(device) 
+
+        if model_args["model_name"] == "gcn_student":
+          student_model = GCN_STUDENT(
+              nfeat = num_nodes,
+              nhid = model_args["hidden_dim"],
+              nclass = num_classes,
+              dropout = model_args["dropout"],
+              run = run
+          ).to(device) 
+
+        elif model_args["model_name"] == "mlp":
+          student_model = MLP(
+              num_layers=model_args["num_layers"], 
+              input_dim=num_nodes, 
+              hidden_dim=model_args["hidden_dim"], 
+              output_dim=model_args["output_dim"], 
+              dropout_ratio=model_args["dropout_ratio"],
+              run = run
+              ).to(device) 
 
         if model_args["evaluation_method"] =='model_selection':
             #Here we leave out the test set since we are not evaluating we can see the performance on the test set after training
@@ -135,7 +148,10 @@ def train(model_args, train_dataset, val_dataset, student_model, threshold_value
     student_model.to(device)
 
     # Define Loss
-    criterion = nn.CrossEntropyLoss(reduction='mean')
+    if model_args["model_name"] == "mlp":
+       criterion = nn.BCEWithLogitsLoss(reduction='mean')
+    else:
+       criterion = nn.CrossEntropyLoss(reduction='mean')
     criterion_soft = CrossEntropyLossForSoftTarget(T=model_args["T"], alpha=model_args["alpha_soft_ce"])
 
     # Define optimizer
@@ -170,7 +186,6 @@ def train(model_args, train_dataset, val_dataset, student_model, threshold_value
         total_loss = 0
         ce_loss = 0
         soft_ce_loss = 0
-        weight_loss = 0
         
         preds = []
         labels = []
@@ -192,23 +207,44 @@ def train(model_args, train_dataset, val_dataset, student_model, threshold_value
             if model_args["threshold"] in ["median", "mean"]:
                 adj = torch.where(adj > threshold_value, torch.tensor([1.0]).to(device), torch.tensor([0.0]).to(device))
             
-            # extract student weight
-            student_weights = student_model.LinearLayer.weight
-
+            # Ground truth label
             y_gt = label.to(device)
 
             # Compute soft label
             y_soft = teacher_model(features, adj)
+            
+            if model_args["model_name"] == "mlp":
+              # Predict
+              features = torch.mean(adj, axis=1)
+              logits = student_model(features)[1]
+              ypred = torch.sigmoid(logits)[0]
 
-            # Predict
-            ypred = student_model(features, adj)
-
-            # Compute loss (foward propagation)
-            loss = model_args["alpha_ce"]*criterion(ypred, y_gt) + criterion_soft(ypred, y_soft) + model_args["alpha_weight"]*weight_similarity_loss(teacher_weights, student_weights)
-
-            _, indices = torch.max(ypred, 1)
-            preds.append(indices.cpu().data.numpy())
-            labels.append(data['label'].long().numpy())
+              # Compute loss (foward propagation)
+              logits_model2 = y_soft.div(model_args["T"])
+              # Apply sigmoid activation function to obtain probabilities
+              probabilities_model2 = torch.sigmoid(logits_model2)
+              if label==1:
+                # Calculate the soft binary cross entropy loss
+                loss_soft = torch.nn.functional.binary_cross_entropy_with_logits(logits.div(model_args["T"]), probabilities_model2[0][1].view(1,1))
+              else:
+                loss_soft = torch.nn.functional.binary_cross_entropy_with_logits(logits.div(model_args["T"]), probabilities_model2[0][0].view(1,1))
+              loss_ce = criterion(logits[0].float() , y_gt.float())
+              loss = model_args["alpha_ce"]*loss_ce + model_args["alpha_soft_ce"]*loss_soft
+              # Save pred
+              pred_label = 1 if ypred >= 0.5 else 0
+              preds.append(np.array(pred_label))
+              labels.append(data['label'].long().numpy())
+            else:
+               # Predict
+               ypred = student_model(features, adj)
+               # Compute loss (foward propagation)
+               loss_ce = criterion(ypred, y_gt)
+               loss_soft = criterion_soft(ypred, y_soft)
+               loss = model_args["alpha_ce"]*loss_ce + criterion_soft(ypred, y_soft)
+               #Save pred
+               _, indices = torch.max(ypred, 1)
+               preds.append(indices.cpu().data.numpy())
+               labels.append(data['label'].long().numpy())
             
             # Compute gradients (backward propagation)
             loss.backward()
@@ -217,9 +253,8 @@ def train(model_args, train_dataset, val_dataset, student_model, threshold_value
             optimizer.step()
                     
             total_loss += loss.item()
-            ce_loss += criterion(ypred, y_gt).item()
-            soft_ce_loss += criterion_soft(ypred, y_soft).item()
-            weight_loss += weight_similarity_loss(teacher_weights, student_weights).item()
+            ce_loss += loss_ce.item()
+            soft_ce_loss += loss_soft.item()
 
             elapsed = time.time() - begin_time
             total_time += elapsed
@@ -241,23 +276,21 @@ def train(model_args, train_dataset, val_dataset, student_model, threshold_value
         print(f"Time taken for epoch {epoch}: {total_time}")
         print(f"Train accuracy: {result['acc']}")
         print(f"Train loss: {total_loss / len(train_dataset)}")
-        print(f"Train weight loss: {weight_loss / len(train_dataset)}")
-
-        
+        print(f"Train Soft CE loss: {soft_ce_loss / len(train_dataset)}")
+        print(f"Train CE loss: {ce_loss / len(train_dataset)}")
+ 
         train_loss.append(total_loss / len(train_dataset))
         train_ce_loss.append(ce_loss / len(train_dataset))
         train_soft_ce_loss.append(soft_ce_loss / len(train_dataset))
-        train_weight_loss.append(weight_loss / len(train_dataset))
         train_acc.append(result['acc'])
         train_f1.append(result['F1'])
         train_recall.append(result['recall'])
         train_precision.append(result['prec'])
         
-        val_loss, val_ce_loss, val_soft_ce_loss, val_weight_loss, val_acc, val_precision, val_recall, val_f1 = validate(val_dataset, student_model, model_args, threshold_value, model_name, teacher_model, teacher_weights)
+        val_loss, val_ce_loss, val_soft_ce_loss, val_acc, val_precision, val_recall, val_f1 = validate(val_dataset, student_model, model_args, threshold_value, model_name, teacher_model, teacher_weights)
         validation_loss.append(val_loss)
         validation_ce_loss.append(val_ce_loss)
         validation_soft_ce_loss.append(val_soft_ce_loss)
-        validation_weight_loss.append(val_weight_loss)
         validation_acc.append(val_acc)
         validation_f1.append(val_f1)
         validation_recall.append(val_recall)
@@ -354,10 +387,12 @@ def validate(dataset, model, model_args, threshold_value, model_name, teacher_mo
     total_loss = 0
     ce_loss = 0
     soft_ce_loss = 0
-    weight_loss = 0
-    student_weights = model.LinearLayer.weight
 
-    criterion = nn.CrossEntropyLoss(reduction='mean')
+    # Define Loss
+    if model_args["model_name"] == "mlp":
+       criterion = nn.BCEWithLogitsLoss(reduction='mean')
+    else:
+       criterion = nn.CrossEntropyLoss(reduction='mean')
     criterion_soft = CrossEntropyLossForSoftTarget(T=model_args["T"], alpha=model_args["alpha_soft_ce"])
 
     for _, data in enumerate(dataset):
@@ -381,27 +416,46 @@ def validate(dataset, model, model_args, threshold_value, model_name, teacher_mo
             assign_input = Variable(torch.from_numpy(assign_input).float(), requires_grad=False).to(device)
             assign_input = torch.unsqueeze(assign_input, 0)
             ypred= model(features, adj, batch_num_nodes, assign_x=assign_input)
-        
-        elif model_args["model_name"] == "mlp":
-            features = torch.mean(features, axis=1)
-            ypred = model(features)[1]
-        else:
-            ypred = model(features, adj)
 
         # Ground truth label 
         y_gt = label.to(device)
         # Compute soft label
         y_soft = teacher_model(features, adj)
 
-        loss = model_args["alpha_ce"]*criterion(ypred, y_gt) + criterion_soft(ypred, y_soft) + model_args["alpha_weight"]*weight_similarity_loss(teacher_weights, student_weights)
-        
-        total_loss += loss.item()
-        ce_loss += criterion(ypred, y_gt).item()
-        soft_ce_loss += criterion_soft(ypred, y_soft).item()
-        weight_loss += weight_similarity_loss(teacher_weights, student_weights).item()
+        if model_args["model_name"] == "mlp":
+          # Predict
+          features = torch.mean(adj, axis=1)
+          logits = model(features)[1]
+          ypred = torch.sigmoid(logits)[0]
 
-        _, indices = torch.max(ypred, 1)
-        preds.append(indices.cpu().data.numpy())
+          # Compute loss (foward propagation)
+          logits_model2 = y_soft.div(model_args["T"])
+          # Apply sigmoid activation function to obtain probabilities
+          probabilities_model2 = torch.sigmoid(logits_model2)
+          if label==1:
+            # Calculate the soft binary cross entropy loss
+            loss_soft = torch.nn.functional.binary_cross_entropy_with_logits(logits.div(model_args["T"]), probabilities_model2[0][1].view(1,1))
+          else:
+            loss_soft = torch.nn.functional.binary_cross_entropy_with_logits(logits.div(model_args["T"]), probabilities_model2[0][0].view(1,1))
+          loss_ce = criterion(logits[0].float() , y_gt.float())
+          loss = model_args["alpha_ce"]*loss_ce +  model_args["alpha_soft_ce"]*loss_soft
+          # Save pred
+          pred_label = 1 if ypred >= 0.5 else 0
+          preds.append(np.array(pred_label))
+        else:
+            # Predict
+            ypred = model(features, adj)
+            # Compute loss (foward propagation)
+            loss_ce = criterion(ypred, y_gt)
+            loss_soft = criterion_soft(ypred, y_soft)
+            loss = model_args["alpha_ce"]*loss_ce + criterion_soft(ypred, y_soft)
+            #Save pred
+            _, indices = torch.max(ypred, 1)
+            preds.append(indices.cpu().data.numpy())
+
+        total_loss += loss.item()
+        ce_loss += loss_ce.item()
+        soft_ce_loss += loss_soft.item()
 
     labels = np.hstack(labels)
     preds = np.hstack(preds)
@@ -421,11 +475,10 @@ def validate(dataset, model, model_args, threshold_value, model_name, teacher_mo
     val_total_loss = total_loss / len(dataset)
     val_ce_loss = ce_loss / len(dataset)
     val_soft_ce_loss = soft_ce_loss / len(dataset)
-    val_weight_loss = weight_loss / len(dataset)
     print(f"Validation accuracy: {result['acc']}")
     print(f"Validation Loss: {val_total_loss}")
 
-    return val_total_loss, val_ce_loss, val_soft_ce_loss, val_weight_loss, result['acc'], result['prec'], result['recall'], result['F1']
+    return val_total_loss, val_ce_loss, val_soft_ce_loss, result['acc'], result['prec'], result['recall'], result['F1']
 
 def test(dataset, model, model_args, threshold_value, model_name):
     """

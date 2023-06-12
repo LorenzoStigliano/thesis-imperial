@@ -195,7 +195,7 @@ def train(model_args, train_dataset, val_dataset, model, threshold_value, model_
               ypred= model(features, adj)
           
           if model_args["model_name"] == "mlp":
-            pred_label = 1 if  ypred >= 0.5 else 0
+            pred_label = 1 if ypred >= 0.5 else 0
             preds.append(np.array(pred_label))
             labels.append(data['label'].long().numpy())
           else:
