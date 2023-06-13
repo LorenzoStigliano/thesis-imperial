@@ -64,7 +64,8 @@ def get_metrics(dataset, model, analysis_type, training_type, cv_n, view, run, d
             else:
                 model = "_".join(model.split("_")[:2]) 
                 cv_path = SAVE_DIR_MODEL_DATA+f'model_assessment/{model}/metrics/MainModel_{training_type}_{dataset}_{model}_run_{run}_fixed_init_CV_{cv_n}_view_{view}_with_teacher_{dataset_split}_{metric}.pickle'    
-        if model_args != None:
+        
+        elif model_args != None:
             if "layers" in model_args.keys():
                 if model_args["layers"] == 3 or model_args["layers"] == 4:
                     cv_path = SAVE_DIR_MODEL_DATA+'model_assessment/{}/metrics/MainModel_{}_{}_{}_run_{}_fixed_init_layers_{}_CV_{}_view_{}_{}_{}.pickle'.format(model,training_type, dataset, model, run, model_args["layers"],cv_n, view, dataset_split, metric)
@@ -79,7 +80,6 @@ def get_metrics(dataset, model, analysis_type, training_type, cv_n, view, run, d
     
     with open(cv_path,'rb') as f:
         metrics = pickle.load(f)
-
     return metrics
 
 ############ GETTERS FOR WEIGHTS OF MODELS ############
@@ -113,11 +113,12 @@ def get_weight(dataset, view, model, training_type, shot_n, cv_n, run, student, 
         lambda_ = str(model_args["lambda"])
         cv_path = SAVE_DIR_MODEL_DATA+'model_assessment/{}/weights/W_MainModel_{}_{}_{}_run_{}_fixed_init_student_{}_CV_{}_view_{}_alpha_{}_beta_{}_gamma_{}_lambda_{}.pickle'.format(model,training_type, dataset, model, run, student, cv_n, view, alpha, beta, gamma, lambda_)
     
-    elif "layers" in model_args.keys():
-        if model_args["layers"] == 3 or model_args["layers"] == 4:
-            cv_path = SAVE_DIR_MODEL_DATA+'model_assessment/{}/weights/W_MainModel_{}_{}_{}_run_{}_fixed_init_layers_{}_CV_{}_view_{}.pickle'.format(model,training_type, dataset, model, run, model_args["layers"],cv_n, view)
-        else:
-            cv_path = SAVE_DIR_MODEL_DATA+'model_assessment/{}/weights/W_MainModel_{}_{}_{}_run_{}_fixed_init_CV_{}_view_{}.pickle'.format(model,training_type, dataset, model, run, cv_n, view)
+    elif model_args != None:
+        if "layers" in model_args.keys():
+            if model_args["layers"] == 3 or model_args["layers"] == 4:
+                cv_path = SAVE_DIR_MODEL_DATA+'model_assessment/{}/weights/W_MainModel_{}_{}_{}_run_{}_fixed_init_layers_{}_CV_{}_view_{}.pickle'.format(model,training_type, dataset, model, run, model_args["layers"],cv_n, view)
+            else:
+                cv_path = SAVE_DIR_MODEL_DATA+'model_assessment/{}/weights/W_MainModel_{}_{}_{}_run_{}_fixed_init_CV_{}_view_{}.pickle'.format(model,training_type, dataset, model, run, cv_n, view)
 
     elif "teacher" in model:
         if "weight" in model:
