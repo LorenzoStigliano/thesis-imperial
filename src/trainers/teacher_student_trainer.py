@@ -420,7 +420,7 @@ def validate(dataset, model, model_args, threshold_value, model_name, teacher_mo
         # Ground truth label 
         y_gt = label.to(device)
         # Compute soft label
-        y_soft = teacher_model(features, adj)
+        y_soft , _ = teacher_model(features, adj)
 
         if model_args["model_name"] == "mlp":
           # Predict

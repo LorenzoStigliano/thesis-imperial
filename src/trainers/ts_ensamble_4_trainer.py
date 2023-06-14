@@ -233,7 +233,7 @@ def train(model_args, train_dataset, val_dataset, students, student_names, thres
             y_gt = label.to(device)
 
             # Compute soft label
-            y_soft = teacher_model(features, adj)
+            y_soft, _ = teacher_model(features, adj)
 
             # Predict
             ypred_1 = student_model_1(features, adj)
@@ -536,7 +536,7 @@ def validate(dataset, students, model_args, threshold_value, model_name, teacher
         # Ground truth label 
         y_gt = label.to(device)
         # Compute soft label
-        y_soft = teacher_model(features, adj)
+        y_soft, _ = teacher_model(features, adj)
 
         loss_teacher_student = criterion_soft(ypred_1, y_soft) + criterion_soft(ypred_2, y_soft) + criterion_soft(ypred_3, y_soft) + criterion_soft(ypred_4, y_soft)
         loss_within_student = weight_similarity_loss(student_weights_1, student_weights_2) + weight_similarity_loss(student_weights_1, student_weights_3) + weight_similarity_loss(student_weights_2, student_weights_3) + weight_similarity_loss(student_weights_1, student_weights_4) + weight_similarity_loss(student_weights_2, student_weights_4) + weight_similarity_loss(student_weights_3, student_weights_4)
