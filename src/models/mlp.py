@@ -14,6 +14,7 @@ class MLP(nn.Module):
         run,
         norm_type="none",
     ):
+        torch.manual_seed(run)
         super(MLP, self).__init__()
         self.num_layers = num_layers
         self.norm_type = norm_type

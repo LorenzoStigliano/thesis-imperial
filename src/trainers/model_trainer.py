@@ -192,7 +192,7 @@ def train(model_args, train_dataset, val_dataset, model, threshold_value, model_
               logits = model(features)[1]
               ypred = torch.sigmoid(logits)[0]
           else:
-              ypred= model(features, adj)
+              ypred, _ = model(features, adj)
           
           if model_args["model_name"] == "mlp":
             pred_label = 1 if ypred >= 0.5 else 0
@@ -345,7 +345,7 @@ def validate(dataset, model, model_args, threshold_value, model_name):
             logits = model(features)[1]
             ypred = torch.sigmoid(logits)[0]
         else:
-            ypred = model(features, adj)
+            ypred, _ = model(features, adj)
         
         total_loss += model.loss(ypred, label).item()
     

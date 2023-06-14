@@ -13,7 +13,6 @@ from torch.autograd import Variable
 import sklearn.metrics as metrics
 
 from models.gcn_student import GCN_STUDENT
-from models.mlp import MLP
 from models.model_config import * 
 from utils.helpers import *
 from config import SAVE_DIR_MODEL_DATA
@@ -21,26 +20,38 @@ from config import SAVE_DIR_MODEL_DATA
 #device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 device = torch.device('cpu')
 
-class CrossEntropyLossForSoftTarget(nn.Module):
-    def __init__(self, T=3, alpha=2):
-        super(CrossEntropyLossForSoftTarget, self).__init__()
-        self.T = T
-        self.alpha = alpha
-        self.softmax = nn.Softmax(dim=-1)
-        self.logsoftmax = nn.LogSoftmax(dim=-1)
-    def forward(self, y_pred, y_gt):
-        y_pred_soft = y_pred.div(self.T)
-        y_gt_soft = y_gt.div(self.T)
-        return -(self.softmax(y_gt_soft)*self.logsoftmax(y_pred_soft)).mean().mul(self.alpha)
+def lsp(node_embeddings, adjacency_matrix, sigma=1.0):
+
+    # Compute the squared Euclidean distance matrix between node embeddings
+    squared_distances = torch.cdist(node_embeddings, node_embeddings, p=2).pow(2)
     
-def weight_similarity_loss(w_teacher, w_student):
-    """
-    Compute the KL loss between the weights of the last layer
-    of two networks.
-    """    
-    # Concatenate and compute the cosine similarity
-    loss = nn.CosineSimilarity()
-    return 1 - loss(w_student, w_teacher).abs()
+    # Apply the RBF kernel to the squared distance matrix
+    similarity_matrix = torch.exp(-squared_distances / (2 * sigma**2))
+    
+    # Cast the adjacency matrix to Float
+    adjacency_matrix = adjacency_matrix.float()
+    
+    # Compute the sum of similarities for each node's neighbors
+    sum_similarities = torch.sum(adjacency_matrix * similarity_matrix, dim=1)
+    
+    # Compute the local structure by dividing each node's similarity by the sum
+    local_structure = similarity_matrix / sum_similarities.unsqueeze(1)
+    
+    return local_structure
+
+def extract_ls_vectors(local_structure, adjacency_matrix):
+    # Create a sparse mask tensor from the adjacency matrix
+    mask = adjacency_matrix.to_sparse().to_dense()
+    
+    # Multiply the mask tensor element-wise with the local structure tensor
+    ls_vectors = mask * local_structure
+
+    non_zero_rows = []
+    for row in ls_vectors:
+        # Select non-zero elements in the row
+        non_zero_rows.append(row)
+    
+    return non_zero_rows
 
 def cross_validation(model_args, G_list, view, model_name, cv_number, run=0):
     start = time.time() 
@@ -62,13 +73,7 @@ def cross_validation(model_args, G_list, view, model_name, cv_number, run=0):
             train_dataset, val_dataset, threshold_value = model_assessment_split(train_set, validation_set, test_set, model_args)
         
         print(f"CV : {cv}")
-        if model_args["alpha_weight"] != 0:
-          #add hyperparameters here     
-          #TODO add save parameter with differetn alpha_weight value
-          name = model_name+"_CV_"+str(cv)+"_view_"+str(view)+"_with_teacher_weight_matching"
-        else:
-          #add hyperparameters here     
-          name = model_name+"_CV_"+str(cv)+"_view_"+str(view)+"_with_teacher"
+        name = model_name+"_CV_"+str(cv)+"_view_"+str(view)+"_lsp"
         
         print(name)
 
@@ -76,24 +81,13 @@ def cross_validation(model_args, G_list, view, model_name, cv_number, run=0):
         num_nodes = G_list[0]['adj'].shape[0]
         num_classes = 2 
 
-        if model_args["model_name"] == "gcn_student":
-          student_model = GCN_STUDENT(
-              nfeat = num_nodes,
-              nhid = model_args["hidden_dim"],
-              nclass = num_classes,
-              dropout = model_args["dropout"],
-              run = run
-          ).to(device) 
-
-        elif model_args["model_name"] == "mlp":
-          student_model = MLP(
-              num_layers=model_args["num_layers"], 
-              input_dim=num_nodes, 
-              hidden_dim=model_args["hidden_dim"], 
-              output_dim=model_args["output_dim"], 
-              dropout_ratio=model_args["dropout_ratio"],
-              run = run
-              ).to(device) 
+        student_model = GCN_STUDENT(
+            nfeat = num_nodes,
+            nhid = model_args["hidden_dim"],
+            nclass = num_classes,
+            dropout = model_args["dropout"],
+            run = run
+        ).to(device) 
 
         if model_args["evaluation_method"] =='model_selection':
             #Here we leave out the test set since we are not evaluating we can see the performance on the test set after training
@@ -129,30 +123,19 @@ def train(model_args, train_dataset, val_dataset, student_model, threshold_value
     # Load teacher model
     if model_args['evaluation_method'] == "model_selection":
        teacher_model = torch.load(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+f"/gcn/models/gcn_MainModel_{cv_number}Fold_gender_data_gcn_CV_{cv}_view_{view}.pt")
-       teacher_weights_path = SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+f"/gcn/weights/W_MainModel_{cv_number}Fold_gender_data_gcn_CV_{cv}_view_{view}.pickle"
-       with open(teacher_weights_path,'rb') as f:
-          teacher_weights = pickle.load(f)
     else:
        teacher_model = torch.load(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+f"/gcn/models/gcn_MainModel_{cv_number}Fold_gender_data_gcn_run_{run}_fixed_init_CV_{cv}_view_{view}.pt")
-       teacher_weights_path = SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+f"/gcn/weights/W_MainModel_{cv_number}Fold_gender_data_gcn_run_{run}_fixed_init_CV_{cv}_view_{view}.pickle"
-       with open(teacher_weights_path,'rb') as f:
-          teacher_weights = pickle.load(f)
     
     teacher_model.is_trained = False
     teacher_model.eval()
 
-    #Extract teacher weights
-    teacher_weights = teacher_weights['w'].detach()
     # Transfer
     teacher_model.to(device)
     student_model.to(device)
 
     # Define Loss
-    if model_args["model_name"] == "mlp":
-       criterion = nn.BCEWithLogitsLoss(reduction='mean')
-    else:
-       criterion = nn.CrossEntropyLoss(reduction='mean')
-    criterion_soft = CrossEntropyLossForSoftTarget(T=model_args["T"], alpha=model_args["alpha_soft_ce"])
+    criterion = nn.CrossEntropyLoss(reduction='mean')
+    criterion_kd = nn.KLDivLoss(reduction='batchmean')
 
     # Define optimizer
     optimizer = optim.Adam(student_model.parameters(), lr=model_args["lr"], weight_decay=model_args['weight_decay'])
@@ -162,7 +145,6 @@ def train(model_args, train_dataset, val_dataset, student_model, threshold_value
     train_acc=[]
     train_ce_loss=[]
     train_soft_ce_loss=[]
-    train_weight_loss=[]
     train_f1=[]
     train_recall=[]
     train_precision=[]
@@ -210,41 +192,29 @@ def train(model_args, train_dataset, val_dataset, student_model, threshold_value
             # Ground truth label
             y_gt = label.to(device)
 
-            # Compute soft label
-            y_soft, _ = teacher_model(features, adj)
+            # Get node embeddings from the teacher model
+            _, node_embeddings_teacher = teacher_model(features, adj)
             
-            if model_args["model_name"] == "mlp":
-              # Predict
-              features = torch.mean(adj, axis=1)
-              logits = student_model(features)[1]
-              ypred = torch.sigmoid(logits)[0]
+            # Predict
+            ypred, node_embeddings_student = student_model(features, adj)
 
-              # Compute loss (foward propagation)
-              logits_model2 = y_soft.div(model_args["T"])
-              # Apply sigmoid activation function to obtain probabilities
-              probabilities_model2 = torch.sigmoid(logits_model2)
-              if label==1:
-                # Calculate the soft binary cross entropy loss
-                loss_soft = torch.nn.functional.binary_cross_entropy_with_logits(logits.div(model_args["T"]), probabilities_model2[0][1].view(1,1))
-              else:
-                loss_soft = torch.nn.functional.binary_cross_entropy_with_logits(logits.div(model_args["T"]), probabilities_model2[0][0].view(1,1))
-              loss_ce = criterion(logits[0].float() , y_gt.float())
-              loss = model_args["alpha_ce"]*loss_ce + model_args["alpha_soft_ce"]*loss_soft
-              # Save pred
-              pred_label = 1 if ypred >= 0.5 else 0
-              preds.append(np.array(pred_label))
-              labels.append(data['label'].long().numpy())
-            else:
-               # Predict
-               ypred, _ = student_model(features, adj)
-               # Compute loss (foward propagation)
-               loss_ce = criterion(ypred, y_gt)
-               loss_soft = criterion_soft(ypred, y_soft)
-               loss = model_args["alpha_ce"]*loss_ce + criterion_soft(ypred, y_soft)
-               #Save pred
-               _, indices = torch.max(ypred, 1)
-               preds.append(indices.cpu().data.numpy())
-               labels.append(data['label'].long().numpy())
+            ls_teacher = extract_ls_vectors(lsp(node_embeddings_teacher, adj),adj)
+            ls_student = extract_ls_vectors(lsp(node_embeddings_student, adj),adj)
+
+            # Compute loss (foward propagation)
+            loss_ce = criterion(ypred, y_gt)
+
+            mask = torch.cat([torch.eq(ls_s, 0).unsqueeze(0) for ls_s in ls_student])
+            filtered_ls_s = torch.cat([ls_s[~mask[i]] for i, ls_s in enumerate(ls_student)])
+            filtered_ls_t = torch.cat([ls_t[~mask[i]] for i, ls_t in enumerate(ls_teacher)])
+            losses = criterion_kd(torch.log(filtered_ls_s), filtered_ls_t)
+            loss_soft = losses.mean()
+
+            loss = model_args["alpha_ce"]*loss_ce + model_args["alpha_kd_lsp"]*loss_soft
+            #Save pred
+            _, indices = torch.max(ypred, 1)
+            preds.append(indices.cpu().data.numpy())
+            labels.append(data['label'].long().numpy())
             
             # Compute gradients (backward propagation)
             loss.backward()
@@ -276,7 +246,7 @@ def train(model_args, train_dataset, val_dataset, student_model, threshold_value
         print(f"Time taken for epoch {epoch}: {total_time}")
         print(f"Train accuracy: {result['acc']}")
         print(f"Train loss: {total_loss / len(train_dataset)}")
-        print(f"Train Soft CE loss: {soft_ce_loss / len(train_dataset)}")
+        print(f"Train KD loss: {soft_ce_loss / len(train_dataset)}")
         print(f"Train CE loss: {ce_loss / len(train_dataset)}")
  
         train_loss.append(total_loss / len(train_dataset))
@@ -287,7 +257,7 @@ def train(model_args, train_dataset, val_dataset, student_model, threshold_value
         train_recall.append(result['recall'])
         train_precision.append(result['prec'])
         
-        val_loss, val_ce_loss, val_soft_ce_loss, val_acc, val_precision, val_recall, val_f1 = validate(val_dataset, student_model, model_args, threshold_value, model_name, teacher_model, teacher_weights)
+        val_loss, val_ce_loss, val_soft_ce_loss, val_acc, val_precision, val_recall, val_f1 = validate(val_dataset, student_model, model_args, threshold_value, model_name, teacher_model)
         validation_loss.append(val_loss)
         validation_ce_loss.append(val_ce_loss)
         validation_soft_ce_loss.append(val_soft_ce_loss)
@@ -295,6 +265,7 @@ def train(model_args, train_dataset, val_dataset, student_model, threshold_value
         validation_f1.append(val_f1)
         validation_recall.append(val_recall)
         validation_precision.append(val_precision)
+
     #Save train metrics
     with open(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+"/"+model_args["model_name"]+"/metrics/"+model_name+"_train_acc.pickle", 'wb') as f:
       pickle.dump(train_acc, f)
@@ -330,9 +301,6 @@ def train(model_args, train_dataset, val_dataset, student_model, threshold_value
     los_p = {'loss':train_soft_ce_loss}
     with open(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+"/"+model_args['model_name']+"/training_loss/training_loss_soft_ce_"+model_name+".pickle", 'wb') as f:
       pickle.dump(los_p, f)
-    los_p = {'loss':train_weight_loss}
-    with open(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+"/"+model_args['model_name']+"/training_loss/training_loss_weight_"+model_name+".pickle", 'wb') as f:
-      pickle.dump(los_p, f)
     
     # Save validation loss of GNN model
     los_p = {'loss':validation_loss}
@@ -364,7 +332,7 @@ def train(model_args, train_dataset, val_dataset, student_model, threshold_value
 
         shutil.move(model_args['model_name']+"_"+str(run)+'_W.pickle'.format(),path)
 
-def validate(dataset, model, model_args, threshold_value, model_name, teacher_model, teacher_weights):
+def validate(dataset, model, model_args, threshold_value, model_name, teacher_model):
     """
     Parameters
     ----------
@@ -389,11 +357,8 @@ def validate(dataset, model, model_args, threshold_value, model_name, teacher_mo
     soft_ce_loss = 0
 
     # Define Loss
-    if model_args["model_name"] == "mlp":
-       criterion = nn.BCEWithLogitsLoss(reduction='mean')
-    else:
-       criterion = nn.CrossEntropyLoss(reduction='mean')
-    criterion_soft = CrossEntropyLossForSoftTarget(T=model_args["T"], alpha=model_args["alpha_soft_ce"])
+    criterion = nn.CrossEntropyLoss(reduction='mean')
+    criterion_kd = nn.KLDivLoss(reduction='batchmean')
 
     for _, data in enumerate(dataset):
         adj = Variable(data['adj'].float(), requires_grad=False).to(device)
@@ -420,38 +385,24 @@ def validate(dataset, model, model_args, threshold_value, model_name, teacher_mo
         # Ground truth label 
         y_gt = label.to(device)
         # Compute soft label
-        y_soft = teacher_model(features, adj)
+        _, node_embeddings_teacher = teacher_model(features, adj)
 
-        if model_args["model_name"] == "mlp":
-          # Predict
-          features = torch.mean(adj, axis=1)
-          logits = model(features)[1]
-          ypred = torch.sigmoid(logits)[0]
+        # Predict
+        ypred, node_embeddings_student = model(features, adj)
 
-          # Compute loss (foward propagation)
-          logits_model2 = y_soft.div(model_args["T"])
-          # Apply sigmoid activation function to obtain probabilities
-          probabilities_model2 = torch.sigmoid(logits_model2)
-          if label==1:
-            # Calculate the soft binary cross entropy loss
-            loss_soft = torch.nn.functional.binary_cross_entropy_with_logits(logits.div(model_args["T"]), probabilities_model2[0][1].view(1,1))
-          else:
-            loss_soft = torch.nn.functional.binary_cross_entropy_with_logits(logits.div(model_args["T"]), probabilities_model2[0][0].view(1,1))
-          loss_ce = criterion(logits[0].float() , y_gt.float())
-          loss = model_args["alpha_ce"]*loss_ce +  model_args["alpha_soft_ce"]*loss_soft
-          # Save pred
-          pred_label = 1 if ypred >= 0.5 else 0
-          preds.append(np.array(pred_label))
-        else:
-            # Predict
-            ypred = model(features, adj)
-            # Compute loss (foward propagation)
-            loss_ce = criterion(ypred, y_gt)
-            loss_soft = criterion_soft(ypred, y_soft)
-            loss = model_args["alpha_ce"]*loss_ce + criterion_soft(ypred, y_soft)
-            #Save pred
-            _, indices = torch.max(ypred, 1)
-            preds.append(indices.cpu().data.numpy())
+        ls_teacher = extract_ls_vectors(lsp(node_embeddings_teacher, adj),adj)
+        ls_student = extract_ls_vectors(lsp(node_embeddings_student, adj),adj)
+        # Compute loss (foward propagation)
+        loss_ce = criterion(ypred, y_gt)
+        mask = torch.cat([torch.eq(ls_s, 0).unsqueeze(0) for ls_s in ls_student])
+        filtered_ls_s = torch.cat([ls_s[~mask[i]] for i, ls_s in enumerate(ls_student)])
+        filtered_ls_t = torch.cat([ls_t[~mask[i]] for i, ls_t in enumerate(ls_teacher)])
+        losses = criterion_kd(torch.log(filtered_ls_s), filtered_ls_t)
+        loss_soft = losses.mean()
+        loss = model_args["alpha_ce"]*loss_ce + model_args["alpha_kd_lsp"]*loss_soft
+        #Save pred
+        _, indices = torch.max(ypred, 1)
+        preds.append(indices.cpu().data.numpy())
 
         total_loss += loss.item()
         ce_loss += loss_ce.item()

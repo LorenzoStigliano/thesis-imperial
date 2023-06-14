@@ -35,6 +35,7 @@ gcn_student_args = {
     "alpha_ce": 1, 
     "T": 3, 
     "alpha_soft_ce": 2,
+    "alpha_kd_lsp":2,
     "alpha_weight": 0
 }
 
@@ -50,7 +51,8 @@ gcn_student_weight_args = {
     "alpha_ce": 1, 
     "T": 3, 
     "alpha_soft_ce": 2,
-    "alpha_weight": 2 
+    "alpha_kd_lsp":2,
+    "alpha_weight": 2
 }
 
 gcn_student_ensamble_2_args = {
