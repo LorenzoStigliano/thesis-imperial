@@ -20,14 +20,14 @@ executable      = /homes/ls1121/thesis-imperial/src/script/setup_run_ensemble.sh
 # data would be lost as each job would overwrite the same file in an 
 # uncontrolled manner.  Thus, we direct STDOUT for each job to a uniquely 
 # named file.
-output          = uname.$(Process).out
+output          = /homes/ls1121/thesis-imperial/uname.$(Process).out
 
 # As above, but for STDERR.
-error           = uname.$(Process).err
+error           = /homes/ls1121/thesis-imperial/uname.$(Process).err
 
 # Condor can write a time-ordered log of events related to this job-set
 # to a file we specify.  This specifies where that file should be written.
-log             = uname.log
+log             = /homes/ls1121/thesis-imperial/uname.log
 
 # This specifies what commandline arguments should be passed to the executable.
 
