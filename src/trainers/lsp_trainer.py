@@ -392,13 +392,27 @@ def validate(dataset, model, model_args, threshold_value, model_name, teacher_mo
 
         ls_teacher = extract_ls_vectors(lsp(node_embeddings_teacher, adj),adj)
         ls_student = extract_ls_vectors(lsp(node_embeddings_student, adj),adj)
+ 
         # Compute loss (foward propagation)
         loss_ce = criterion(ypred, y_gt)
+        """
         mask = torch.cat([torch.eq(ls_s, 0).unsqueeze(0) for ls_s in ls_student])
         filtered_ls_s = torch.cat([ls_s[~mask[i]] for i, ls_s in enumerate(ls_student)])
         filtered_ls_t = torch.cat([ls_t[~mask[i]] for i, ls_t in enumerate(ls_teacher)])
         losses = criterion_kd(torch.log(filtered_ls_s), filtered_ls_t)
-        loss_soft = losses.mean()
+        """
+        losses = []
+        for ls_s, ls_t in zip(ls_student, ls_teacher):
+            mask = torch.eq(ls_s, 0)
+            non_zero_ls_s = ls_s[~mask]
+            non_zero_ls_t = ls_t[~mask]
+            
+            if non_zero_ls_s.numel() > 0:
+                loss = criterion_kd(torch.log(non_zero_ls_s), non_zero_ls_t)
+                losses.append(loss)
+
+        loss_soft = torch.mean(torch.stack(losses)) if losses else torch.tensor(0.0)
+        #loss_soft = losses.mean()
         loss = model_args["alpha_ce"]*loss_ce + model_args["alpha_kd_lsp"]*loss_soft
         #Save pred
         _, indices = torch.max(ypred, 1)
