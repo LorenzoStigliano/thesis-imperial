@@ -44,7 +44,7 @@ def parrallel_run(run):
     views = [0, 2, 4, 5] #0, 2, 4, 5
     for dataset_i in datasets_asdnc:
         for view_i in views:
-            models = ["gcn_student"] #"gcn_student", "gcn_student_teacher_weight"
+            models = ["mlp"] #"gcn_student", "gcn_student_teacher_weight"
             for model in models:
                 for cv in [3, 5, 10]:
                     train_main_model(dataset_i, model, view_i, cv, run)

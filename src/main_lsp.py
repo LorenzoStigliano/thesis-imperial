@@ -18,19 +18,18 @@ def train_main_model(dataset, model, view, cv_number, run=0):
     np.random.seed(run)
     random.seed(run)
 
-    model_strip = "_".join(model.split("_")[:2]) 
     cv_name = str(cv_number)+"Fold"
-    model_name = "MainModel_"+cv_name+"_"+dataset+"_"+model_strip
+    model_name = "MainModel_"+cv_name+"_"+dataset+"_"+model
 
     G_list = load_data(dataset, view, NormalizeInputGraphs=False)
 
-    new_folder(model_strip, gcn_student_args["evaluation_method"])
+    new_folder(model, gcn_student_args["evaluation_method"])
     
     if gcn_args["evaluation_method"] == "model_assessment":
             model_name += f"_run_{run}_fixed_init"
     
-    if model == "gcn_student":
-        cross_validation(gcn_student_args, G_list, view, model_name, cv_number, run)
+    if model == "lsp":
+        cross_validation(lsp_student_args, G_list, view, model_name, cv_number, run)
 
 def parrallel_run(run):
     print(run)
@@ -38,7 +37,7 @@ def parrallel_run(run):
     views = [0, 2, 4, 5] #0, 2, 4, 5
     for dataset_i in datasets_asdnc:
         for view_i in views:
-            models = ["gcn_student"] #"gcn_student", "gcn_student_teacher_weight"
+            models = ["lsp"] #"gcn_student", "gcn_student_teacher_weight"
             for model in models:
                 for cv in [3, 5, 10]:
                     train_main_model(dataset_i, model, view_i, cv, run)

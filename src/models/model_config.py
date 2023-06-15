@@ -172,3 +172,19 @@ diffpool_args = {
     "model_name":"diffpool",
     "evaluation_method": "model assessment"
 }
+
+lsp_student_args = {
+    "num_epochs":50, 
+    "lr": 0.001, 
+    "weight_decay":5e-4, 
+    "hidden_dim":64,
+    "dropout":0,
+    "threshold":"median", # Threshold the graph adjacency matrix. Possible values: no_threshold, median, mean
+    "model_name":"gcn_student",
+    "evaluation_method": "model_assessment", # model selection or model assessment
+    "alpha_ce": 1, 
+    "T": 3, 
+    "alpha_soft_ce": 2,
+    "alpha_kd_lsp":2,
+    "alpha_weight": 0
+}
