@@ -125,7 +125,7 @@ gcn_student_ensamble_5_args = {
 
 mlp_args = {
     "num_epochs":50, 
-    "lr": 0.001, 
+    "lr": 0.0001, 
     "weight_decay":5e-4, 
     "num_layers":1, 
     "input_dim":35,
@@ -136,7 +136,7 @@ mlp_args = {
     "model_name":"mlp",
     "evaluation_method": "model_assessment", # model selection or model assessment
     "alpha_ce": 1, 
-    "T": 3, 
+    "T": 2, 
     "alpha_soft_ce": 2,
     "alpha_weight": 0
 }
