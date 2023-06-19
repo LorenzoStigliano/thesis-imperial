@@ -65,7 +65,7 @@ def parrallel_run(run):
     views = [0, 2, 4, 5] #0, 2, 4, 5
     for dataset_i in datasets:
         for view_i in views:
-            models = [mlp_args] # "gcn", "gcn_student" "gcn_3_args" args 
+            models = [gcn_student_args] # "gcn", "gcn_student" "gcn_3_args" args 
             for model in models:
                 for cv in [3, 5, 10]:
                     train_main_model(dataset_i, model["model_name"], view_i, cv, model, run)

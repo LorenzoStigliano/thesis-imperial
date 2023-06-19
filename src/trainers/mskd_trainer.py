@@ -53,6 +53,19 @@ def extract_ls_vectors(local_structure, adjacency_matrix):
     
     return non_zero_rows
 
+class CrossEntropyLossForSoftTarget(nn.Module):
+    def __init__(self, T=3, alpha=2):
+        super(CrossEntropyLossForSoftTarget, self).__init__()
+        self.T = T
+        self.alpha = alpha
+        self.softmax = nn.Softmax(dim=-1)
+        self.logsoftmax = nn.LogSoftmax(dim=-1)
+    def forward(self, y_pred, y_gt):
+        y_pred_soft = y_pred.div(self.T)
+        y_gt_soft = y_gt.div(self.T)
+        return -(self.softmax(y_gt_soft)*self.logsoftmax(y_pred_soft)).mean().mul(self.alpha)
+    
+
 def cross_validation(model_args, G_list, view, model_name, cv_number, run=0):
     start = time.time() 
     print("Run : ",run)
@@ -73,7 +86,7 @@ def cross_validation(model_args, G_list, view, model_name, cv_number, run=0):
             train_dataset, val_dataset, threshold_value = model_assessment_split(train_set, validation_set, test_set, model_args)
         
         print(f"CV : {cv}")
-        name = model_name+"_CV_"+str(cv)+"_view_"+str(view)+"_lsp"
+        name = model_name+"_CV_"+str(cv)+"_view_"+str(view)+"_mskd"
         
         print(name)
 
@@ -122,20 +135,28 @@ def train(model_args, train_dataset, val_dataset, student_model, threshold_value
     """
     # Load teacher model
     if model_args['evaluation_method'] == "model_selection":
-       teacher_model = torch.load(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+f"/gcn/models/gcn_MainModel_{cv_number}Fold_gender_data_gcn_CV_{cv}_view_{view}.pt")
+       teacher_model_1 = torch.load(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+f"/gcn_student/models/gcn_student_MainModel_{cv_number}Fold_gender_data_gcn_student_run_{run}_fixed_init_CV_{cv}_view_{view}.pt")
+       teacher_model_2 = torch.load(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+f"/gcn/models/gcn_MainModel_{cv_number}Fold_gender_data_gcn_run_{run}_fixed_init_CV_{cv}_view_{view}.pt")
+
     else:
-       teacher_model = torch.load(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+f"/gcn/models/gcn_MainModel_{cv_number}Fold_gender_data_gcn_run_{run}_fixed_init_CV_{cv}_view_{view}.pt")
-    
-    teacher_model.is_trained = False
-    teacher_model.eval()
+       teacher_model_1 = torch.load(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+f"/gcn_student/models/gcn_student_MainModel_{cv_number}Fold_gender_data_gcn_student_run_{run}_fixed_init_CV_{cv}_view_{view}.pt")
+       teacher_model_2 = torch.load(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+f"/gcn/models/gcn_MainModel_{cv_number}Fold_gender_data_gcn_run_{run}_fixed_init_CV_{cv}_view_{view}.pt")
+
+    teacher_model_1.is_trained = False
+    teacher_model_1.eval()
+
+    teacher_model_2.is_trained = False
+    teacher_model_2.eval()
 
     # Transfer
-    teacher_model.to(device)
+    teacher_model_1.to(device)
+    teacher_model_2.to(device)
     student_model.to(device)
 
     # Define Loss
     criterion = nn.CrossEntropyLoss(reduction='mean')
     criterion_kd = nn.KLDivLoss(reduction='batchmean')
+    criterion_soft = CrossEntropyLossForSoftTarget(T=model_args["T"], alpha=model_args["alpha_soft_ce"])
 
     # Define optimizer
     optimizer = optim.Adam(student_model.parameters(), lr=model_args["lr"], weight_decay=model_args['weight_decay'])
@@ -144,14 +165,14 @@ def train(model_args, train_dataset, val_dataset, student_model, threshold_value
     train_loss=[]
     train_acc=[]
     train_ce_loss=[]
-    train_soft_ce_loss=[]
+    train_mskd_loss=[]
     train_f1=[]
     train_recall=[]
     train_precision=[]
 
     validation_loss=[]
     validation_ce_loss=[]
-    validation_soft_ce_loss=[]
+    validation_mskd_loss=[]
     validation_weight_loss=[]
     validation_acc=[]
     validation_f1=[]
@@ -167,7 +188,7 @@ def train(model_args, train_dataset, val_dataset, student_model, threshold_value
         total_time = 0
         total_loss = 0
         ce_loss = 0
-        soft_ce_loss = 0
+        mskd_loss = 0
         
         preds = []
         labels = []
@@ -192,25 +213,40 @@ def train(model_args, train_dataset, val_dataset, student_model, threshold_value
             # Ground truth label
             y_gt = label.to(device)
 
-            # Get node embeddings from the teacher model
-            _, node_embeddings_teacher = teacher_model(features, adj)
+            # Get node embeddings from the teacher model and logits for soft-loss 
+            y_soft_1, node_embeddings_teacher_1 = teacher_model_1(features, adj)
+            y_soft_2, node_embeddings_teacher_2 = teacher_model_2(features, adj)
             
-            # Predict
+            # Predict for student model 
             ypred, node_embeddings_student = student_model(features, adj)
 
-            ls_teacher = extract_ls_vectors(lsp(node_embeddings_teacher, adj),adj)
+            #Calculate alpha for importance for "Attentional Topological Semantic Amalgamation"
+            #https://github.com/NKU-IIPLab/MSKD/blob/master/main.py
+            alpha_1 = torch.mean(torch.flatten(ypred.t().mm(y_soft_1)))
+            alpha_2 = torch.mean(torch.flatten(ypred.t().mm(y_soft_2)))
+            s = alpha_1 + alpha_2
+            alpha1 = alpha_1 / s
+            alpha2 = alpha_2 / s
+            sim = torch.tensor([alpha1, alpha2])
+            softmax = nn.Softmax(dim=-1)
+            alpha_ = softmax(sim).numpy().tolist()
+
+            ls_teacher_1 = extract_ls_vectors(lsp(node_embeddings_teacher_1, adj),adj)
+            ls_teacher_2 = extract_ls_vectors(lsp(node_embeddings_teacher_2, adj),adj)
             ls_student = extract_ls_vectors(lsp(node_embeddings_student, adj),adj)
 
             # Compute loss (foward propagation)
             loss_ce = criterion(ypred, y_gt)
-
             mask = torch.cat([torch.eq(ls_s, 0).unsqueeze(0) for ls_s in ls_student])
             filtered_ls_s = torch.cat([ls_s[~mask[i]] for i, ls_s in enumerate(ls_student)])
-            filtered_ls_t = torch.cat([ls_t[~mask[i]] for i, ls_t in enumerate(ls_teacher)])
-            losses = criterion_kd(torch.log(filtered_ls_s), filtered_ls_t)
-            loss_soft = losses.mean()
+            filtered_ls_t_1 = torch.cat([ls_t[~mask[i]] for i, ls_t in enumerate(ls_teacher_1)])
+            filtered_ls_t_2 = torch.cat([ls_t[~mask[i]] for i, ls_t in enumerate(ls_teacher_2)])
+            losses_1 = alpha_[0]*criterion_kd(torch.log(filtered_ls_s), filtered_ls_t_1)
+            losses_2 = alpha_[1]*criterion_kd(torch.log(filtered_ls_s), filtered_ls_t_2)
+            loss_soft_1 = losses_1.mean()
+            loss_soft_2 = losses_2.mean()
 
-            loss = model_args["alpha_ce"]*loss_ce + model_args["alpha_kd_lsp"]*loss_soft
+            loss = model_args["alpha_ce"]*loss_ce+ criterion_soft(ypred, y_soft_1)+criterion_soft(ypred, y_soft_2)+model_args["alpha_mskd"]*(loss_soft_1+loss_soft_2)
             #Save pred
             _, indices = torch.max(ypred, 1)
             preds.append(indices.cpu().data.numpy())
@@ -224,7 +260,7 @@ def train(model_args, train_dataset, val_dataset, student_model, threshold_value
                     
             total_loss += loss.item()
             ce_loss += loss_ce.item()
-            soft_ce_loss += loss_soft.item()
+            mskd_loss += loss_soft_1.item() + loss_soft_1.item()
 
             elapsed = time.time() - begin_time
             total_time += elapsed
@@ -236,31 +272,31 @@ def train(model_args, train_dataset, val_dataset, student_model, threshold_value
         preds = np.hstack(preds)
         labels = np.hstack(labels)
         result = {
-                    'prec': metrics.precision_score(labels, preds),
-                    'recall': metrics.recall_score(labels, preds),
-                    'acc': metrics.accuracy_score(labels, preds),
-                    'F1': metrics.f1_score(labels, preds)
+          'prec': metrics.precision_score(labels, preds),
+          'recall': metrics.recall_score(labels, preds),
+          'acc': metrics.accuracy_score(labels, preds),
+          'F1': metrics.f1_score(labels, preds)
         }
               
         print("---------------------------------")
         print(f"Time taken for epoch {epoch}: {total_time}")
         print(f"Train accuracy: {result['acc']}")
         print(f"Train loss: {total_loss / len(train_dataset)}")
-        print(f"Train KD loss: {soft_ce_loss / len(train_dataset)}")
+        print(f"Train MSKD loss: {mskd_loss / len(train_dataset)}")
         print(f"Train CE loss: {ce_loss / len(train_dataset)}")
  
         train_loss.append(total_loss / len(train_dataset))
         train_ce_loss.append(ce_loss / len(train_dataset))
-        train_soft_ce_loss.append(soft_ce_loss / len(train_dataset))
+        train_mskd_loss.append(mskd_loss / len(train_dataset))
         train_acc.append(result['acc'])
         train_f1.append(result['F1'])
         train_recall.append(result['recall'])
         train_precision.append(result['prec'])
         
-        val_loss, val_ce_loss, val_soft_ce_loss, val_acc, val_precision, val_recall, val_f1 = validate(val_dataset, student_model, model_args, threshold_value, model_name, teacher_model)
+        val_loss, val_ce_loss, val_mskd_loss, val_acc, val_precision, val_recall, val_f1 = validate(val_dataset, student_model, model_args, threshold_value, model_name, teacher_model_1, teacher_model_2)
         validation_loss.append(val_loss)
         validation_ce_loss.append(val_ce_loss)
-        validation_soft_ce_loss.append(val_soft_ce_loss)
+        validation_mskd_loss.append(val_mskd_loss)
         validation_acc.append(val_acc)
         validation_f1.append(val_f1)
         validation_recall.append(val_recall)
@@ -298,7 +334,7 @@ def train(model_args, train_dataset, val_dataset, student_model, threshold_value
     los_p = {'loss':train_ce_loss}
     with open(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+"/"+model_args['model_name']+"/training_loss/training_loss_ce_"+model_name+".pickle", 'wb') as f:
       pickle.dump(los_p, f)
-    los_p = {'loss':train_soft_ce_loss}
+    los_p = {'loss':train_mskd_loss}
     with open(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+"/"+model_args['model_name']+"/training_loss/training_loss_soft_ce_"+model_name+".pickle", 'wb') as f:
       pickle.dump(los_p, f)
     
@@ -309,7 +345,7 @@ def train(model_args, train_dataset, val_dataset, student_model, threshold_value
     los_p = {'loss':validation_ce_loss}
     with open(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+"/"+model_args['model_name']+"/validation_loss/validation_loss_ce_"+model_name+".pickle", 'wb') as f:
       pickle.dump(los_p, f)
-    los_p = {'loss':validation_soft_ce_loss}
+    los_p = {'loss':validation_mskd_loss}
     with open(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+"/"+model_args['model_name']+"/validation_loss/validation_loss_soft_ce_"+model_name+".pickle", 'wb') as f:
       pickle.dump(los_p, f)
     los_p = {'loss':validation_weight_loss}
@@ -332,7 +368,7 @@ def train(model_args, train_dataset, val_dataset, student_model, threshold_value
 
         shutil.move(model_args['model_name']+"_"+str(run)+'_W.pickle'.format(),path)
 
-def validate(dataset, model, model_args, threshold_value, model_name, teacher_model):
+def validate(dataset, model, model_args, threshold_value, model_name, teacher_model_1, teacher_model_2):
     """
     Parameters
     ----------
@@ -354,11 +390,12 @@ def validate(dataset, model, model_args, threshold_value, model_name, teacher_mo
     preds = []
     total_loss = 0
     ce_loss = 0
-    soft_ce_loss = 0
+    mskd_loss = 0
 
     # Define Loss
     criterion = nn.CrossEntropyLoss(reduction='mean')
     criterion_kd = nn.KLDivLoss(reduction='batchmean')
+    criterion_soft = CrossEntropyLossForSoftTarget(T=model_args["T"], alpha=model_args["alpha_soft_ce"])
 
     for _, data in enumerate(dataset):
         adj = Variable(data['adj'].float(), requires_grad=False).to(device)
@@ -384,32 +421,53 @@ def validate(dataset, model, model_args, threshold_value, model_name, teacher_mo
 
         # Ground truth label 
         y_gt = label.to(device)
-        # Compute soft label
-        _, node_embeddings_teacher = teacher_model(features, adj)
+        # Get node embeddings from the teacher model and logits for soft-loss 
+        y_soft_1, node_embeddings_teacher_1 = teacher_model_1(features, adj)
+        y_soft_2, node_embeddings_teacher_2 = teacher_model_2(features, adj)
 
         # Predict
         ypred, node_embeddings_student = model(features, adj)
 
-        ls_teacher = extract_ls_vectors(lsp(node_embeddings_teacher, adj),adj)
+        ls_teacher_1 = extract_ls_vectors(lsp(node_embeddings_teacher_1, adj),adj)
+        ls_teacher_2 = extract_ls_vectors(lsp(node_embeddings_teacher_2, adj),adj)
         ls_student = extract_ls_vectors(lsp(node_embeddings_student, adj),adj)
  
+        # Compute loss (foward propagation)
+        loss_ce = criterion(ypred, y_gt)
+        # Calculate alpha for importance for "Attentional Topological Semantic Amalgamation"
+        # https://github.com/NKU-IIPLab/MSKD/blob/master/main.py
+        alpha_1 = torch.mean(torch.flatten(ypred.t().mm(y_soft_1)))
+        alpha_2 = torch.mean(torch.flatten(ypred.t().mm(y_soft_2)))
+        s = alpha_1 + alpha_2
+        alpha1 = alpha_1 / s
+        alpha2 = alpha_2 / s
+        sim = torch.tensor([alpha1, alpha2])
+        softmax = nn.Softmax(dim=-1)
+        alpha_ = softmax(sim).numpy().tolist()
+        
+        ls_teacher_1 = extract_ls_vectors(lsp(node_embeddings_teacher_1, adj),adj)
+        ls_teacher_2 = extract_ls_vectors(lsp(node_embeddings_teacher_2, adj),adj)
+        ls_student = extract_ls_vectors(lsp(node_embeddings_student, adj),adj)
+
         # Compute loss (foward propagation)
         loss_ce = criterion(ypred, y_gt)
 
         mask = torch.cat([torch.eq(ls_s, 0).unsqueeze(0) for ls_s in ls_student])
         filtered_ls_s = torch.cat([ls_s[~mask[i]] for i, ls_s in enumerate(ls_student)])
-        filtered_ls_t = torch.cat([ls_t[~mask[i]] for i, ls_t in enumerate(ls_teacher)])
-        losses = criterion_kd(torch.log(filtered_ls_s), filtered_ls_t)
-        loss_soft = losses.mean()
-        
-        loss = model_args["alpha_ce"]*loss_ce + model_args["alpha_kd_lsp"]*loss_soft
+        filtered_ls_t_1 = torch.cat([ls_t[~mask[i]] for i, ls_t in enumerate(ls_teacher_1)])
+        filtered_ls_t_2 = torch.cat([ls_t[~mask[i]] for i, ls_t in enumerate(ls_teacher_2)])
+        losses_1 = alpha_[0]*criterion_kd(torch.log(filtered_ls_s), filtered_ls_t_1)
+        losses_2 = alpha_[1]*criterion_kd(torch.log(filtered_ls_s), filtered_ls_t_2)
+        loss_soft_1 = losses_1.mean()
+        loss_soft_2 = losses_2.mean()
+        loss = model_args["alpha_ce"]*loss_ce+ criterion_soft(ypred, y_soft_1)+criterion_soft(ypred, y_soft_2)+ model_args["alpha_mskd"]*(loss_soft_1+loss_soft_2)
         #Save pred
         _, indices = torch.max(ypred, 1)
         preds.append(indices.cpu().data.numpy())
 
         total_loss += loss.item()
         ce_loss += loss_ce.item()
-        soft_ce_loss += loss_soft.item()
+        mskd_loss += loss_soft_1.item() + loss_soft_1.item()
 
     labels = np.hstack(labels)
     preds = np.hstack(preds)
@@ -428,11 +486,11 @@ def validate(dataset, model, model_args, threshold_value, model_name, teacher_mo
 
     val_total_loss = total_loss / len(dataset)
     val_ce_loss = ce_loss / len(dataset)
-    val_soft_ce_loss = soft_ce_loss / len(dataset)
+    val_mskd_loss = mskd_loss / len(dataset)
     print(f"Validation accuracy: {result['acc']}")
     print(f"Validation Loss: {val_total_loss}")
 
-    return val_total_loss, val_ce_loss, val_soft_ce_loss, result['acc'], result['prec'], result['recall'], result['F1']
+    return val_total_loss, val_ce_loss, val_mskd_loss, result['acc'], result['prec'], result['recall'], result['F1']
 
 def test(dataset, model, model_args, threshold_value, model_name):
     """
