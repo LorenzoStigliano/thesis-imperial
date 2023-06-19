@@ -191,7 +191,7 @@ lsp_student_args = {
 
 mskd_student_args = {
     "num_epochs":50, 
-    "lr": 0.0001, 
+    "lr": 0.001, 
     "weight_decay":5e-4, 
     "hidden_dim":64,
     "dropout":0,
