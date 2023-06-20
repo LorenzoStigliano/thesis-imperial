@@ -23,9 +23,9 @@ def train_main_model(dataset, model, view, cv_number, run=0):
 
     G_list = load_data(dataset, view, NormalizeInputGraphs=False)
 
-    new_folder(model, gcn_student_args["evaluation_method"])
+    new_folder(model, lsp_student_args["evaluation_method"])
     
-    if gcn_args["evaluation_method"] == "model_assessment":
+    if lsp_student_args["evaluation_method"] == "model_assessment":
             model_name += f"_run_{run}_fixed_init"
     
     if model == "lsp":

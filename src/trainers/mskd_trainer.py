@@ -366,7 +366,7 @@ def train(model_args, train_dataset, val_dataset, student_model, threshold_value
         if os.path.exists(path):
             os.remove(path)
 
-        shutil.move(model_args['model_name']+"_"+str(run)+'_W.pickle'.format(),path)
+        shutil.move("gcn_student_"+str(run)+'_W.pickle'.format(),path)
 
 def validate(dataset, model, model_args, threshold_value, model_name, teacher_model_1, teacher_model_2):
     """

@@ -180,7 +180,7 @@ lsp_student_args = {
     "hidden_dim":64,
     "dropout":0,
     "threshold":"median", # Threshold the graph adjacency matrix. Possible values: no_threshold, median, mean
-    "model_name":"gcn_student",
+    "model_name":"lsp",
     "evaluation_method": "model_assessment", # model selection or model assessment
     "alpha_ce": 1, 
     "T": 3, 
@@ -196,7 +196,7 @@ mskd_student_args = {
     "hidden_dim":64,
     "dropout":0,
     "threshold":"median", # Threshold the graph adjacency matrix. Possible values: no_threshold, median, mean
-    "model_name":"gcn_student",
+    "model_name":"mskd",
     "evaluation_method": "model_assessment", # model selection or model assessment
     "alpha_ce": 1, 
     "T": 3, 
