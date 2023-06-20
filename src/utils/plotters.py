@@ -414,7 +414,7 @@ def plot_bar_chart_metric_multiple_runs(dataset, view, models, CV, runs, metric,
     plt.ylabel(f"Metric: {metric}")
     x_ticks = [i for i in CV]+ ["Average"]
     
-    plt.xticks([r + barWidth for r in range(len(models)+1)], x_ticks)
+    plt.xticks([r + barWidth for r in range(len(CV)+1)], x_ticks)
     plt.title(title)
     plt.grid(axis = 'y')
     plt.legend()

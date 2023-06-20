@@ -4,7 +4,7 @@
 universe        = vanilla
 
 # This defines the path of the executable we want to run.
-executable      = /homes/ls1121/thesis-imperial/src/script/setup_run_lsp.sh
+executable      = /homes/ls1121/thesis-imperial/src/scripts/setup_run_lsp.sh
 
 # This specifies where data sent to STDOUT by the executable should be
 # directed to.
