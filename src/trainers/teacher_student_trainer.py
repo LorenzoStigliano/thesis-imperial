@@ -62,13 +62,8 @@ def cross_validation(model_args, G_list, view, model_name, cv_number, run=0):
             train_dataset, val_dataset, threshold_value = model_assessment_split(train_set, validation_set, test_set, model_args)
         
         print(f"CV : {cv}")
-        if model_args["alpha_weight"] != 0:
-          #add hyperparameters here     
-          #TODO add save parameter with differetn alpha_weight value
-          name = model_name+"_CV_"+str(cv)+"_view_"+str(view)+"_with_teacher_weight_matching"
-        else:
-          #add hyperparameters here     
-          name = model_name+"_CV_"+str(cv)+"_view_"+str(view)+"_with_teacher"
+        #add hyperparameters here     
+        name = model_name+"_CV_"+str(cv)+"_view_"+str(view)+"_with_teacher"
         
         print(name)
 

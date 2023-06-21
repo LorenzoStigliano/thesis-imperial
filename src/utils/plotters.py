@@ -67,9 +67,10 @@ def plot_learning_curves(dataset, views, model, evaluation_method, folds, with_t
                     directory_validation_losses = f'{SAVE_DIR_MODEL_DATA}{evaluation_method}/{model}/validation_loss/validation_loss_MainModel_{folds}Fold_{dataset}_{model}_run_{run}_CV_{fold}_view_{view}_with_teacher.pickle'
                 else:
                     directory_train_losses = f'{SAVE_DIR_MODEL_DATA}{evaluation_method}/{model}/training_loss/training_loss_MainModel_{folds}Fold_{dataset}_{model}_run_{run}_CV_{fold}_view_{view}.pickle'
-                    directory_validation_losses = f'{SAVE_DIR_MODEL_DATA}{evaluation_method}/{model}/validation_loss/validation_loss_MainModel_{folds}Fold_{dataset}_{model}_run_{run}_CV_{fold}_view_{view}=.pickle'
+                    directory_validation_losses = f'{SAVE_DIR_MODEL_DATA}{evaluation_method}/{model}/validation_loss/validation_loss_MainModel_{folds}Fold_{dataset}_{model}_run_{run}_CV_{fold}_view_{view}.pickle'
 
-
+            print(directory_train_losses)
+            print(directory_validation_losses)
             with open(directory_train_losses,'rb') as f:
                 train_losses = pickle.load(f)  
     

@@ -34,25 +34,7 @@ gcn_student_args = {
     "evaluation_method": "model_assessment", # model selection or model assessment
     "alpha_ce": 1, 
     "T": 3, 
-    "alpha_soft_ce": 2,
-    "alpha_kd_lsp":2,
-    "alpha_weight": 0
-}
-
-gcn_student_weight_args = {
-    "num_epochs":50, 
-    "lr": 0.0001,
-    "weight_decay":5e-4, 
-    "hidden_dim":64,
-    "dropout":0,
-    "threshold":"median", # Threshold the graph adjacency matrix. Possible values: no_threshold, median, mean
-    "model_name":"gcn_student",
-    "evaluation_method": "model_assessment", # model selection or model assessment
-    "alpha_ce": 1, 
-    "T": 3, 
-    "alpha_soft_ce": 2,
-    "alpha_kd_lsp":2,
-    "alpha_weight": 2
+    "alpha_soft_ce": 2
 }
 
 gcn_student_ensamble_2_args = {
@@ -214,7 +196,7 @@ fitnet_student_args = {
     "model_name":"fitnet",
     "evaluation_method": "model_assessment", # model selection or model assessment
     "alpha_ce": 1, 
-    "T": 2, 
+    "T": 3, 
     "alpha_soft_ce": 2,
-    "alpha_kd_lsp": 2
+    "alpha_ht": 0.5
 }
