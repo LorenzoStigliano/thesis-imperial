@@ -218,14 +218,14 @@ def train(model_args, train_dataset, val_dataset, student_model, threshold_value
                     'acc': metrics.accuracy_score(labels, preds),
                     'F1': metrics.f1_score(labels, preds)
         }
-              
-        print("---------------------------------")
-        print(f"Time taken for epoch {epoch}: {total_time}")
-        print(f"Train accuracy: {result['acc']}")
-        print(f"Train loss: {total_loss / len(train_dataset)}")
-        print(f"Train Soft CE loss: {soft_ce_loss / len(train_dataset)}")
-        print(f"Train CE loss: {ce_loss / len(train_dataset)}")
-        print(f"Train MSE loss: {mse_loss / len(train_dataset)}")
+        if epoch==model_args["num_epochs"]-1:
+          print("---------------------------------")
+          print(f"Time taken for epoch {epoch}: {total_time}")
+          print(f"Train accuracy: {result['acc']}")
+          print(f"Train loss: {total_loss / len(train_dataset)}")
+          print(f"Train Soft CE loss: {soft_ce_loss / len(train_dataset)}")
+          print(f"Train CE loss: {ce_loss / len(train_dataset)}")
+          print(f"Train MSE loss: {mse_loss / len(train_dataset)}")
  
         train_loss.append(total_loss / len(train_dataset))
         train_ce_loss.append(ce_loss / len(train_dataset))
@@ -236,7 +236,7 @@ def train(model_args, train_dataset, val_dataset, student_model, threshold_value
         train_recall.append(result['recall'])
         train_precision.append(result['prec'])
         
-        val_loss, val_ce_loss, val_soft_ce_loss, val_mse_loss, val_acc, val_precision, val_recall, val_f1 = validate(val_dataset, student_model, model_args, threshold_value, model_name, teacher_model)
+        val_loss, val_ce_loss, val_soft_ce_loss, val_mse_loss, val_acc, val_precision, val_recall, val_f1 = validate(val_dataset, student_model, model_args, threshold_value, model_name, teacher_model, epoch)
         validation_loss.append(val_loss)
         validation_ce_loss.append(val_ce_loss)
         validation_soft_ce_loss.append(val_soft_ce_loss)
@@ -312,7 +312,7 @@ def train(model_args, train_dataset, val_dataset, student_model, threshold_value
 
         shutil.move("gcn_student_"+str(run)+'_W.pickle'.format(), path)
 
-def validate(dataset, model, model_args, threshold_value, model_name, teacher_model):
+def validate(dataset, model, model_args, threshold_value, model_name, teacher_model, epoch):
     """
     Parameters
     ----------
@@ -406,8 +406,9 @@ def validate(dataset, model, model_args, threshold_value, model_name, teacher_mo
     val_ce_loss = ce_loss / len(dataset)
     val_soft_ce_loss = soft_ce_loss / len(dataset)
     val_mse_loss = mse_loss / len(dataset)
-    print(f"Validation accuracy: {result['acc']}")
-    print(f"Validation Loss: {val_total_loss}")
+    if epoch==model_args["num_epochs"]-1:
+      print(f"Validation accuracy: {result['acc']}")
+      print(f"Validation Loss: {val_total_loss}")
 
     return val_total_loss, val_ce_loss, val_soft_ce_loss, val_mse_loss, result['acc'], result['prec'], result['recall'], result['F1']
 

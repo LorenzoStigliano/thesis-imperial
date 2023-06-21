@@ -203,15 +203,15 @@ fitnet_student_args_0_4 = {
 
 fitnet_student_args = {
     "num_epochs":50, 
-    "lr": 0.00005, 
+    "lr": 0.001, 
     "weight_decay":5e-4, 
     "hidden_dim":64,
     "dropout":0,
     "threshold":"median", # Threshold the graph adjacency matrix. Possible values: no_threshold, median, mean
     "model_name":"fitnet",
     "evaluation_method": "model_assessment", # model selection or model assessment
-    "alpha_ce": 2, 
-    "T": 3, 
+    "alpha_ce": 1, 
+    "T": 2, 
     "alpha_soft_ce": 2,
-    "alpha_ht": 0.5
+    "alpha_ht": 0.2
 }

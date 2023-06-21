@@ -29,12 +29,12 @@ def train_main_model(dataset, model, view, cv_number, run=0):
             model_name += f"_run_{run}_fixed_init"
     
     if model == "fitnet":
-        cross_validation(fitnet_student_args_0_4, G_list, view, model_name, cv_number, run)
+        cross_validation(fitnet_student_args, G_list, view, model_name, cv_number, run)
 
 def parrallel_run(run):
     print(run)
     datasets_asdnc = ['gender_data']
-    views = [0, 2, 4, 5] #0, 2, 4, 5
+    views = [2, 5] #0, 2, 4, 5
     for dataset_i in datasets_asdnc:
         for view_i in views:
             models = ["fitnet"] #"gcn_student", "gcn_student_teacher_weight"
