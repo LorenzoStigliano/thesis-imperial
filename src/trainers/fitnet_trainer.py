@@ -371,7 +371,8 @@ def validate(dataset, model, model_args, threshold_value, model_name, teacher_mo
         ypred, node_embeddings_student = model(features, adj)
         # Compute loss (foward propagation)
         loss_ce = criterion(ypred, y_gt)
-        loss_mse = criterion_mse(node_embeddings_teacher, node_embeddings_student)
+        norms = torch.norm(node_embeddings_teacher, dim=-1, keepdim=True)
+        loss_mse = criterion_mse(node_embeddings_teacher/norms, node_embeddings_student)
         loss_soft = criterion_soft(ypred, y_soft)
 
         loss = model_args["alpha_ce"]*loss_ce + loss_soft + model_args["alpha_ht"]*loss_mse

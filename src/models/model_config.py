@@ -210,8 +210,8 @@ fitnet_student_args = {
     "threshold":"median", # Threshold the graph adjacency matrix. Possible values: no_threshold, median, mean
     "model_name":"fitnet",
     "evaluation_method": "model_assessment", # model selection or model assessment
-    "alpha_ce": 1, 
-    "T": 4, 
-    "alpha_soft_ce": 2,
+    "alpha_ce": 2, 
+    "T": 2, 
+    "alpha_soft_ce": 1,
     "alpha_ht": 0.5
 }
