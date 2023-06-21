@@ -34,7 +34,7 @@ def train_main_model(dataset, model, view, cv_number, run=0):
 def parrallel_run(run):
     print(run)
     datasets_asdnc = ['gender_data']
-    views = [0, 2, 4, 5] #0, 2, 4, 5
+    views = [2, 5] #0, 2, 4, 5
     for dataset_i in datasets_asdnc:
         for view_i in views:
             models = ["fitnet"] #"gcn_student", "gcn_student_teacher_weight"
