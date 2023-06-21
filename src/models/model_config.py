@@ -207,7 +207,7 @@ mskd_student_args = {
 fitnet_student_args = {
     "num_epochs":50, 
     "lr": 0.001, 
-    "weight_decay":1e-3, 
+    "weight_decay":5e-4, 
     "hidden_dim":64,
     "dropout":0,
     "threshold":"median", # Threshold the graph adjacency matrix. Possible values: no_threshold, median, mean
@@ -216,5 +216,5 @@ fitnet_student_args = {
     "alpha_ce": 1, 
     "T": 2, 
     "alpha_soft_ce": 2,
-    "alpha_kd_lsp": 1
+    "alpha_kd_lsp": 2
 }

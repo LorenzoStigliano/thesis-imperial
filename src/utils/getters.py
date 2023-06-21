@@ -76,6 +76,9 @@ def get_metrics(dataset, model, analysis_type, training_type, cv_n, view, run, d
         
         elif "mskd" == model:
             cv_path = SAVE_DIR_MODEL_DATA+f'model_assessment/{model}/metrics/MainModel_{training_type}_{dataset}_{model}_run_{run}_fixed_init_CV_{cv_n}_view_{view}_{model}_{dataset_split}_{metric}.pickle'    
+        
+        elif "fitnet" == model:
+            cv_path = SAVE_DIR_MODEL_DATA+f'model_assessment/{model}/metrics/MainModel_{training_type}_{dataset}_{model}_run_{run}_fixed_init_CV_{cv_n}_view_{view}_{model}_{dataset_split}_{metric}.pickle'    
 
         elif model_args != None:
             if "layers" in model_args.keys():
@@ -140,6 +143,9 @@ def get_weight(dataset, view, model, training_type, shot_n, cv_n, run, student, 
     elif "mskd" == model:
         cv_path = SAVE_DIR_MODEL_DATA+'model_assessment/{}/weights/W_MainModel_{}_{}_{}_run_{}_fixed_init_CV_{}_view_{}_mskd.pickle'.format(model,training_type, dataset, model, run, cv_n, view)
 
+    elif "fitnet" == model:
+        cv_path = SAVE_DIR_MODEL_DATA+'model_assessment/{}/weights/W_MainModel_{}_{}_{}_run_{}_fixed_init_CV_{}_view_{}_fitnet.pickle'.format(model,training_type, dataset, model, run, cv_n, view)
+
     elif model_args != None:
         if "layers" in model_args.keys():
             if model_args["layers"] == 3 or model_args["layers"] == 4:
@@ -158,7 +164,7 @@ def get_weight(dataset, view, model, training_type, shot_n, cv_n, run, student, 
     if model == 'sag' or  model == 'diffpool':
         weights_vector = torch.mean(weights['w'], 1).detach().numpy()
         weights_vector = torch.mean(weights['w'], 1).detach().numpy()
-    if model == 'gcn' or model == 'gcn_student' or model == 'gcn_student_ensamble_3' or model =="mlp" or model =="lsp" or model =="mskd" :
+    if model == 'gcn' or model == 'gcn_student' or model == 'gcn_student_ensamble_3' or model =="mlp" or model =="lsp" or model =="mskd" or model =="fitnet" :
         weights_vector = weights['w'].squeeze().detach().numpy()
     if model == 'gat':
         weights_vector = weights['w'].squeeze().detach().numpy()
