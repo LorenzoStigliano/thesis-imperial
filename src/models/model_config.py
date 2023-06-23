@@ -55,7 +55,7 @@ gcn_student_ensamble_2_args = {
 }
 
 gcn_student_lsp_ensamble_3_args = {
-    "num_epochs":1, 
+    "num_epochs":50, 
     "lr": 0.0001, # 0.0001 when training without teacher
     "weight_decay":5e-4, 
     "hidden_dim":64,

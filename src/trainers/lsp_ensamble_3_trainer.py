@@ -270,21 +270,17 @@ def train(model_args, train_dataset, val_dataset, students, student_names, thres
             ypred_2, node_embeddings_student_2 = student_model_2(features, adj)
             ypred_3, node_embeddings_student_3 = student_model_3(features, adj)
             y_pred_ensamble = torch.unsqueeze(sum(ypred_1 + ypred_2 + ypred_3)/3, dim=0)
+            node_embeddings_ensamble = torch.unsqueeze(sum(node_embeddings_student_1 + node_embeddings_student_2 + node_embeddings_student_3)/3, dim=0)
 
             ls_teacher = extract_ls_vectors(lsp(node_embeddings_teacher, adj),adj)
-            ls_student_1 = extract_ls_vectors(lsp(node_embeddings_student_1, adj),adj)
-            ls_student_2 = extract_ls_vectors(lsp(node_embeddings_student_2, adj),adj)
-            ls_student_3 = extract_ls_vectors(lsp(node_embeddings_student_3, adj),adj)
+            ls_ensamble = extract_ls_vectors(lsp(node_embeddings_ensamble, adj),adj)
 
-            loss_teacher_student = 0 
-            for ls_student in [ls_student_1, ls_student_2, ls_student_3]:
-              mask = torch.cat([torch.eq(ls_s, 0).unsqueeze(0) for ls_s in ls_student])
-              filtered_ls_s = torch.cat([ls_s[~mask[i]] for i, ls_s in enumerate(ls_student)])
-              filtered_ls_t = torch.cat([ls_t[~mask[i]] for i, ls_t in enumerate(ls_teacher)])
-              losses = criterion_kd(torch.log(filtered_ls_s), filtered_ls_t)
-              loss_teacher_student += losses.mean()
-
-            # Compute loss (foward propagation)
+            mask = torch.cat([torch.eq(ls_s, 0).unsqueeze(0) for ls_s in ls_ensamble])
+            filtered_ls_e = torch.cat([ls_s[~mask[i]] for i, ls_s in enumerate(ls_ensamble)])
+            filtered_ls_t = torch.cat([ls_t[~mask[i]] for i, ls_t in enumerate(ls_teacher)])
+            losses = criterion_kd(torch.log(filtered_ls_e), filtered_ls_t)
+            
+            loss_teacher_student = losses.mean()
             loss_within_student = weight_similarity_loss(student_weights_1, student_weights_2) + weight_similarity_loss(student_weights_1, student_weights_3) + weight_similarity_loss(student_weights_2, student_weights_3)
             loss_ensamble_soft_ce = criterion_soft(y_pred_ensamble, y_soft)
             loss_ensamble_ce = criterion(y_pred_ensamble, y_gt)
@@ -333,7 +329,7 @@ def train(model_args, train_dataset, val_dataset, students, student_names, thres
               student_model_1.is_trained = True
               student_model_2.is_trained = True
               student_model_3.is_trained = True
-        
+        """
         preds_ensamble = np.hstack(preds_ensamble)
         labels_ensamble  = np.hstack(labels_ensamble)
         result = {
@@ -342,17 +338,15 @@ def train(model_args, train_dataset, val_dataset, students, student_names, thres
             'acc': metrics.accuracy_score(labels_ensamble, preds_ensamble),
             'F1': metrics.f1_score(labels_ensamble, preds_ensamble)
         }
-        train_acc_1.append(metrics.accuracy_score(np.hstack(labels_1), np.hstack(preds_1)))
-        train_acc_2.append(metrics.accuracy_score(np.hstack(labels_2), np.hstack(preds_2)))
-        train_acc_3.append(metrics.accuracy_score(np.hstack(labels_3), np.hstack(preds_3)))
         train_ensamble_acc.append(result['acc'])
+        """
               
         print("---------------------------------")
         print(f"Time taken for epoch {epoch}: {total_time}")
-        print(f"Train ensamble accuracy: {result['acc']}")
-        print(f"Train model 1 accuracy: {train_acc_1[-1]}")
-        print(f"Train model 2 accuracy: {train_acc_2[-1]}")
-        print(f"Train model 3 accuracy: {train_acc_3[-1]}")
+        print(f"Train ensamble accuracy: {metrics.accuracy_score(labels_ensamble, preds_ensamble)}")
+        print(f"Train model 1 accuracy: {metrics.accuracy_score(np.hstack(labels_1), np.hstack(preds_1))}")
+        print(f"Train model 2 accuracy: {metrics.accuracy_score(np.hstack(labels_2), np.hstack(preds_2))}")
+        print(f"Train model 3 accuracy: {metrics.accuracy_score(np.hstack(labels_3), np.hstack(preds_3))}")
         print(f"Train total loss: {total_loss / len(train_dataset)}")
         print(f"Train teacher and student loss: {t_loss_teacher_student / len(train_dataset)}")
         print(f"Train within student loss for weights: {t_loss_within_student / len(train_dataset)}")
@@ -379,6 +373,7 @@ def train(model_args, train_dataset, val_dataset, students, student_names, thres
         validation_loss_within_student.append(val_loss_within_student)
     
     #Save train metrics acc (4)
+    """
     with open(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+"/"+model_args["model_name"]+"/metrics/"+model_name+"_train_acc_ensamble.pickle", 'wb') as f:
       pickle.dump(train_ensamble_acc, f)
     with open(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+"/"+model_args["model_name"]+"/metrics/"+model_name+"_train_acc_student_0.pickle", 'wb') as f:
@@ -387,6 +382,7 @@ def train(model_args, train_dataset, val_dataset, students, student_names, thres
       pickle.dump(train_acc_2, f)
     with open(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+"/"+model_args["model_name"]+"/metrics/"+model_name+"_train_acc_student_2.pickle", 'wb') as f:
       pickle.dump(train_acc_3, f)
+    """
 
     # Save final labels and predictions of model on train set for ensamble and indiviudal students in ensamble (4)
     simple_r = {'labels':labels_ensamble,'preds':preds_ensamble}
@@ -542,6 +538,7 @@ def validate(dataset, students, model_args, threshold_value, model_name, teacher
         ypred_2, node_embeddings_student_2 = student_model_2(features, adj)
         ypred_3, node_embeddings_student_3 = student_model_3(features, adj)
         y_pred_ensamble = torch.unsqueeze(sum(ypred_1 + ypred_2 + ypred_3)/3, dim=0)
+        node_embeddings_ensamble = torch.unsqueeze(sum(node_embeddings_student_1 + node_embeddings_student_2 + node_embeddings_student_3)/3, dim=0)
 
         # Ground truth label 
         y_gt = label.to(device)
@@ -549,18 +546,14 @@ def validate(dataset, students, model_args, threshold_value, model_name, teacher
         y_soft, node_embeddings_teacher = teacher_model(features, adj)
 
         ls_teacher = extract_ls_vectors(lsp(node_embeddings_teacher, adj),adj)
-        ls_student_1 = extract_ls_vectors(lsp(node_embeddings_student_1, adj),adj)
-        ls_student_2 = extract_ls_vectors(lsp(node_embeddings_student_2, adj),adj)
-        ls_student_3 = extract_ls_vectors(lsp(node_embeddings_student_3, adj),adj)
+        ls_ensamble = extract_ls_vectors(lsp(node_embeddings_ensamble, adj),adj)
 
-        loss_teacher_student = 0 
-        for ls_student in [ls_student_1, ls_student_2, ls_student_3]:
-          mask = torch.cat([torch.eq(ls_s, 0).unsqueeze(0) for ls_s in ls_student])
-          filtered_ls_s = torch.cat([ls_s[~mask[i]] for i, ls_s in enumerate(ls_student)])
-          filtered_ls_t = torch.cat([ls_t[~mask[i]] for i, ls_t in enumerate(ls_teacher)])
-          losses = criterion_kd(torch.log(filtered_ls_s), filtered_ls_t)
-          loss_teacher_student += losses.mean()
-
+        mask = torch.cat([torch.eq(ls_s, 0).unsqueeze(0) for ls_s in ls_ensamble])
+        filtered_ls_e = torch.cat([ls_s[~mask[i]] for i, ls_s in enumerate(ls_ensamble)])
+        filtered_ls_t = torch.cat([ls_t[~mask[i]] for i, ls_t in enumerate(ls_teacher)])
+        losses = criterion_kd(torch.log(filtered_ls_e), filtered_ls_t)
+        
+        loss_teacher_student = losses.mean()
         loss_within_student = weight_similarity_loss(student_weights_1, student_weights_2) + weight_similarity_loss(student_weights_1, student_weights_3) + weight_similarity_loss(student_weights_2, student_weights_3)
         loss_ensamble_soft_ce = criterion_soft(y_pred_ensamble, y_soft)
         loss_ensamble_ce = criterion(y_pred_ensamble, y_gt)
