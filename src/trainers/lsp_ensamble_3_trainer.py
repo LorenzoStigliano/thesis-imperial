@@ -280,9 +280,9 @@ def train(model_args, train_dataset, val_dataset, students, student_names, thres
             filtered_ls_t = torch.cat([ls_t[~mask[i]] for i, ls_t in enumerate(ls_teacher)])
             losses = criterion_kd(torch.log(filtered_ls_e), filtered_ls_t)
             
-            loss_teacher_student = losses.mean()
+            loss_teacher_student = criterion_soft(ypred_1, y_soft) + criterion_soft(ypred_2, y_soft) + criterion_soft(ypred_3, y_soft)
             loss_within_student = weight_similarity_loss(student_weights_1, student_weights_2) + weight_similarity_loss(student_weights_1, student_weights_3) + weight_similarity_loss(student_weights_2, student_weights_3)
-            loss_ensamble_soft_ce = criterion_soft(y_pred_ensamble, y_soft)
+            loss_ensamble_soft_ce = losses.mean()
             loss_ensamble_ce = criterion(y_pred_ensamble, y_gt)
 
             loss = model_args["alpha"]*loss_ensamble_ce + model_args["beta"]*loss_ensamble_soft_ce + model_args["gamma"]*loss_teacher_student + model_args["lambda"]*loss_within_student
@@ -553,9 +553,9 @@ def validate(dataset, students, model_args, threshold_value, model_name, teacher
         filtered_ls_t = torch.cat([ls_t[~mask[i]] for i, ls_t in enumerate(ls_teacher)])
         losses = criterion_kd(torch.log(filtered_ls_e), filtered_ls_t)
         
-        loss_teacher_student = losses.mean()
+        loss_teacher_student = criterion_soft(ypred_1, y_soft) + criterion_soft(ypred_2, y_soft) + criterion_soft(ypred_3, y_soft)
         loss_within_student = weight_similarity_loss(student_weights_1, student_weights_2) + weight_similarity_loss(student_weights_1, student_weights_3) + weight_similarity_loss(student_weights_2, student_weights_3)
-        loss_ensamble_soft_ce = criterion_soft(y_pred_ensamble, y_soft)
+        loss_ensamble_soft_ce = losses.mean()
         loss_ensamble_ce = criterion(y_pred_ensamble, y_gt)
 
         loss = model_args["alpha"]*loss_ensamble_ce + model_args["beta"]*loss_ensamble_soft_ce + model_args["gamma"]*loss_teacher_student + model_args["lambda"]*loss_within_student
