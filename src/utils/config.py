@@ -37,5 +37,5 @@ SAVE_DIR_CV_PROCESSED = '/Users/lorenzostigliano/Documents/University/Imperial/S
 """
 SAVE_DIR_MODEL_DATA = '/vol/bitbucket/ls1121/model_data/'
 
-SAVE_DIR_FIGS = '/homes/ls1121/Masters Thesis/thesis-imperial/figures/'
+SAVE_DIR_FIGS = '/homes/ls1121/thesis-imperial/figures/'
 """

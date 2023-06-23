@@ -324,7 +324,7 @@ def plot_bar_chart_reproducibility_mulitple_runs(dataset, views, models, CV, run
     USAGE:
     plot_bar_chart_reproducibility_mulitple_runs(dataset="gender_data", views=[0, 2, 4, 5], models=["gcn", "gcn_student","gcn_student_teacher"], CV=["3Fold", "5Fold", "10Fold"], runs=[i for i in range(10)], save_fig=True)
     """
-    plt.rcParams["figure.figsize"] = (15,5)
+    plt.rcParams["figure.figsize"] = (20,8)
 
     barWidth = 1/(len(models)+1)
 
@@ -410,7 +410,7 @@ def plot_bar_chart_metric_multiple_runs(dataset, view, models, CV, runs, metric,
     plt.ylim(min_y_lim, max_y_lim)
     
     #title = f"Dataset:{dataset}, Metric:{metric}, View:{view}, Across: {len(runs)} seeds with fixed init"
-    title = f"Accuracy across view {view} for 3, 5 and 10-Fold CV"
+    title = f"{metric} across view {view} for 3, 5 and 10-Fold CV"
     
     plt.ylabel(f"Metric: {metric}")
     x_ticks = [i for i in CV]+ ["Average"]
