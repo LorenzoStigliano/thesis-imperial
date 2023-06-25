@@ -178,7 +178,7 @@ mlp_args = {
 }
 
 gat_args = {
-    "num_epochs":50, 
+    "num_epochs":25, 
     "lr":0.0001, 
     "weight_decay":5e-4,
     "threshold":"median", # Threshold the graph adjacency matrix. Possible values: no_threshold, median, mean

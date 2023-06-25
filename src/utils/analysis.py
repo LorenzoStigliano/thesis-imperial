@@ -156,7 +156,6 @@ def view_metric_analysis(models, CV, view, run, metric, dataset, dataset_split, 
     """
     view_data_mean = []
     view_data_std = []
-
     mean, std = metric_and_view_analysis(models=models, 
                                     CV=CV, 
                                     analysis_type=analysis_type, 

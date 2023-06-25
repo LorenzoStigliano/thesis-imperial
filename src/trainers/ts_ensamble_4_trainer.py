@@ -122,13 +122,13 @@ def train(model_args, train_dataset, val_dataset, students, student_names, thres
     """
     # Load teacher model
     if model_args['evaluation_method'] == "model_selection":
-       teacher_model = torch.load(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+f"/gcn/models/gcn_MainModel_{cv_number}Fold_gender_data_gcn_CV_{cv}_view_{view}.pt")
-       teacher_weights_path = SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+f"/gcn/weights/W_MainModel_{cv_number}Fold_gender_data_gcn_CV_{cv}_view_{view}.pickle"
+       teacher_model = torch.load(SAVE_DIR_MODEL_DATA+model_args['dataset']+"/"+model_args['backbone']+"/"+model_args['evaluation_method']+f"/gcn/models/gcn_MainModel_{cv_number}Fold_gender_data_gcn_CV_{cv}_view_{view}.pt")
+       teacher_weights_path = SAVE_DIR_MODEL_DATA+model_args['dataset']+"/"+model_args['backbone']+"/"+model_args['evaluation_method']+f"/gcn/weights/W_MainModel_{cv_number}Fold_gender_data_gcn_CV_{cv}_view_{view}.pickle"
        with open(teacher_weights_path,'rb') as f:
           teacher_weights = pickle.load(f)
     else:
-       teacher_model = torch.load(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+f"/gcn/models/gcn_MainModel_{cv_number}Fold_gender_data_gcn_run_{run}_fixed_init_CV_{cv}_view_{view}.pt")
-       teacher_weights_path = SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+f"/gcn/weights/W_MainModel_{cv_number}Fold_gender_data_gcn_run_{run}_fixed_init_CV_{cv}_view_{view}.pickle"
+       teacher_model = torch.load(SAVE_DIR_MODEL_DATA+model_args['dataset']+"/"+model_args['backbone']+"/"+model_args['evaluation_method']+f"/gcn/models/gcn_MainModel_{cv_number}Fold_gender_data_gcn_run_{run}_fixed_init_CV_{cv}_view_{view}.pt")
+       teacher_weights_path = SAVE_DIR_MODEL_DATA+model_args['dataset']+"/"+model_args['backbone']+"/"+model_args['evaluation_method']+f"/gcn/weights/W_MainModel_{cv_number}Fold_gender_data_gcn_run_{run}_fixed_init_CV_{cv}_view_{view}.pickle"
        with open(teacher_weights_path,'rb') as f:
           teacher_weights = pickle.load(f)
     teacher_model.is_trained = False
@@ -349,109 +349,109 @@ def train(model_args, train_dataset, val_dataset, students, student_names, thres
         validation_loss_within_student.append(val_loss_within_student)
     
     #Save train metrics acc (4)
-    with open(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+"/"+model_args["model_name"]+"/metrics/"+model_name+"_train_acc_ensamble.pickle", 'wb') as f:
+    with open(SAVE_DIR_MODEL_DATA+model_args['dataset']+"/"+model_args['backbone']+"/"+model_args['evaluation_method']+"/"+model_args["model_name"]+"/metrics/"+model_name+"_train_acc_ensamble.pickle", 'wb') as f:
       pickle.dump(train_ensamble_acc, f)
-    with open(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+"/"+model_args["model_name"]+"/metrics/"+model_name+"_train_acc_student_0.pickle", 'wb') as f:
+    with open(SAVE_DIR_MODEL_DATA+model_args['dataset']+"/"+model_args['backbone']+"/"+model_args['evaluation_method']+"/"+model_args["model_name"]+"/metrics/"+model_name+"_train_acc_student_0.pickle", 'wb') as f:
       pickle.dump(train_acc_1, f)
-    with open(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+"/"+model_args["model_name"]+"/metrics/"+model_name+"_train_acc_student_1.pickle", 'wb') as f:
+    with open(SAVE_DIR_MODEL_DATA+model_args['dataset']+"/"+model_args['backbone']+"/"+model_args['evaluation_method']+"/"+model_args["model_name"]+"/metrics/"+model_name+"_train_acc_student_1.pickle", 'wb') as f:
       pickle.dump(train_acc_2, f)
-    with open(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+"/"+model_args["model_name"]+"/metrics/"+model_name+"_train_acc_student_2.pickle", 'wb') as f:
+    with open(SAVE_DIR_MODEL_DATA+model_args['dataset']+"/"+model_args['backbone']+"/"+model_args['evaluation_method']+"/"+model_args["model_name"]+"/metrics/"+model_name+"_train_acc_student_2.pickle", 'wb') as f:
       pickle.dump(train_acc_3, f)
-    with open(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+"/"+model_args["model_name"]+"/metrics/"+model_name+"_train_acc_student_3.pickle", 'wb') as f:
+    with open(SAVE_DIR_MODEL_DATA+model_args['dataset']+"/"+model_args['backbone']+"/"+model_args['evaluation_method']+"/"+model_args["model_name"]+"/metrics/"+model_name+"_train_acc_student_3.pickle", 'wb') as f:
       pickle.dump(train_acc_4, f)
 
     # Save final labels and predictions of model on train set for ensamble and indiviudal students in ensamble (4)
     simple_r = {'labels':labels_ensamble,'preds':preds_ensamble}
-    with open(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+"/"+model_args["model_name"]+"/labels_and_preds/"+model_name+"_train_ensemble.pickle", 'wb') as f:
+    with open(SAVE_DIR_MODEL_DATA+model_args['dataset']+"/"+model_args['backbone']+"/"+model_args['evaluation_method']+"/"+model_args["model_name"]+"/labels_and_preds/"+model_name+"_train_ensemble.pickle", 'wb') as f:
       pickle.dump(simple_r, f)
     
     simple_r = {'labels':np.hstack(labels_1),'preds':np.hstack(preds_1)}
-    with open(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+"/"+model_args["model_name"]+"/labels_and_preds/"+model_name+"_train_student_0.pickle", 'wb') as f:
+    with open(SAVE_DIR_MODEL_DATA+model_args['dataset']+"/"+model_args['backbone']+"/"+model_args['evaluation_method']+"/"+model_args["model_name"]+"/labels_and_preds/"+model_name+"_train_student_0.pickle", 'wb') as f:
       pickle.dump(simple_r, f)
     
     simple_r = {'labels':np.hstack(labels_2),'preds':np.hstack(preds_2)}
-    with open(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+"/"+model_args["model_name"]+"/labels_and_preds/"+model_name+"_train_student_1.pickle", 'wb') as f:
+    with open(SAVE_DIR_MODEL_DATA+model_args['dataset']+"/"+model_args['backbone']+"/"+model_args['evaluation_method']+"/"+model_args["model_name"]+"/labels_and_preds/"+model_name+"_train_student_1.pickle", 'wb') as f:
       pickle.dump(simple_r, f)
     
     simple_r = {'labels':np.hstack(labels_3),'preds':np.hstack(preds_3)}
-    with open(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+"/"+model_args["model_name"]+"/labels_and_preds/"+model_name+"_train_student_2.pickle", 'wb') as f:
+    with open(SAVE_DIR_MODEL_DATA+model_args['dataset']+"/"+model_args['backbone']+"/"+model_args['evaluation_method']+"/"+model_args["model_name"]+"/labels_and_preds/"+model_name+"_train_student_2.pickle", 'wb') as f:
       pickle.dump(simple_r, f) 
 
     simple_r = {'labels':np.hstack(labels_4),'preds':np.hstack(preds_4)}
-    with open(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+"/"+model_args["model_name"]+"/labels_and_preds/"+model_name+"_train_student_3.pickle", 'wb') as f:
+    with open(SAVE_DIR_MODEL_DATA+model_args['dataset']+"/"+model_args['backbone']+"/"+model_args['evaluation_method']+"/"+model_args["model_name"]+"/labels_and_preds/"+model_name+"_train_student_3.pickle", 'wb') as f:
       pickle.dump(simple_r, f)    
     
     # Save training loss of GNN model (8)
     los_p = {'loss':total_train_loss}
-    with open(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+"/"+model_args['model_name']+"/training_loss/training_loss_ensemble_"+model_name+".pickle", 'wb') as f:
+    with open(SAVE_DIR_MODEL_DATA+model_args['dataset']+"/"+model_args['backbone']+"/"+model_args['evaluation_method']+"/"+model_args['model_name']+"/training_loss/training_loss_ensemble_"+model_name+".pickle", 'wb') as f:
       pickle.dump(los_p, f)
     los_p = {'loss':train_loss_1}
-    with open(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+"/"+model_args['model_name']+"/training_loss/training_loss_student_0_"+model_name+".pickle", 'wb') as f:
+    with open(SAVE_DIR_MODEL_DATA+model_args['dataset']+"/"+model_args['backbone']+"/"+model_args['evaluation_method']+"/"+model_args['model_name']+"/training_loss/training_loss_student_0_"+model_name+".pickle", 'wb') as f:
       pickle.dump(los_p, f)
     los_p = {'loss':train_loss_2}
-    with open(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+"/"+model_args['model_name']+"/training_loss/training_loss_student_1_"+model_name+".pickle", 'wb') as f:
+    with open(SAVE_DIR_MODEL_DATA+model_args['dataset']+"/"+model_args['backbone']+"/"+model_args['evaluation_method']+"/"+model_args['model_name']+"/training_loss/training_loss_student_1_"+model_name+".pickle", 'wb') as f:
       pickle.dump(los_p, f)
     los_p = {'loss':train_loss_3}
-    with open(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+"/"+model_args['model_name']+"/training_loss/training_loss_student_2_"+model_name+".pickle", 'wb') as f:
+    with open(SAVE_DIR_MODEL_DATA+model_args['dataset']+"/"+model_args['backbone']+"/"+model_args['evaluation_method']+"/"+model_args['model_name']+"/training_loss/training_loss_student_2_"+model_name+".pickle", 'wb') as f:
       pickle.dump(los_p, f)
     los_p = {'loss':train_loss_4}
-    with open(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+"/"+model_args['model_name']+"/training_loss/training_loss_student_3_"+model_name+".pickle", 'wb') as f:
+    with open(SAVE_DIR_MODEL_DATA+model_args['dataset']+"/"+model_args['backbone']+"/"+model_args['evaluation_method']+"/"+model_args['model_name']+"/training_loss/training_loss_student_3_"+model_name+".pickle", 'wb') as f:
       pickle.dump(los_p, f)
     los_p = {'loss':train_loss_teacher_student}
-    with open(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+"/"+model_args['model_name']+"/training_loss/training_loss_teacher_student_"+model_name+".pickle", 'wb') as f:
+    with open(SAVE_DIR_MODEL_DATA+model_args['dataset']+"/"+model_args['backbone']+"/"+model_args['evaluation_method']+"/"+model_args['model_name']+"/training_loss/training_loss_teacher_student_"+model_name+".pickle", 'wb') as f:
       pickle.dump(los_p, f)
     los_p = {'loss':train_loss_ensamble_ce}
-    with open(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+"/"+model_args['model_name']+"/training_loss/training_loss_ensamble_ce_"+model_name+".pickle", 'wb') as f:
+    with open(SAVE_DIR_MODEL_DATA+model_args['dataset']+"/"+model_args['backbone']+"/"+model_args['evaluation_method']+"/"+model_args['model_name']+"/training_loss/training_loss_ensamble_ce_"+model_name+".pickle", 'wb') as f:
       pickle.dump(los_p, f)
     los_p = {'loss':train_ensamble_soft_ce_loss}
-    with open(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+"/"+model_args['model_name']+"/training_loss/training_loss_ensamble_soft_ce_"+model_name+".pickle", 'wb') as f:
+    with open(SAVE_DIR_MODEL_DATA+model_args['dataset']+"/"+model_args['backbone']+"/"+model_args['evaluation_method']+"/"+model_args['model_name']+"/training_loss/training_loss_ensamble_soft_ce_"+model_name+".pickle", 'wb') as f:
       pickle.dump(los_p, f)
     los_p = {'loss':train_loss_within_student}
-    with open(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+"/"+model_args['model_name']+"/training_loss/training_loss_within_student_"+model_name+".pickle", 'wb') as f:
+    with open(SAVE_DIR_MODEL_DATA+model_args['dataset']+"/"+model_args['backbone']+"/"+model_args['evaluation_method']+"/"+model_args['model_name']+"/training_loss/training_loss_within_student_"+model_name+".pickle", 'wb') as f:
       pickle.dump(los_p, f)
 
     # Save validation loss of GNN model (8)
     los_p = {'loss':validation_total_loss}
-    with open(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+"/"+model_args['model_name']+"/validation_loss/validation_loss_ensemble_"+model_name+".pickle", 'wb') as f:
+    with open(SAVE_DIR_MODEL_DATA+model_args['dataset']+"/"+model_args['backbone']+"/"+model_args['evaluation_method']+"/"+model_args['model_name']+"/validation_loss/validation_loss_ensemble_"+model_name+".pickle", 'wb') as f:
       pickle.dump(los_p, f)
     los_p = {'loss':validation_loss_1}
-    with open(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+"/"+model_args['model_name']+"/validation_loss/validation_loss_student_0_"+model_name+".pickle", 'wb') as f:
+    with open(SAVE_DIR_MODEL_DATA+model_args['dataset']+"/"+model_args['backbone']+"/"+model_args['evaluation_method']+"/"+model_args['model_name']+"/validation_loss/validation_loss_student_0_"+model_name+".pickle", 'wb') as f:
       pickle.dump(los_p, f)
     los_p = {'loss':validation_loss_2}
-    with open(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+"/"+model_args['model_name']+"/validation_loss/validation_loss_student_1_"+model_name+".pickle", 'wb') as f:
+    with open(SAVE_DIR_MODEL_DATA+model_args['dataset']+"/"+model_args['backbone']+"/"+model_args['evaluation_method']+"/"+model_args['model_name']+"/validation_loss/validation_loss_student_1_"+model_name+".pickle", 'wb') as f:
       pickle.dump(los_p, f)
     los_p = {'loss':validation_loss_3}
-    with open(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+"/"+model_args['model_name']+"/validation_loss/validation_loss_student_2_"+model_name+".pickle", 'wb') as f:
+    with open(SAVE_DIR_MODEL_DATA+model_args['dataset']+"/"+model_args['backbone']+"/"+model_args['evaluation_method']+"/"+model_args['model_name']+"/validation_loss/validation_loss_student_2_"+model_name+".pickle", 'wb') as f:
       pickle.dump(los_p, f)
     los_p = {'loss':validation_loss_4}
-    with open(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+"/"+model_args['model_name']+"/validation_loss/validation_loss_student_3_"+model_name+".pickle", 'wb') as f:
+    with open(SAVE_DIR_MODEL_DATA+model_args['dataset']+"/"+model_args['backbone']+"/"+model_args['evaluation_method']+"/"+model_args['model_name']+"/validation_loss/validation_loss_student_3_"+model_name+".pickle", 'wb') as f:
       pickle.dump(los_p, f)
     los_p = {'loss':validation_loss_teacher_student}
-    with open(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+"/"+model_args['model_name']+"/validation_loss/validation_loss_teacher_student_"+model_name+".pickle", 'wb') as f:
+    with open(SAVE_DIR_MODEL_DATA+model_args['dataset']+"/"+model_args['backbone']+"/"+model_args['evaluation_method']+"/"+model_args['model_name']+"/validation_loss/validation_loss_teacher_student_"+model_name+".pickle", 'wb') as f:
       pickle.dump(los_p, f)
     los_p = {'loss':validation_loss_ensamble_ce}
-    with open(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+"/"+model_args['model_name']+"/validation_loss/validation_loss_ensamble_ce_"+model_name+".pickle", 'wb') as f:
+    with open(SAVE_DIR_MODEL_DATA+model_args['dataset']+"/"+model_args['backbone']+"/"+model_args['evaluation_method']+"/"+model_args['model_name']+"/validation_loss/validation_loss_ensamble_ce_"+model_name+".pickle", 'wb') as f:
       pickle.dump(los_p, f)
     los_p = {'loss':validation_ensamble_soft_ce_loss}
-    with open(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+"/"+model_args['model_name']+"/validation_loss/validation_loss_ensamble_soft_ce_"+model_name+".pickle", 'wb') as f:
+    with open(SAVE_DIR_MODEL_DATA+model_args['dataset']+"/"+model_args['backbone']+"/"+model_args['evaluation_method']+"/"+model_args['model_name']+"/validation_loss/validation_loss_ensamble_soft_ce_"+model_name+".pickle", 'wb') as f:
       pickle.dump(los_p, f)
     los_p = {'loss':validation_loss_within_student}
-    with open(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+"/"+model_args['model_name']+"/validation_loss/validation_loss_within_student_"+model_name+".pickle", 'wb') as f:
+    with open(SAVE_DIR_MODEL_DATA+model_args['dataset']+"/"+model_args['backbone']+"/"+model_args['evaluation_method']+"/"+model_args['model_name']+"/validation_loss/validation_loss_within_student_"+model_name+".pickle", 'wb') as f:
       pickle.dump(los_p, f)    
     
     # Save Model (4)
     number = 0
     for student_name, student_model in zip(student_names, [student_model_1, student_model_2, student_model_3, student_model_4]):
-      print(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+"/"+model_args['model_name']+"/models/"+student_name+".pt")
-      torch.save(student_model, SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+"/"+model_args['model_name']+"/models/"+student_name+".pt")
+      print(SAVE_DIR_MODEL_DATA+model_args['dataset']+"/"+model_args['backbone']+"/"+model_args['evaluation_method']+"/"+model_args['model_name']+"/models/"+student_name+".pt")
+      torch.save(student_model, SAVE_DIR_MODEL_DATA+model_args['dataset']+"/"+model_args['backbone']+"/"+model_args['evaluation_method']+"/"+model_args['model_name']+"/models/"+student_name+".pt")
     
       # Save weights
       if model_args['model_name'] == "diffpool":
           w_dict = {"w": student_model.state_dict()["assign_conv_first_modules.0.weight"]}
-          with open(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+"/"+model_args['model_name']+'/weights/W_'+student_name+'.pickle', 'wb') as f:
+          with open(SAVE_DIR_MODEL_DATA+model_args['dataset']+"/"+model_args['backbone']+"/"+model_args['evaluation_method']+"/"+model_args['model_name']+'/weights/W_'+student_name+'.pickle', 'wb') as f:
               pickle.dump(w_dict, f)
       else:
-          path = SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+"/"+model_args['model_name']+'/weights/W_'+student_name+'.pickle'
+          path = SAVE_DIR_MODEL_DATA+model_args['dataset']+"/"+model_args['backbone']+"/"+model_args['evaluation_method']+"/"+model_args['model_name']+'/weights/W_'+student_name+'.pickle'
           
           if os.path.exists(path):
               os.remove(path)
@@ -578,27 +578,27 @@ def validate(dataset, students, model_args, threshold_value, model_name, teacher
     
     simple_r = {'labels':labels_ensamble,'preds':preds_ensamble}
     # Save labels and predictions of model on test set  (4)
-    with open(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+"/"+model_args["model_name"]+"/labels_and_preds/"+model_name+"_val_ensamble.pickle", 'wb') as f:
+    with open(SAVE_DIR_MODEL_DATA+model_args['dataset']+"/"+model_args['backbone']+"/"+model_args['evaluation_method']+"/"+model_args["model_name"]+"/labels_and_preds/"+model_name+"_val_ensamble.pickle", 'wb') as f:
       pickle.dump(simple_r, f)
     
     simple_r = {'labels':labels_1,'preds':preds_1}
     # Save labels and predictions of model on test set 
-    with open(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+"/"+model_args["model_name"]+"/labels_and_preds/"+model_name+"_val_student_0.pickle", 'wb') as f:
+    with open(SAVE_DIR_MODEL_DATA+model_args['dataset']+"/"+model_args['backbone']+"/"+model_args['evaluation_method']+"/"+model_args["model_name"]+"/labels_and_preds/"+model_name+"_val_student_0.pickle", 'wb') as f:
       pickle.dump(simple_r, f)   
 
     simple_r = {'labels':labels_2,'preds':preds_2}
     # Save labels and predictions of model on test set 
-    with open(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+"/"+model_args["model_name"]+"/labels_and_preds/"+model_name+"_val_student_1.pickle", 'wb') as f:
+    with open(SAVE_DIR_MODEL_DATA+model_args['dataset']+"/"+model_args['backbone']+"/"+model_args['evaluation_method']+"/"+model_args["model_name"]+"/labels_and_preds/"+model_name+"_val_student_1.pickle", 'wb') as f:
       pickle.dump(simple_r, f)   
 
     simple_r = {'labels':labels_3,'preds':preds_3}
     # Save labels and predictions of model on test set 
-    with open(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+"/"+model_args["model_name"]+"/labels_and_preds/"+model_name+"_val_student_2.pickle", 'wb') as f:
+    with open(SAVE_DIR_MODEL_DATA+model_args['dataset']+"/"+model_args['backbone']+"/"+model_args['evaluation_method']+"/"+model_args["model_name"]+"/labels_and_preds/"+model_name+"_val_student_2.pickle", 'wb') as f:
       pickle.dump(simple_r, f)   
 
     simple_r = {'labels':labels_4,'preds':preds_4}
     # Save labels and predictions of model on test set 
-    with open(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+"/"+model_args["model_name"]+"/labels_and_preds/"+model_name+"_val_student_3.pickle", 'wb') as f:
+    with open(SAVE_DIR_MODEL_DATA+model_args['dataset']+"/"+model_args['backbone']+"/"+model_args['evaluation_method']+"/"+model_args["model_name"]+"/labels_and_preds/"+model_name+"_val_student_3.pickle", 'wb') as f:
       pickle.dump(simple_r, f)   
 
     val_total_loss = total_loss / len(dataset)
@@ -675,7 +675,7 @@ def test(dataset, model, model_args, threshold_value, model_name):
 
     simple_r = {'labels':labels,'preds':preds}
     # Save labels and predictions of model on test set 
-    with open(SAVE_DIR_MODEL_DATA+model_args['evaluation_method']+"/"+model_args["model_name"]+"/labels_and_preds/"+model_name+"_test.pickle", 'wb') as f:
+    with open(SAVE_DIR_MODEL_DATA+model_args['dataset']+"/"+model_args['backbone']+"/"+model_args['evaluation_method']+"/"+model_args["model_name"]+"/labels_and_preds/"+model_name+"_test.pickle", 'wb') as f:
       pickle.dump(simple_r, f)
 
     print('Held-out test set loss: {}'.format(total_loss / len(dataset)))

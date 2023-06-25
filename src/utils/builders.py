@@ -87,7 +87,7 @@ def dump_data_gender_data(data_dir, save_dir, dataset):
   with open(save_dir + dataset +'/'+dataset+'_ages', 'wb') as f:
     pickle.dump(ages, f)
 
-def new_folder(model, evaluation_method):
+def new_folder(model, evaluation_method, backbone="gcn", dataset="gender_data"):
     """
     Parameters
     ----------
@@ -97,11 +97,11 @@ def new_folder(model, evaluation_method):
     ----------
     Creates GNN directories if not exist.
     """
-    if not os.path.exists(SAVE_DIR_MODEL_DATA+evaluation_method+"/"+model):
-        os.makedirs(SAVE_DIR_MODEL_DATA+evaluation_method+"/"+model)
-        os.makedirs(SAVE_DIR_MODEL_DATA+evaluation_method+"/"+model+"/weights")
-        os.makedirs(SAVE_DIR_MODEL_DATA+evaluation_method+"/"+model+"/training_loss")
-        os.makedirs(SAVE_DIR_MODEL_DATA+evaluation_method+"/"+model+"/validation_loss")
-        os.makedirs(SAVE_DIR_MODEL_DATA+evaluation_method+"/"+model+"/models")
-        os.makedirs(SAVE_DIR_MODEL_DATA+evaluation_method+"/"+model+"/labels_and_preds")
-        os.makedirs(SAVE_DIR_MODEL_DATA+evaluation_method+"/"+model+"/metrics")
+    if not os.path.exists(SAVE_DIR_MODEL_DATA+dataset+"/"+backbone+"/"+evaluation_method+"/"+model):
+        os.makedirs(SAVE_DIR_MODEL_DATA+dataset+"/"+backbone+"/"+evaluation_method+"/"+model)
+        os.makedirs(SAVE_DIR_MODEL_DATA+dataset+"/"+backbone+"/"+evaluation_method+"/"+model+"/weights")
+        os.makedirs(SAVE_DIR_MODEL_DATA+dataset+"/"+backbone+"/"+evaluation_method+"/"+model+"/training_loss")
+        os.makedirs(SAVE_DIR_MODEL_DATA+dataset+"/"+backbone+"/"+evaluation_method+"/"+model+"/validation_loss")
+        os.makedirs(SAVE_DIR_MODEL_DATA+dataset+"/"+backbone+"/"+evaluation_method+"/"+model+"/models")
+        os.makedirs(SAVE_DIR_MODEL_DATA+dataset+"/"+backbone+"/"+evaluation_method+"/"+model+"/labels_and_preds")
+        os.makedirs(SAVE_DIR_MODEL_DATA+dataset+"/"+backbone+"/"+evaluation_method+"/"+model+"/metrics")
