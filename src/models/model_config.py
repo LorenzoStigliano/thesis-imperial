@@ -138,26 +138,6 @@ gcn_student_ensamble_5_args = {
     "n_students":5 # TOTAL number of students in ensamble 
 }
 
-mlp_args = {
-    "num_epochs":50, 
-    "lr": 0.0001, 
-    "weight_decay":5e-4, 
-    "num_layers":1, 
-    "input_dim":35,
-    "hidden_dim":35,
-    "output_dim":1, 
-    "threshold":"median", # Threshold the graph adjacency matrix. Possible values: no_threshold, median, mean
-    "dropout_ratio":0,
-    "model_name":"mlp",
-    "backbone":"mlp",
-    "dataset":"gender_data",
-    "evaluation_method": "model_assessment", # model selection or model assessment
-    "alpha_ce": 1, 
-    "T": 2, 
-    "alpha_soft_ce": 2,
-    "alpha_weight": 0
-}
-
 gat_args = {
     "num_epochs":50, 
     "lr":0.0001, 
