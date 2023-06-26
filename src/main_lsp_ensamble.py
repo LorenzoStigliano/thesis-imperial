@@ -27,9 +27,15 @@ def train_main_model(dataset, model, view, cv_number, model_args, run=0):
     
     if gcn_args["evaluation_method"] == "model_assessment":
             model_name += f"_run_{run}_fixed_init"
-    
+            
+    if model_args["model_name"] == "gcn_student_lsp_ensamble_2":
+        cross_validation_3(model_args, G_list, view, model_name, cv_number, n_students=2, run=run)
     if model_args["model_name"] == "gcn_student_lsp_ensamble_3":
         cross_validation_3(model_args, G_list, view, model_name, cv_number, n_students=3, run=run)
+    if model_args["model_name"] == "gcn_student_lsp_ensamble_4":
+        cross_validation_3(model_args, G_list, view, model_name, cv_number, n_students=4, run=run)
+    if model_args["model_name"] == "gcn_student_lsp_ensamble_5":
+        cross_validation_3(model_args, G_list, view, model_name, cv_number, n_students=5, run=run)
 
 def parrallel_run(run):
     print(run)
@@ -58,5 +64,4 @@ if __name__ == '__main__':
         Training GNN Models with datasets of data directory.
         '''
         runs = runs # 0, 1, 2, 3, 4, 5, 6, 7, 8, 9
-        #joblib.cpu_count()
         Parallel(n_jobs=n_jobs)(delayed(parrallel_run)(run) for run in runs)

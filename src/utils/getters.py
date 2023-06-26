@@ -116,12 +116,26 @@ def extract_weights(dataset, view, model, training_type, run, student=0, model_a
 
 def get_weight(dataset, view, model, training_type, shot_n, cv_n, run, student, model_args=None):
     if "ensamble" in model:
+        
         alpha = str(model_args["alpha"])
         beta = str(model_args["beta"])
         gamma = str(model_args["gamma"])
         lambda_ = str(model_args["lambda"])
-        cv_path = SAVE_DIR_MODEL_DATA+f'{dataset}/{model_args["backbone"]}/'+'model_assessment/{}/weights/W_MainModel_{}_{}_{}_run_{}_fixed_init_student_{}_CV_{}_view_{}_alpha_{}_beta_{}_gamma_{}_lambda_{}.pickle'.format(model,training_type, dataset, model, run, student, cv_n, view, alpha, beta, gamma, lambda_)
-    
+        
+        #SPECIAL CASE WHERE WE ANALYSE THE ENSAMBLE 
+        if student == -1:
+            all_weights = []
+            for student in range(model_args["n_students"]):
+                cv_path = SAVE_DIR_MODEL_DATA+f'{dataset}/{model_args["backbone"]}/'+'model_assessment/{}/weights/W_MainModel_{}_{}_{}_run_{}_fixed_init_student_{}_CV_{}_view_{}_alpha_{}_beta_{}_gamma_{}_lambda_{}.pickle'.format(model,training_type, dataset, model, run, student, cv_n, view, alpha, beta, gamma, lambda_)
+                with open(cv_path,'rb') as f:
+                 weights = pickle.load(f)
+                weights_vector = weights['w'].squeeze().detach().numpy() 
+                all_weights.append(weights_vector)
+            return np.mean(all_weights, axis=0)
+
+        else:
+            cv_path = SAVE_DIR_MODEL_DATA+f'{dataset}/{model_args["backbone"]}/'+'model_assessment/{}/weights/W_MainModel_{}_{}_{}_run_{}_fixed_init_student_{}_CV_{}_view_{}_alpha_{}_beta_{}_gamma_{}_lambda_{}.pickle'.format(model,training_type, dataset, model, run, student, cv_n, view, alpha, beta, gamma, lambda_)
+        
     elif "teacher" in model:
         if "weight" in model:
             model = "_".join(model.split("_")[:2]) 
@@ -157,14 +171,6 @@ def get_weight(dataset, view, model, training_type, shot_n, cv_n, run, student, 
     with open(x_path,'rb') as f:
         weights = pickle.load(f)
 
-    if model == 'sag' or  model == 'diffpool':
-        weights_vector = torch.mean(weights['w'], 1).detach().numpy()
-        weights_vector = torch.mean(weights['w'], 1).detach().numpy()
-    if model == 'gcn' or model == 'gcn_student'or model == 'gcn_student_ensamble_2' or model == 'gcn_student_ensamble_3' or model == 'gcn_student_ensamble_4' or model == 'gcn_student_ensamble_5' or model =="mlp" or model =="lsp" or model =="mskd" or model =="fitnet" :
-        weights_vector = weights['w'].squeeze().detach().numpy()
-    if model == 'gat':
-        weights_vector = weights['w'].squeeze().detach().numpy()
-    if model == 'gunet':
-        weights_vector = torch.mean(weights['w'], 0).detach().numpy()    
+    weights_vector = weights['w'].squeeze().detach().numpy() 
     
     return weights_vector

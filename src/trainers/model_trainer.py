@@ -13,7 +13,6 @@ from models.gcn_3_layers import GCN3
 from models.gcn_student import GCN_STUDENT
 from models.mlp import MLP
 from models.gat import GAT
-import models.diffpool as DIFFPOOL
 
 from utils.helpers import *
 from config import SAVE_DIR_MODEL_DATA
@@ -57,16 +56,7 @@ def cross_validation(model_args, G_list, view, model_name, cv_number, run=0):
         num_nodes = G_list[0]['adj'].shape[0]
         num_classes = 2 #TODO: make sure it can be used with any number of classes
     
-        if model_args["model_name"]=='diffpool':
-            input_dim = num_nodes
-            model = DIFFPOOL.SoftPoolingGcnEncoder(
-                num_nodes, 
-                input_dim, model_args['hidden_dim'], model_args['output_dim'], num_classes, model_args['num_gc_layers'],
-                model_args['hidden_dim'], assign_ratio=model_args['assign_ratio'], num_pooling=model_args['num_pool'],
-                bn=model_args['bn'], dropout=model_args['dropout'], linkpred=model_args['linkpred'], args=model_args,
-                assign_input_dim=num_nodes).to(device)     
-        
-        elif model_args["model_name"]=='gcn' and model_args["layers"]==2:
+        if model_args["model_name"]=='gcn' and model_args["layers"]==2:
             model = GCN(
                 nfeat = num_nodes,
                 nhid = model_args["hidden_dim"],
