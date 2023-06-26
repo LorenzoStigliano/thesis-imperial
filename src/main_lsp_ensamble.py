@@ -4,7 +4,10 @@ import numpy as np
 import torch
 
 from models.model_config import * 
+from trainers.lsp_ensamble_2_trainer import cross_validation_2
 from trainers.lsp_ensamble_3_trainer import cross_validation_3
+from trainers.lsp_ensamble_4_trainer import cross_validation_4
+from trainers.lsp_ensamble_5_trainer import cross_validation_5
 
 from utils.builders import new_folder
 from utils.loaders import load_data

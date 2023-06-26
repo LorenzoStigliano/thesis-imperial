@@ -248,58 +248,6 @@ def train(model_args, train_dataset, val_dataset, students, student_names, thres
             loss_ensamble_ce = criterion(y_pred_ensamble, y_gt)
 
             loss = model_args["alpha"]*loss_ensamble_ce + model_args["beta"]*loss_ensamble_soft_ce + model_args["gamma"]*loss_teacher_student + model_args["lambda"]*loss_within_student
-
-
-            # Get the predictions of the ensamble and the individual models
-            _, indices = torch.max(y_pred_ensamble, 1)
-            preds_ensamble.append(indices.cpu().data.numpy())
-            labels_ensamble.append(data['label'].long().numpy())
-
-            _, indices = torch.max(ypred_1, 1)
-            preds_1.append(indices.cpu().data.numpy())
-            labels_1.append(data['label'].long().numpy())
-
-            _, indices = torch.max(ypred_2, 1)
-            preds_2.append(indices.cpu().data.numpy())
-            labels_2.append(data['label'].long().numpy())
-
-            _, indices = torch.max(ypred_3, 1)
-            preds_3.append(indices.cpu().data.numpy())
-            labels_3.append(data['label'].long().numpy())
-
-            _, indices = torch.max(ypred_4, 1)
-            preds_4.append(indices.cpu().data.numpy())
-            labels_4.append(data['label'].long().numpy())
-
-            _, indices = torch.max(ypred_5, 1)
-            preds_5.append(indices.cpu().data.numpy())
-            labels_5.append(data['label'].long().numpy())
-            
-            
-            # Get the predictions of the ensamble and the individual models
-            _, indices = torch.max(y_pred_ensamble, 1)
-            preds_ensamble.append(indices.cpu().data.numpy())
-            labels_ensamble.append(data['label'].long().numpy())
-
-            _, indices = torch.max(ypred_1, 1)
-            preds_1.append(indices.cpu().data.numpy())
-            labels_1.append(data['label'].long().numpy())
-
-            _, indices = torch.max(ypred_2, 1)
-            preds_2.append(indices.cpu().data.numpy())
-            labels_2.append(data['label'].long().numpy())
-
-            _, indices = torch.max(ypred_3, 1)
-            preds_3.append(indices.cpu().data.numpy())
-            labels_3.append(data['label'].long().numpy())
-
-            _, indices = torch.max(ypred_4, 1)
-            preds_4.append(indices.cpu().data.numpy())
-            labels_4.append(data['label'].long().numpy())
-
-            _, indices = torch.max(ypred_5, 1)
-            preds_5.append(indices.cpu().data.numpy())
-            labels_5.append(data['label'].long().numpy())
             
             # Compute gradients (backward propagation)
             loss.backward()
