@@ -15,7 +15,7 @@ from models.mlp import MLP
 from models.gat import GAT
 
 from utils.helpers import *
-from config import SAVE_DIR_MODEL_DATA
+from utils.config import SAVE_DIR_MODEL_DATA
 
 #device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 device = torch.device('cpu')

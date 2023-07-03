@@ -14,7 +14,7 @@ import sklearn.metrics as metrics
 from models.gcn_student_lsp_ensamble import GCN_STUDENT_ENSAMBLE
 from models.model_config import * 
 from utils.helpers import *
-from config import SAVE_DIR_MODEL_DATA
+from utils.config import SAVE_DIR_MODEL_DATA
 
 #device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 device = torch.device('cpu')
