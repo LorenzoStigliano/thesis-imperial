@@ -12,4 +12,6 @@ export CPATH=/vol/cuda/10.1.243/include:$CPATH
 # Set LD_LIBRARY_PATH environment variable
 export LD_LIBRARY_PATH=/vol/cuda/10.1.243/lib64:$LD_LIBRARY_PATH
 
-python /homes/ls1121/thesis-imperial/src/main_cross_validation_3_layers.py --runs 0 1 2 3 4 5 6 7 8 9 --n_jobs 10
+python /homes/ls1121/thesis-imperial/src/main_cross_validation.py --runs 0 1 2 3 4 --n_jobs 1
+python /homes/ls1121/thesis-imperial/src/main_cross_validation.py --runs 5 6 7 8 9 --n_jobs 1
+
