@@ -129,7 +129,10 @@ gat_args = {
     "alpha":0.2, # Alpha for the leaky_relu.
     "dropout": 0.1,
     "model_name":"gat",
-    "evaluation_method": "model assessment"
+    "evaluation_method": "model_assessment",
+    "dataset":"gender_data",
+    "backbone":"gat",
+    "model_name":"gat",
 }
 
 diffpool_args = {

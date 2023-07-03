@@ -14,9 +14,9 @@ def get_labels_and_preds(dataset, model, analysis_type, training_type, cv_n, vie
             gamma = str(model_args["gamma"])
             lambda_ = str(model_args["lambda"])
             if student == -1:
-                cv_path =  SAVE_DIR_MODEL_DATA+f'{dataset}/{model_args["backbone"]}/model_assessment/{model}/labels_and_preds/MainModel_{training_type}_{dataset}_{model}_run_{run}_fixed_init_CV_{cv_n}_view_{view}_alpha_{alpha}_beta_{beta}_gamma_{gamma}_lambda_{lambda_}_{dataset_split}_ensamble.pickle'
+                cv_path =  SAVE_DIR_MODEL_DATA+f'{dataset}/{model_args["backbone"]}/model_assessment/{model}/labels_and_preds/MainModel_{training_type}_{dataset}_{model_args["model_name"]}_run_{run}_fixed_init_CV_{cv_n}_view_{view}_alpha_{alpha}_beta_{beta}_gamma_{gamma}_lambda_{lambda_}_{dataset_split}_ensamble.pickle'
             else:
-                cv_path =  SAVE_DIR_MODEL_DATA+f'{dataset}/{model_args["backbone"]}/model_assessment/{model}/labels_and_preds/MainModel_{training_type}_{dataset}_{model}_run_{run}_fixed_init_CV_{cv_n}_view_{view}_alpha_{alpha}_beta_{beta}_gamma_{gamma}_lambda_{lambda_}_{dataset_split}_student_{student}.pickle'
+                cv_path =  SAVE_DIR_MODEL_DATA+f'{dataset}/{model_args["backbone"]}/model_assessment/{model}/labels_and_preds/MainModel_{training_type}_{dataset}_{model_args["model_name"]}_run_{run}_fixed_init_CV_{cv_n}_view_{view}_alpha_{alpha}_beta_{beta}_gamma_{gamma}_lambda_{lambda_}_{dataset_split}_student_{student}.pickle'
         
         elif "teacher" in model:
             if "weight" in model:
@@ -126,7 +126,7 @@ def get_weight(dataset, view, model, training_type, shot_n, cv_n, run, student, 
         if student == -1:
             all_weights = []
             for student in range(model_args["n_students"]):
-                cv_path = SAVE_DIR_MODEL_DATA+f'{dataset}/{model_args["backbone"]}/'+'model_assessment/{}/weights/W_MainModel_{}_{}_{}_run_{}_fixed_init_student_{}_CV_{}_view_{}_alpha_{}_beta_{}_gamma_{}_lambda_{}.pickle'.format(model,training_type, dataset, model, run, student, cv_n, view, alpha, beta, gamma, lambda_)
+                cv_path = SAVE_DIR_MODEL_DATA+f'{dataset}/{model_args["backbone"]}/'+'model_assessment/{}/weights/W_MainModel_{}_{}_{}_run_{}_fixed_init_student_{}_CV_{}_view_{}_alpha_{}_beta_{}_gamma_{}_lambda_{}.pickle'.format(model,training_type, dataset, model_args["model_name"], run, student, cv_n, view, alpha, beta, gamma, lambda_)
                 with open(cv_path,'rb') as f:
                  weights = pickle.load(f)
                 weights_vector = weights['w'].squeeze().detach().numpy() 
@@ -134,7 +134,7 @@ def get_weight(dataset, view, model, training_type, shot_n, cv_n, run, student, 
             return np.mean(all_weights, axis=0)
 
         else:
-            cv_path = SAVE_DIR_MODEL_DATA+f'{dataset}/{model_args["backbone"]}/'+'model_assessment/{}/weights/W_MainModel_{}_{}_{}_run_{}_fixed_init_student_{}_CV_{}_view_{}_alpha_{}_beta_{}_gamma_{}_lambda_{}.pickle'.format(model,training_type, dataset, model, run, student, cv_n, view, alpha, beta, gamma, lambda_)
+            cv_path = SAVE_DIR_MODEL_DATA+f'{dataset}/{model_args["backbone"]}/'+'model_assessment/{}/weights/W_MainModel_{}_{}_{}_run_{}_fixed_init_student_{}_CV_{}_view_{}_alpha_{}_beta_{}_gamma_{}_lambda_{}.pickle'.format(model,training_type, dataset, model_args["model_name"], run, student, cv_n, view, alpha, beta, gamma, lambda_)
         
     elif "teacher" in model:
         if "weight" in model:

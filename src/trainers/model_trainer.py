@@ -8,11 +8,11 @@ import sklearn.metrics as metrics
 from torch.autograd import Variable
 import torch.nn.functional as F
 
-from models.gcn import GCN
-from models.gcn_3_layers import GCN3
-from models.gcn_student import GCN_STUDENT
-from models.mlp import MLP
-from models.gat import GAT
+from models.gcn.gcn import GCN
+from models.gcn.gcn_3_layers import GCN3
+from models.gcn.gcn_student import GCN_STUDENT
+from models.mlp.mlp import MLP
+from models.gat.gat import GAT
 
 from utils.helpers import *
 from utils.config import SAVE_DIR_MODEL_DATA
@@ -81,7 +81,9 @@ def cross_validation(model_args, G_list, view, model_name, cv_number, run=0):
                 nclass=num_classes, 
                 dropout=model_args['dropout'], 
                 nheads=model_args['nb_heads'], 
-                alpha=model_args['alpha']).to(device)   
+                alpha=model_args['alpha'],
+                run = run
+            ).to(device)   
         
         elif model_args["model_name"] == "gcn_student":
             model = GCN_STUDENT(
@@ -101,6 +103,7 @@ def cross_validation(model_args, G_list, view, model_name, cv_number, run=0):
                 dropout_ratio=model_args["dropout_ratio"],
                 run = run
                 )
+        
         if model_args["evaluation_method"] =='model_selection': 
             train(model_args, train_dataset, val_dataset, model, threshold_value, model_name+"_CV_"+str(i)+"_view_"+str(view))
             #See performance on the held-out test set 

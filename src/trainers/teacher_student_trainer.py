@@ -12,8 +12,8 @@ import torch.optim as optim
 from torch.autograd import Variable
 import sklearn.metrics as metrics
 
-from models.gcn_student import GCN_STUDENT
-from models.mlp import MLP
+from models.gcn.gcn_student import GCN_STUDENT
+from models.mlp.mlp import MLP
 from models.model_config import * 
 from utils.helpers import *
 from utils.config import SAVE_DIR_MODEL_DATA

@@ -90,8 +90,9 @@ class GraphAttentionLayer(nn.Module):
         return self.__class__.__name__ + ' (' + str(self.in_features) + ' -> ' + str(self.out_features) + ')'
 
 class GAT(nn.Module):
-    def __init__(self, nfeat, nhid, nclass, dropout, alpha, nheads):
+    def __init__(self, nfeat, nhid, nclass, dropout, alpha, nheads, run):
         """Dense version of GAT."""
+        torch.manual_seed(run)
         super(GAT, self).__init__()
         self.dropout = dropout
 
@@ -102,27 +103,27 @@ class GAT(nn.Module):
         self.out_att = GraphAttentionLayer(nhid * nheads, nclass, dropout=dropout, alpha=alpha, concat=False)
         self.LinearLayer = nn.Linear(nfeat,1)
         self.is_trained = False
+        self.run = run
 
-        
     def forward(self, x, adj):
         x = F.dropout(x, self.dropout, training=self.training)
         x = torch.cat([att(x, adj) for att in self.attentions], dim=1)
         x = F.dropout(x, self.dropout, training=self.training)
-        x = F.elu(self.out_att(x, adj))
-        x = F.log_softmax(x, dim=1)
+        node_embeddings = F.elu(self.out_att(x, adj))
+        x = F.log_softmax(node_embeddings, dim=1)
         x = self.LinearLayer(torch.transpose(x,0,1))
         # Save weights of GAT model
         
         if self.is_trained:
             w_dict = {"w": self.LinearLayer.weight}
-            with open("gat_W.pickle", 'wb') as f:
+            with open("gat_"+str(self.run)+"_W.pickle", 'wb') as f:
               pickle.dump(w_dict, f)
               print("GAT Weights are saved:")
               print(self.LinearLayer.weight)
             self.is_trained = False
         
         x = torch.transpose(x,0,1)
-        return x
+        return x, node_embeddings
     
     def loss(self, pred, label, type='softmax'):
         # softmax + CE

@@ -67,7 +67,6 @@ class GCN(nn.Module):
         x = F.dropout(x, self.dropout, training=self.training)
         node_embeddings = self.gc2(x, adj)  # Extract node embeddings from gc2
         x = F.log_softmax(node_embeddings, dim=1)
-        x = F.log_softmax(x, dim=1)
         x = self.LinearLayer(torch.transpose(x,0,1))
         
         if self.is_trained:
