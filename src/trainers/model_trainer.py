@@ -11,8 +11,11 @@ import torch.nn.functional as F
 from models.gcn.gcn import GCN
 from models.gcn.gcn_3_layers import GCN3
 from models.gcn.gcn_student import GCN_STUDENT
-from models.mlp.mlp import MLP
+
 from models.gat.gat import GAT
+from models.gat.gat_student import GAT_STUDENT
+
+from models.mlp.mlp import MLP
 
 from utils.helpers import *
 from utils.config import SAVE_DIR_MODEL_DATA
@@ -93,6 +96,17 @@ def cross_validation(model_args, G_list, view, model_name, cv_number, run=0):
                 dropout = model_args["dropout"],
                 run = run
             ).to(device) 
+        
+        elif model_args["model_name"]=='gat_student':
+            model = GAT_STUDENT(
+                nfeat=num_nodes, 
+                nhid=model_args['hidden_dim'], 
+                nclass=num_classes, 
+                dropout=model_args['dropout'], 
+                nheads=model_args['nb_heads'], 
+                alpha=model_args['alpha'],
+                run = run
+            ).to(device)   
         
         elif model_args["model_name"] == "mlp":
             model = MLP(

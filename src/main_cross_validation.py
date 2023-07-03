@@ -59,7 +59,7 @@ def train_main_model(dataset, model, view, cv_number, model_args, run=0):
             model_name += f"_run_{run}_fixed_init"
         cross_validation(model_args, G_list, view, model_name, cv_number, run)
     
-    elif model=='gat':
+    elif model=='gat' or model=='gat_student':
         if model_args["evaluation_method"] == "model_assessment":
             model_name += f"_run_{run}_fixed_init"
         cross_validation(model_args, G_list, view, model_name, cv_number, run)
@@ -70,7 +70,7 @@ def parrallel_run(run):
     views = [0, 2, 4, 5] #0, 2, 4, 5
     for dataset_i in datasets:
         for view_i in views:
-            models = [gat_args] # "gcn", "gcn_student" "gcn_3_args" args  gcn_student_args
+            models = [gat_student_args] # "gcn", "gcn_student" "gcn_3_args" args  gcn_student_args
             for model in models:
                 for cv in [3, 5, 10]:
                     train_main_model(dataset_i, model["model_name"], view_i, cv, model, run)
