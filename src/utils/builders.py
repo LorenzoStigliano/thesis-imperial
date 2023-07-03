@@ -1,12 +1,16 @@
 import os 
+import sys
 import pickle
 import numpy as np
 import scipy.io as sio
+
 #import medmnist
 #from medmnist import INFO
 
 #import torch.utils.data as data
 #import torchvision.transforms as transforms
+
+sys.path.append('/Users/lorenzostigliano/Documents/University/Imperial/Summer Term/thesis-imperial/src/utils')
 
 from config import SAVE_DIR_MODEL_DATA
 

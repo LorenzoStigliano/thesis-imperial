@@ -72,7 +72,7 @@ def weight_similarity_loss(w_teacher, w_student):
     loss = nn.CosineSimilarity()
     return loss(w_student, w_teacher).abs()
 
-def cross_validation_2(model_args, G_list, view, model_name, cv_number, n_students, run=0):
+def lsp_cross_validation_2(model_args, G_list, view, model_name, cv_number, n_students, run=0):
     start = time.time() 
     print("Run : ",run)
     print("--------------------------------------------------------------------------")
