@@ -139,7 +139,7 @@ gat_student_args = {
     "lr":0.0001, 
     "weight_decay":5e-4,
     "threshold":"median", # Threshold the graph adjacency matrix. Possible values: no_threshold, median, mean
-    "hidden_dim":2,
+    "hidden_dim":4,
     "nb_heads":4, # Attention heads
     "alpha":0.2, # Alpha for the leaky_relu.
     "dropout": 0.1,

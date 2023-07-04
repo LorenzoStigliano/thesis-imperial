@@ -100,13 +100,11 @@ def metric_and_view_analysis(models, CV, analysis_type, view, run, dataset_split
 
     all_data_mean = []
     all_data_std = []
-    
     if model_args == None:
         for model in models:
             
             model_results_mean = []
             model_results_std = []
-        
             for training_type in CV:
                 metrics = extract_metrics(dataset=dataset, 
                                         model=model, 
