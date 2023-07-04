@@ -446,14 +446,14 @@ gat_args = {
 }
 
 gat_student_args = {
-    "num_epochs":1, 
+    "num_epochs":50, 
     "lr":0.0001, 
     "weight_decay":5e-4,
     "threshold":"median", # Threshold the graph adjacency matrix. Possible values: no_threshold, median, mean
     "hidden_dim":8,
-    "nb_heads":2, # Attention heads
+    "nb_heads":8, # Attention heads
     "alpha":0.2, # Alpha for the leaky_relu.
-    "dropout": 0.1,
+    "dropout": 0.8,
     "model_name":"gat_student",
     "evaluation_method": "model_assessment",
     "dataset":"gender_data",
