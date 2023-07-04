@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 """
 Created on Wed Dec 30 00:34:57 2020
-
 @author: Mohammed Amine
 """
 
@@ -58,7 +57,7 @@ class GraphAttentionLayer(nn.Module):
         # e1, e2, ..., eN, e1, e2, ..., eN, ..., e1, e2, ..., eN 
         # '----------------------------------------------------' -> N times
         # 
-        
+
         Wh_repeated_in_chunks = Wh.repeat_interleave(N, dim=0)
         Wh_repeated_alternating = Wh.repeat(N, 1)
         # Wh_repeated_in_chunks.shape == Wh_repeated_alternating.shape == (N * N, out_features)
@@ -95,19 +94,25 @@ class GAT_STUDENT(nn.Module):
         torch.manual_seed(run)
         super(GAT_STUDENT, self).__init__()
         self.dropout = dropout
-        self.attentions = [GraphAttentionLayer(nfeat, nclass, dropout=dropout, alpha=alpha, concat=False) for _ in range(nheads)]
+
+        self.attentions = [GraphAttentionLayer(nfeat, nhid, dropout=dropout, alpha=alpha, concat=True) for _ in range(nheads)]
         for i, attention in enumerate(self.attentions):
             self.add_module('attention_{}'.format(i), attention)
+
+        self.out_att = GraphAttentionLayer(nhid * nheads, nclass, dropout=dropout, alpha=alpha, concat=False)
         self.LinearLayer = nn.Linear(nfeat,1)
         self.is_trained = False
         self.run = run
 
     def forward(self, x, adj):
         x = F.dropout(x, self.dropout, training=self.training)
-        node_embeddings = torch.mean(torch.stack([att(x, adj) for att in self.attentions], dim=0), dim=0)
+        x = torch.cat([att(x, adj) for att in self.attentions], dim=1)
+        x = F.dropout(x, self.dropout, training=self.training)
+        node_embeddings = F.elu(self.out_att(x, adj))
         x = F.log_softmax(node_embeddings, dim=1)
         x = self.LinearLayer(torch.transpose(x,0,1))
         # Save weights of GAT model
+
         if self.is_trained:
             w_dict = {"w": self.LinearLayer.weight}
             with open("gat_student_"+str(self.run)+"_W.pickle", 'wb') as f:
@@ -115,10 +120,10 @@ class GAT_STUDENT(nn.Module):
               print("GAT Weights are saved:")
               print(self.LinearLayer.weight)
             self.is_trained = False
-        
+
         x = torch.transpose(x,0,1)
         return x, node_embeddings
-    
+
     def loss(self, pred, label, type='softmax'):
         # softmax + CE
         return F.cross_entropy(pred, label, reduction='mean')
