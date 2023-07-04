@@ -95,25 +95,19 @@ class GAT_STUDENT(nn.Module):
         torch.manual_seed(run)
         super(GAT_STUDENT, self).__init__()
         self.dropout = dropout
-
-        self.attentions = [GraphAttentionLayer(nfeat, nhid, dropout=dropout, alpha=alpha, concat=True) for _ in range(nheads)]
+        self.attentions = [GraphAttentionLayer(nfeat, nclass, dropout=dropout, alpha=alpha, concat=False) for _ in range(nheads)]
         for i, attention in enumerate(self.attentions):
             self.add_module('attention_{}'.format(i), attention)
-
-        self.out_att = GraphAttentionLayer(nhid * nheads, nclass, dropout=dropout, alpha=alpha, concat=False)
         self.LinearLayer = nn.Linear(nfeat,1)
         self.is_trained = False
         self.run = run
 
     def forward(self, x, adj):
         x = F.dropout(x, self.dropout, training=self.training)
-        x = torch.cat([att(x, adj) for att in self.attentions], dim=1)
-        x = F.dropout(x, self.dropout, training=self.training)
-        node_embeddings = F.elu(self.out_att(x, adj))
+        node_embeddings = torch.mean(torch.stack([att(x, adj) for att in self.attentions], dim=0), dim=0)
         x = F.log_softmax(node_embeddings, dim=1)
         x = self.LinearLayer(torch.transpose(x,0,1))
         # Save weights of GAT model
-        
         if self.is_trained:
             w_dict = {"w": self.LinearLayer.weight}
             with open("gat_student_"+str(self.run)+"_W.pickle", 'wb') as f:
