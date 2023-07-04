@@ -1,6 +1,5 @@
 
 import time
-import torch
 import pickle
 import random
 import shutil 
@@ -13,7 +12,7 @@ from torch.autograd import Variable
 import sklearn.metrics as metrics
 
 from models.gcn.gcn_student import GCN_STUDENT
-from models.mlp.mlp import MLP
+from models.gat.gat_student import GAT_STUDENT
 from models.model_config import * 
 from utils.helpers import *
 from utils.config import SAVE_DIR_MODEL_DATA
@@ -33,15 +32,6 @@ class CrossEntropyLossForSoftTarget(nn.Module):
         y_gt_soft = y_gt.div(self.T)
         return -(self.softmax(y_gt_soft)*self.logsoftmax(y_pred_soft)).mean().mul(self.alpha)
     
-def weight_similarity_loss(w_teacher, w_student):
-    """
-    Compute the KL loss between the weights of the last layer
-    of two networks.
-    """    
-    # Concatenate and compute the cosine similarity
-    loss = nn.CosineSimilarity()
-    return 1 - loss(w_student, w_teacher).abs()
-
 def cross_validation(model_args, G_list, view, model_name, cv_number, run=0):
     start = time.time() 
     print("Run : ",run)
@@ -80,15 +70,16 @@ def cross_validation(model_args, G_list, view, model_name, cv_number, run=0):
               run = run
           ).to(device) 
 
-        elif model_args["model_name"] == "mlp":
-          student_model = MLP(
-              num_layers=model_args["num_layers"], 
-              input_dim=num_nodes, 
-              hidden_dim=model_args["hidden_dim"], 
-              output_dim=model_args["output_dim"], 
-              dropout_ratio=model_args["dropout_ratio"],
+        elif model_args["model_name"] == "gat_student":
+          student_model = GAT_STUDENT(
+              nfeat=num_nodes, 
+              nhid=model_args['hidden_dim'], 
+              nclass=num_classes, 
+              dropout=model_args['dropout'], 
+              nheads=model_args['nb_heads'], 
+              alpha=model_args['alpha'],
               run = run
-              ).to(device) 
+          ).to(device)  
 
         if model_args["evaluation_method"] =='model_selection':
             #Here we leave out the test set since we are not evaluating we can see the performance on the test set after training
@@ -122,31 +113,17 @@ def train(model_args, train_dataset, val_dataset, student_model, threshold_value
     This methods performs the training of the model on train dataset and calls evaluate() method for evaluation.
     """
     # Load teacher model
-    if model_args['evaluation_method'] == "model_selection":
-       teacher_model = torch.load(SAVE_DIR_MODEL_DATA+model_args['dataset']+"/"+model_args['backbone']+"/"+model_args['evaluation_method']+f"/gcn/models/gcn_MainModel_{cv_number}Fold_gender_data_gcn_CV_{cv}_view_{view}.pt")
-       teacher_weights_path = SAVE_DIR_MODEL_DATA+model_args['dataset']+"/"+model_args['backbone']+"/"+model_args['evaluation_method']+f"/gcn/weights/W_MainModel_{cv_number}Fold_gender_data_gcn_CV_{cv}_view_{view}.pickle"
-       with open(teacher_weights_path,'rb') as f:
-          teacher_weights = pickle.load(f)
-    else:
-       teacher_model = torch.load(SAVE_DIR_MODEL_DATA+model_args['dataset']+"/"+model_args['backbone']+"/"+model_args['evaluation_method']+f"/gcn/models/gcn_MainModel_{cv_number}Fold_gender_data_gcn_run_{run}_fixed_init_CV_{cv}_view_{view}.pt")
-       teacher_weights_path = SAVE_DIR_MODEL_DATA+model_args['dataset']+"/"+model_args['backbone']+"/"+model_args['evaluation_method']+f"/gcn/weights/W_MainModel_{cv_number}Fold_gender_data_gcn_run_{run}_fixed_init_CV_{cv}_view_{view}.pickle"
-       with open(teacher_weights_path,'rb') as f:
-          teacher_weights = pickle.load(f)
+    teacher_model = torch.load(SAVE_DIR_MODEL_DATA+model_args['dataset']+"/"+model_args['backbone']+"/"+model_args['evaluation_method']+f"/{model_args['backbone']}/models/{model_args['backbone']}_MainModel_{cv_number}Fold_gender_data_{model_args['backbone']}_run_{run}_fixed_init_CV_{cv}_view_{view}.pt")
     
     teacher_model.is_trained = False
     teacher_model.eval()
 
-    #Extract teacher weights
-    teacher_weights = teacher_weights['w'].detach()
     # Transfer
     teacher_model.to(device)
     student_model.to(device)
 
     # Define Loss
-    if model_args["model_name"] == "mlp":
-       criterion = nn.BCEWithLogitsLoss(reduction='mean')
-    else:
-       criterion = nn.CrossEntropyLoss(reduction='mean')
+    criterion = nn.CrossEntropyLoss(reduction='mean')
     criterion_soft = CrossEntropyLossForSoftTarget(T=model_args["T"], alpha=model_args["alpha_soft_ce"])
 
     # Define optimizer
@@ -208,38 +185,16 @@ def train(model_args, train_dataset, val_dataset, student_model, threshold_value
             # Compute soft label
             y_soft, _ = teacher_model(features, adj)
             
-            if model_args["model_name"] == "mlp":
-              # Predict
-              features = torch.mean(adj, axis=1)
-              logits = student_model(features)[1]
-              ypred = torch.sigmoid(logits)[0]
-
-              # Compute loss (foward propagation)
-              logits_model2 = y_soft.div(model_args["T"])
-              # Apply sigmoid activation function to obtain probabilities
-              probabilities_model2 = torch.sigmoid(logits_model2)
-              if label==1:
-                # Calculate the soft binary cross entropy loss
-                loss_soft = torch.nn.functional.binary_cross_entropy_with_logits(logits.div(model_args["T"]), probabilities_model2[0][1].view(1,1))
-              else:
-                loss_soft = torch.nn.functional.binary_cross_entropy_with_logits(logits.div(model_args["T"]), probabilities_model2[0][0].view(1,1))
-              loss_ce = criterion(logits[0].float() , y_gt.float())
-              loss = model_args["alpha_ce"]*loss_ce + model_args["alpha_soft_ce"]*loss_soft
-              # Save pred
-              pred_label = 1 if ypred >= 0.5 else 0
-              preds.append(np.array(pred_label))
-              labels.append(data['label'].long().numpy())
-            else:
-               # Predict
-               ypred, _ = student_model(features, adj)
-               # Compute loss (foward propagation)
-               loss_ce = criterion(ypred, y_gt)
-               loss_soft = criterion_soft(ypred, y_soft)
-               loss = model_args["alpha_ce"]*loss_ce + criterion_soft(ypred, y_soft)
-               #Save pred
-               _, indices = torch.max(ypred, 1)
-               preds.append(indices.cpu().data.numpy())
-               labels.append(data['label'].long().numpy())
+            # Predict
+            ypred, _ = student_model(features, adj)
+            # Compute loss (foward propagation)
+            loss_ce = criterion(ypred, y_gt)
+            loss_soft = criterion_soft(ypred, y_soft)
+            loss = model_args["alpha_ce"]*loss_ce + criterion_soft(ypred, y_soft)
+            #Save pred
+            _, indices = torch.max(ypred, 1)
+            preds.append(indices.cpu().data.numpy())
+            labels.append(data['label'].long().numpy())
             
             # Compute gradients (backward propagation)
             loss.backward()
@@ -282,7 +237,7 @@ def train(model_args, train_dataset, val_dataset, student_model, threshold_value
         train_recall.append(result['recall'])
         train_precision.append(result['prec'])
         
-        val_loss, val_ce_loss, val_soft_ce_loss, val_acc, val_precision, val_recall, val_f1 = validate(val_dataset, student_model, model_args, threshold_value, model_name, teacher_model, teacher_weights)
+        val_loss, val_ce_loss, val_soft_ce_loss, val_acc, val_precision, val_recall, val_f1 = validate(val_dataset, student_model, model_args, threshold_value, model_name, teacher_model)
         validation_loss.append(val_loss)
         validation_ce_loss.append(val_ce_loss)
         validation_soft_ce_loss.append(val_soft_ce_loss)
@@ -347,19 +302,12 @@ def train(model_args, train_dataset, val_dataset, student_model, threshold_value
     torch.save(student_model, SAVE_DIR_MODEL_DATA+model_args['dataset']+"/"+model_args['backbone']+"/"+model_args['evaluation_method']+"/"+model_args['model_name']+"/models/"+model_args['model_name']+"_"+model_name+".pt")
     
     # Save weights
-    if model_args['model_name'] == "diffpool":
-        w_dict = {"w": student_model.state_dict()["assign_conv_first_modules.0.weight"]}
-        with open(SAVE_DIR_MODEL_DATA+model_args['dataset']+"/"+model_args['backbone']+"/"+model_args['evaluation_method']+"/"+model_args['model_name']+'/weights/W_'+model_name+'.pickle', 'wb') as f:
-            pickle.dump(w_dict, f)
-    else:
-        path = SAVE_DIR_MODEL_DATA+model_args['dataset']+"/"+model_args['backbone']+"/"+model_args['evaluation_method']+"/"+model_args['model_name']+'/weights/W_'+model_name+'.pickle'
-        
-        if os.path.exists(path):
-            os.remove(path)
+    path = SAVE_DIR_MODEL_DATA+model_args['dataset']+"/"+model_args['backbone']+"/"+model_args['evaluation_method']+"/"+model_args['model_name']+'/weights/W_'+model_name+'.pickle'
+    if os.path.exists(path):
+       os.remove(path)
+    shutil.move(model_args['model_name']+"_"+str(run)+'_W.pickle', path)
 
-        shutil.move(model_args['model_name']+"_"+str(run)+'_W.pickle'.format(),path)
-
-def validate(dataset, model, model_args, threshold_value, model_name, teacher_model, teacher_weights):
+def validate(dataset, model, model_args, threshold_value, model_name, teacher_model):
     """
     Parameters
     ----------
@@ -384,10 +332,7 @@ def validate(dataset, model, model_args, threshold_value, model_name, teacher_mo
     soft_ce_loss = 0
 
     # Define Loss
-    if model_args["model_name"] == "mlp":
-       criterion = nn.BCEWithLogitsLoss(reduction='mean')
-    else:
-       criterion = nn.CrossEntropyLoss(reduction='mean')
+    criterion = nn.CrossEntropyLoss(reduction='mean')
     criterion_soft = CrossEntropyLossForSoftTarget(T=model_args["T"], alpha=model_args["alpha_soft_ce"])
 
     for _, data in enumerate(dataset):
@@ -404,49 +349,20 @@ def validate(dataset, model, model_args, threshold_value, model_name, teacher_mo
         if model_args["threshold"] in ["median", "mean"]:
             adj = torch.where(adj > threshold_value, torch.tensor([1.0]).to(device), torch.tensor([0.0]).to(device))
         
-        if model_args["model_name"] == 'diffpool':
-            batch_num_nodes=np.array([adj.shape[1]])
-            features = torch.unsqueeze(features, 0)
-            assign_input = np.identity(adj.shape[1])
-            assign_input = Variable(torch.from_numpy(assign_input).float(), requires_grad=False).to(device)
-            assign_input = torch.unsqueeze(assign_input, 0)
-            ypred= model(features, adj, batch_num_nodes, assign_x=assign_input)
-
         # Ground truth label 
         y_gt = label.to(device)
         # Compute soft label
         y_soft , _ = teacher_model(features, adj)
 
-        if model_args["model_name"] == "mlp":
-          # Predict
-          features = torch.mean(adj, axis=1)
-          logits = model(features)[1]
-          ypred = torch.sigmoid(logits)[0]
-
-          # Compute loss (foward propagation)
-          logits_model2 = y_soft.div(model_args["T"])
-          # Apply sigmoid activation function to obtain probabilities
-          probabilities_model2 = torch.sigmoid(logits_model2)
-          if label==1:
-            # Calculate the soft binary cross entropy loss
-            loss_soft = torch.nn.functional.binary_cross_entropy_with_logits(logits.div(model_args["T"]), probabilities_model2[0][1].view(1,1))
-          else:
-            loss_soft = torch.nn.functional.binary_cross_entropy_with_logits(logits.div(model_args["T"]), probabilities_model2[0][0].view(1,1))
-          loss_ce = criterion(logits[0].float() , y_gt.float())
-          loss = model_args["alpha_ce"]*loss_ce +  model_args["alpha_soft_ce"]*loss_soft
-          # Save pred
-          pred_label = 1 if ypred >= 0.5 else 0
-          preds.append(np.array(pred_label))
-        else:
-            # Predict
-            ypred, _ = model(features, adj)
-            # Compute loss (foward propagation)
-            loss_ce = criterion(ypred, y_gt)
-            loss_soft = criterion_soft(ypred, y_soft)
-            loss = model_args["alpha_ce"]*loss_ce + criterion_soft(ypred, y_soft)
-            #Save pred
-            _, indices = torch.max(ypred, 1)
-            preds.append(indices.cpu().data.numpy())
+        # Predict
+        ypred, _ = model(features, adj)
+        # Compute loss (foward propagation)
+        loss_ce = criterion(ypred, y_gt)
+        loss_soft = criterion_soft(ypred, y_soft)
+        loss = model_args["alpha_ce"]*loss_ce + criterion_soft(ypred, y_soft)
+        #Save pred
+        _, indices = torch.max(ypred, 1)
+        preds.append(indices.cpu().data.numpy())
 
         total_loss += loss.item()
         ce_loss += loss_ce.item()
@@ -511,19 +427,7 @@ def test(dataset, model, model_args, threshold_value, model_name):
         if model_args["threshold"] in ["median", "mean"]:
             adj = torch.where(adj > threshold_value, torch.tensor([1.0]).to(device), torch.tensor([0.0]).to(device))
         
-        if model_args["model_name"] == 'diffpool':
-            batch_num_nodes=np.array([adj.shape[1]])
-            features = torch.unsqueeze(features, 0)
-            assign_input = np.identity(adj.shape[1])
-            assign_input = Variable(torch.from_numpy(assign_input).float(), requires_grad=False).to(device)
-            assign_input = torch.unsqueeze(assign_input, 0)
-            ypred= model(features, adj, batch_num_nodes, assign_x=assign_input)
-        
-        elif model_args["model_name"] == "mlp":
-            features = torch.mean(features, axis=1)
-            ypred = model(features)[1]
-        else:
-            ypred = model(features, adj)
+        ypred, _ = model(features, adj)
         
         total_loss += model.loss(ypred, label).item()
         _, indices = torch.max(ypred, 1)

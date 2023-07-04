@@ -1,6 +1,5 @@
 
 import time
-import torch
 import pickle
 import random
 import shutil 
@@ -13,6 +12,7 @@ from torch.autograd import Variable
 import sklearn.metrics as metrics
 
 from models.gcn.gcn_student import GCN_STUDENT
+from models.gat.gat_student import GAT_STUDENT
 from models.model_config import * 
 from utils.helpers import *
 from utils.config import SAVE_DIR_MODEL_DATA
@@ -60,13 +60,25 @@ def cross_validation(model_args, G_list, view, model_name, cv_number, run=0):
         num_nodes = G_list[0]['adj'].shape[0]
         num_classes = 2 
 
-        student_model = GCN_STUDENT(
-            nfeat = num_nodes,
-            nhid = model_args["hidden_dim"],
-            nclass = num_classes,
-            dropout = model_args["dropout"],
-            run = run
-        ).to(device) 
+        if model_args["backbone"] == "gcn":
+          student_model = GCN_STUDENT(
+              nfeat = num_nodes,
+              nhid = model_args["hidden_dim"],
+              nclass = num_classes,
+              dropout = model_args["dropout"],
+              run = run
+          ).to(device)  
+
+        if model_args["backbone"] == "gat":
+            student_model = GAT_STUDENT(
+                nfeat=num_nodes, 
+                nhid=model_args['hidden_dim'], 
+                nclass=num_classes, 
+                dropout=model_args['dropout'], 
+                nheads=model_args['nb_heads'], 
+                alpha=model_args['alpha'],
+                run = run
+            ).to(device)  
 
         if model_args["evaluation_method"] =='model_selection':
             #Here we leave out the test set since we are not evaluating we can see the performance on the test set after training
@@ -100,11 +112,7 @@ def train(model_args, train_dataset, val_dataset, student_model, threshold_value
     This methods performs the training of the model on train dataset and calls evaluate() method for evaluation.
     """
     # Load teacher model
-    if model_args['evaluation_method'] == "model_selection":
-       teacher_model = torch.load(SAVE_DIR_MODEL_DATA+model_args['dataset']+"/"+model_args['backbone']+"/"+model_args['evaluation_method']+f"/gcn/models/gcn_MainModel_{cv_number}Fold_gender_data_gcn_CV_{cv}_view_{view}.pt")
-    else:
-       teacher_model = torch.load(SAVE_DIR_MODEL_DATA+model_args['dataset']+"/"+model_args['backbone']+"/"+model_args['evaluation_method']+f"/gcn/models/gcn_MainModel_{cv_number}Fold_gender_data_gcn_run_{run}_fixed_init_CV_{cv}_view_{view}.pt")
-    
+    teacher_model = torch.load(SAVE_DIR_MODEL_DATA+model_args['dataset']+"/"+model_args['backbone']+"/"+model_args['evaluation_method']+f"/{model_args['backbone']}/models/{model_args['backbone']}_MainModel_{cv_number}Fold_gender_data_{model_args['backbone']}_run_{run}_fixed_init_CV_{cv}_view_{view}.pt")
     teacher_model.is_trained = False
     teacher_model.eval()
 
@@ -300,17 +308,10 @@ def train(model_args, train_dataset, val_dataset, student_model, threshold_value
     torch.save(student_model, SAVE_DIR_MODEL_DATA+model_args['dataset']+"/"+model_args['backbone']+"/"+model_args['evaluation_method']+"/"+model_args['model_name']+"/models/"+model_args['model_name']+"_"+model_name+".pt")
     
     # Save weights
-    if model_args['model_name'] == "diffpool":
-        w_dict = {"w": student_model.state_dict()["assign_conv_first_modules.0.weight"]}
-        with open(SAVE_DIR_MODEL_DATA+model_args['dataset']+"/"+model_args['backbone']+"/"+model_args['evaluation_method']+"/"+model_args['model_name']+'/weights/W_'+model_name+'.pickle', 'wb') as f:
-            pickle.dump(w_dict, f)
-    else:
-        path = SAVE_DIR_MODEL_DATA+model_args['dataset']+"/"+model_args['backbone']+"/"+model_args['evaluation_method']+"/"+model_args['model_name']+'/weights/W_'+model_name+'.pickle'
-        
-        if os.path.exists(path):
-            os.remove(path)
-
-        shutil.move("gcn_student_"+str(run)+'_W.pickle'.format(), path)
+    path = SAVE_DIR_MODEL_DATA+model_args['dataset']+"/"+model_args['backbone']+"/"+model_args['evaluation_method']+"/"+model_args['model_name']+'/weights/W_'+model_name+'.pickle'
+    if os.path.exists(path):
+        os.remove(path)
+    shutil.move("gcn_student_"+str(run)+'_W.pickle'.format(), path)
 
 def validate(dataset, model, model_args, threshold_value, model_name, teacher_model, epoch):
     """

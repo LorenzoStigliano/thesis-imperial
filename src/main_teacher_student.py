@@ -12,7 +12,7 @@ from utils.loaders import load_data
 import joblib
 from joblib import Parallel, delayed
 
-def train_main_model(dataset, model, view, cv_number, run=0):
+def train_main_model(dataset, model, view, cv_number, model_args, run=0):
     
     torch.manual_seed(run)
     np.random.seed(run)
@@ -24,16 +24,13 @@ def train_main_model(dataset, model, view, cv_number, run=0):
 
     G_list = load_data(dataset, view, NormalizeInputGraphs=False)
 
-    new_folder(model_strip, gcn_student_args["evaluation_method"])
+    new_folder(model, model_args["evaluation_method"], backbone=model_args["backbone"])
     
-    if gcn_args["evaluation_method"] == "model_assessment":
+    if model_args["evaluation_method"] == "model_assessment":
             model_name += f"_run_{run}_fixed_init"
     
-    if model == "gcn_student":
-        cross_validation(gcn_student_args, G_list, view, model_name, cv_number, run)
-    
-    if model == "mlp":
-        cross_validation(mlp_args, G_list, view, model_name, cv_number, run)
+    if model_args["model_name"] == "gcn_student" or model_args["model_name"] == "gat_student":
+        cross_validation(model_args, G_list, view, model_name, cv_number, run)
 
 def parrallel_run(run):
     print(run)
@@ -41,10 +38,10 @@ def parrallel_run(run):
     views = [0, 2, 4, 5] #0, 2, 4, 5
     for dataset_i in datasets_asdnc:
         for view_i in views:
-            models = ["gcn_student"] #"gcn_student", "gcn_student_teacher_weight"
+            models = [gcn_student_args] #"gcn_student"
             for model in models:
                 for cv in [3, 5, 10]:
-                    train_main_model(dataset_i, model, view_i, cv, run)
+                    train_main_model(dataset_i, model["model_name"], view_i, cv, model, run)
 
 if __name__ == '__main__':
         

@@ -43,23 +43,13 @@ def train_main_model(dataset, model, view, cv_number, model_args, run=0):
             model_name += f"_run_{run}_fixed_init"
         cross_validation(model_args, G_list, view, model_name, cv_number, run)
     
-    if model=='gcn' and model_args["layers"]!=2:
+    elif model=='gcn' and model_args["layers"]!=2:
         if model_args["evaluation_method"] == "model_assessment":
             layers = model_args["layers"]
             model_name += f"_run_{run}_fixed_init_layers_{str(layers)}"
         cross_validation(model_args, G_list, view, model_name, cv_number, run)
     
-    elif model=='gcn_student':
-        if model_args["evaluation_method"] == "model_assessment":
-            model_name += f"_run_{run}_fixed_init"
-        cross_validation(model_args, G_list, view, model_name, cv_number, run)
-    
-    elif model=='mlp':
-        if model_args["evaluation_method"] == "model_assessment":
-            model_name += f"_run_{run}_fixed_init"
-        cross_validation(model_args, G_list, view, model_name, cv_number, run)
-    
-    elif model=='gat' or model=='gat_student':
+    elif model=='gcn_student' or model=='gat' or model=='gat_student':
         if model_args["evaluation_method"] == "model_assessment":
             model_name += f"_run_{run}_fixed_init"
         cross_validation(model_args, G_list, view, model_name, cv_number, run)
