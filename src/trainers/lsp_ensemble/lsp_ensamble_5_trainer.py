@@ -12,6 +12,7 @@ from torch.autograd import Variable
 import sklearn.metrics as metrics
 
 from models.gcn.gcn_student_lsp_ensamble import GCN_STUDENT_ENSAMBLE
+from models.gat.gat_student_ensamble import GAT_STUDENT_ENSAMBLE
 from models.model_config import * 
 from utils.helpers import *
 from utils.config import SAVE_DIR_MODEL_DATA
@@ -108,16 +109,30 @@ def lsp_cross_validation_5(model_args, G_list, view, model_name, cv_number, n_st
         num_nodes = G_list[0]['adj'].shape[0]
         num_classes = 2 
         for i in range(n_students):
-            student_model = GCN_STUDENT_ENSAMBLE(
-                nfeat = num_nodes,
-                nhid = model_args["hidden_dim"],
-                nclass = num_classes,
-                dropout = model_args["dropout"],
-                seed = i,
-                run = run, 
-                number = i,
-                total_number = model_args["n_students"]
-            ).to(device)
+            if model_args["backbone"] == "gcn":
+              student_model = GCN_STUDENT_ENSAMBLE(
+                  nfeat = num_nodes,
+                  nhid = model_args["hidden_dim"],
+                  nclass = num_classes,
+                  dropout = model_args["dropout"],
+                  seed = i,
+                  run = run, 
+                  number = i,
+                  total_number = model_args["n_students"]
+              ).to(device)
+            else:
+              student_model = GAT_STUDENT_ENSAMBLE(
+                  nfeat=num_nodes, 
+                  nhid=model_args['hidden_dim'], 
+                  nclass=num_classes, 
+                  dropout=model_args['dropout'], 
+                  nheads=model_args['nb_heads'], 
+                  alpha=model_args['alpha'],
+                  seed = i,
+                  run = run, 
+                  number = i,
+                  total_number = model_args["n_students"]
+              ).to(device)  
             students.append(student_model)
 
         train_set, validation_set, test_set = datasets_splits(folds, model_args, cv)
@@ -154,21 +169,10 @@ def train(model_args, train_dataset, val_dataset, students, student_names, thres
     This methods performs the training of the model on train dataset and calls evaluate() method for evaluation.
     """
     # Load teacher model
-    if model_args['evaluation_method'] == "model_selection":
-       teacher_model = torch.load(SAVE_DIR_MODEL_DATA+model_args['dataset']+"/"+model_args['backbone']+"/"+model_args['evaluation_method']+f"/gcn/models/gcn_MainModel_{cv_number}Fold_gender_data_gcn_CV_{cv}_view_{view}.pt")
-       teacher_weights_path = SAVE_DIR_MODEL_DATA+model_args['dataset']+"/"+model_args['backbone']+"/"+model_args['evaluation_method']+f"/gcn/weights/W_MainModel_{cv_number}Fold_gender_data_gcn_CV_{cv}_view_{view}.pickle"
-       with open(teacher_weights_path,'rb') as f:
-          teacher_weights = pickle.load(f)
-    else:
-       teacher_model = torch.load(SAVE_DIR_MODEL_DATA+model_args['dataset']+"/"+model_args['backbone']+"/"+model_args['evaluation_method']+f"/gcn/models/gcn_MainModel_{cv_number}Fold_gender_data_gcn_run_{run}_fixed_init_CV_{cv}_view_{view}.pt")
-       teacher_weights_path = SAVE_DIR_MODEL_DATA+model_args['dataset']+"/"+model_args['backbone']+"/"+model_args['evaluation_method']+f"/gcn/weights/W_MainModel_{cv_number}Fold_gender_data_gcn_run_{run}_fixed_init_CV_{cv}_view_{view}.pickle"
-       with open(teacher_weights_path,'rb') as f:
-          teacher_weights = pickle.load(f)
+    teacher_model = torch.load(SAVE_DIR_MODEL_DATA+model_args['dataset']+"/"+model_args['backbone']+"/"+model_args['evaluation_method']+f"/{model_args['backbone']}/models/{model_args['backbone']}_MainModel_{cv_number}Fold_gender_data_{model_args['backbone']}_run_{run}_fixed_init_CV_{cv}_view_{view}.pt")
     teacher_model.is_trained = False
     teacher_model.eval()
 
-    #Extract teacher weights
-    teacher_weights = teacher_weights['w'].detach()
     # Transfer
     teacher_model.to(device)
     student_model_1 = students[0].to(device)
@@ -358,7 +362,7 @@ def train(model_args, train_dataset, val_dataset, students, student_names, thres
         # loss of weights within the students 
         train_loss_within_student.append(t_loss_within_student / len(train_dataset)) 
         
-        val_total_loss, val_loss_teacher_student, val_loss_ensamble_ce, val_ensamble_soft_ce_loss, val_loss_within_student = validate(val_dataset, students, model_args, threshold_value, model_name, teacher_model, teacher_weights)
+        val_total_loss, val_loss_teacher_student, val_loss_ensamble_ce, val_ensamble_soft_ce_loss, val_loss_within_student = validate(val_dataset, students, model_args, threshold_value, model_name, teacher_model)
         validation_total_loss.append(val_total_loss)
         validation_loss_teacher_student.append(val_loss_teacher_student)
         validation_loss_ensamble_ce.append(val_loss_ensamble_ce)
@@ -431,23 +435,18 @@ def train(model_args, train_dataset, val_dataset, students, student_names, thres
       torch.save(student_model, SAVE_DIR_MODEL_DATA+model_args['dataset']+"/"+model_args['backbone']+"/"+model_args['evaluation_method']+"/"+model_args['model_name']+"/models/"+student_name+".pt")
     
       # Save weights
-      if model_args['model_name'] == "diffpool":
-          w_dict = {"w": student_model.state_dict()["assign_conv_first_modules.0.weight"]}
-          with open(SAVE_DIR_MODEL_DATA+model_args['dataset']+"/"+model_args['backbone']+"/"+model_args['evaluation_method']+"/"+model_args['model_name']+'/weights/W_'+student_name+'.pickle', 'wb') as f:
-              pickle.dump(w_dict, f)
-      else:
-          path = SAVE_DIR_MODEL_DATA+model_args['dataset']+"/"+model_args['backbone']+"/"+model_args['evaluation_method']+"/"+model_args['model_name']+'/weights/W_'+student_name+'.pickle'
-          
-          if os.path.exists(path):
-              os.remove(path)
-
-          shutil.move(model_args['model_name']+f'_number_{number}_run_{run}_W.pickle', path)  
+      path = SAVE_DIR_MODEL_DATA+model_args['dataset']+"/"+model_args['backbone']+"/"+model_args['evaluation_method']+"/"+model_args['model_name']+'/weights/W_'+student_name+'.pickle'
       
+      if os.path.exists(path):
+          os.remove(path)
+
+      shutil.move(model_args['model_name']+f'_number_{number}_run_{run}_W.pickle', path)  
+  
       number+=1
 
 
 
-def validate(dataset, students, model_args, threshold_value, model_name, teacher_model, teacher_weights):
+def validate(dataset, students, model_args, threshold_value, model_name, teacher_model):
     """
     Parameters
     ----------
