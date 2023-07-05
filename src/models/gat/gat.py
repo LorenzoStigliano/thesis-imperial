@@ -109,8 +109,8 @@ class GAT(nn.Module):
         x = F.dropout(x, self.dropout, training=self.training)
         x = torch.cat([att(x, adj) for att in self.attentions], dim=1)
         x = F.dropout(x, self.dropout, training=self.training)
-        node_embeddings = F.elu(self.out_att(x, adj))
-        x = F.log_softmax(node_embeddings, dim=1)
+        node_embeddings = self.out_att(x, adj)
+        x = F.log_softmax(F.elu(node_embeddings), dim=1)
         x = self.LinearLayer(torch.transpose(x,0,1))
         # Save weights of GAT model
         
