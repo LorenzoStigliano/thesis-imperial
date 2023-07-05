@@ -386,7 +386,7 @@ def plot_bar_chart_metric_multiple_runs(dataset, view, models, CV, runs, metric,
     barWidth = 1/(len(models)+1)
 
     mean_all_runs = []
-    for run in [i for i in range(10)]:
+    for run in runs:
         view_data_mean, _ = view_metric_analysis(models=models, CV=CV, view=view, run=run, metric=metric, dataset=dataset, dataset_split=dataset_split, analysis_type=analysis_type, model_args=model_args)
         mean_all_runs.append(view_data_mean)
 
