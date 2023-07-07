@@ -430,7 +430,7 @@ gcn_student_lsp_ensamble_4_args_4 = {
 ######################################## GCN BACKBONE MODEL PARAMETERS w/BreastMNIST ########################################
 
 gcn_BreastMNIST_args = {
-    "num_epochs":1, 
+    "num_epochs":50, 
     "lr": 1e-4, 
     "weight_decay":5e-4, 
     "hidden_dim":64,
@@ -444,7 +444,7 @@ gcn_BreastMNIST_args = {
 }
 
 gcn_student_BreastMNIST_args = {
-    "num_epochs":1, 
+    "num_epochs":50, 
     "lr": 1e-5, 
     "weight_decay":5e-4, 
     "hidden_dim":64,
@@ -462,10 +462,10 @@ gcn_student_BreastMNIST_args = {
 ######################################## GCN BACKBONE MODEL PARAMETERS w/PneumoniaMNIST ########################################
 
 gcn_PneumoniaMNIST_args = {
-    "num_epochs":1, 
-    "lr": 1e-6, 
+    "num_epochs":50, 
+    "lr": 1e-5, 
     "weight_decay":5e-4, 
-    "hidden_dim":64,
+    "hidden_dim":48,
     "dropout":0,
     "threshold":"median", # Threshold the graph adjacency matrix. Possible values: no_threshold, median, mean
     "model_name":"gcn",
@@ -476,7 +476,7 @@ gcn_PneumoniaMNIST_args = {
 }
 
 gcn_student_PneumoniaMNIST_args = {
-    "num_epochs":1, 
+    "num_epochs":50, 
     "lr": 1e-6, 
     "weight_decay":5e-4, 
     "hidden_dim":64,
