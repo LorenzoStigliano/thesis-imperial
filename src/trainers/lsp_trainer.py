@@ -100,7 +100,7 @@ def cross_validation(model_args, G_list, view, model_name, cv_number, run=0):
                 nheads=model_args['nb_heads'], 
                 alpha=model_args['alpha'],
                 run = run,
-              dataset = model_args["dataset"]
+                dataset = model_args["dataset"]
             ).to(device)  
 
         if model_args["evaluation_method"] =='model_selection':

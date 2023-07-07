@@ -100,7 +100,8 @@ def cross_validation_3(model_args, G_list, view, model_name, cv_number, n_studen
                   seed = i,
                   run = run, 
                   number = i,
-                  total_number = model_args["n_students"]
+                  total_number = model_args["n_students"],
+                  dataset = model_args["dataset"]
               ).to(device)  
             students.append(student_model)
 
