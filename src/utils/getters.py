@@ -173,7 +173,7 @@ def get_weight(dataset, view, model, training_type, shot_n, cv_n, run, student, 
             if model_args["layers"] == 3 or model_args["layers"] == 4:
                 cv_path = SAVE_DIR_MODEL_DATA+f'{dataset}/{model_args["backbone"]}/'+'model_assessment/{}/weights/W_MainModel_{}_{}_{}_run_{}_fixed_init_layers_{}_CV_{}_view_{}.pickle'.format(model,training_type, dataset, model, run, model_args["layers"],cv_n, view)
             else:
-                cv_path = SAVE_DIR_MODEL_DATA+f'{dataset}/{model_args["backbone"]}/'+'model_assessment/{}/weights/W_MainModel_{}_{}_{}_run_{}_fixed_init_CV_{}_view_{}.pickle'.format(model,training_type, dataset, model, run, cv_n, view)
+                cv_path = SAVE_DIR_MODEL_DATA+f'{dataset}/{model_args["backbone"]}/'+'model_assessment/{}/weights/W_MainModel_{}_{}_{}_run_{}_fixed_init_CV_{}_view_{}.pickle'.format(model, training_type, dataset, model, run, cv_n, view)
         else:
             cv_path = SAVE_DIR_MODEL_DATA+f'{dataset}/{model_args["backbone"]}/'+'model_assessment/{}/weights/W_MainModel_{}_{}_{}_run_{}_fixed_init_CV_{}_view_{}_with_teacher.pickle'.format(model,training_type, dataset, model, run, cv_n, view)
     else:
