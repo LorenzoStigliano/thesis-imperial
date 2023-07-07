@@ -12,7 +12,8 @@ class MLP(nn.Module):
         output_dim,
         dropout_ratio,
         run,
-        norm_type="none",
+        dataset,
+        norm_type="none"
     ):
         torch.manual_seed(run)
         super(MLP, self).__init__()
@@ -23,6 +24,7 @@ class MLP(nn.Module):
         self.norms = nn.ModuleList()
         self.is_trained = False
         self.run = run
+        self.dataset
 
         if num_layers == 1:
             self.layers.append(nn.Linear(input_dim, output_dim))
@@ -57,7 +59,7 @@ class MLP(nn.Module):
         if self.is_trained:
           linear_layer = self.layers[0]
           w_dict = {"w": linear_layer.weight}
-          with open("mlp_"+str(self.run)+"_W.pickle", 'wb') as f:
+          with open("mlp_"+str(self.run)+"_"+str(self.dataset)+"_W.pickle", 'wb') as f:
             pickle.dump(w_dict, f)
           self.is_trained = False
           print("MLP Weights are saved:")

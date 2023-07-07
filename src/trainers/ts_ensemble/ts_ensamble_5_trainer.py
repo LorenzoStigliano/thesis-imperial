@@ -86,7 +86,8 @@ def cross_validation_5(model_args, G_list, view, model_name, cv_number, n_studen
                   seed = i,
                   run = run, 
                   number = i,
-                  total_number = model_args["n_students"]
+                  total_number = model_args["n_students"],
+                  dataset = model_args["dataset"]
               ).to(device)
             else:
               student_model = GAT_STUDENT_ENSAMBLE(
@@ -99,7 +100,8 @@ def cross_validation_5(model_args, G_list, view, model_name, cv_number, n_studen
                   seed = i,
                   run = run, 
                   number = i,
-                  total_number = model_args["n_students"]
+                  total_number = model_args["n_students"],
+                  dataset = model_args["dataset"]
               ).to(device)  
             students.append(student_model)
 
@@ -398,7 +400,8 @@ def train(model_args, train_dataset, val_dataset, students, student_names, thres
       if os.path.exists(path):
           os.remove(path)
 
-      shutil.move(model_args['model_name']+f'_number_{number}_run_{run}_W.pickle', path)  
+      dataset_NAME = model_args['dataset']
+      shutil.move(model_args['model_name']+f'_number_{number}_run_{run}_{dataset_NAME}_W.pickle', path)   
       
       number+=1
 

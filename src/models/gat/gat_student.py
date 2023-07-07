@@ -90,7 +90,7 @@ class GraphAttentionLayer(nn.Module):
         return self.__class__.__name__ + ' (' + str(self.in_features) + ' -> ' + str(self.out_features) + ')'
 
 class GAT_STUDENT(nn.Module):
-    def __init__(self, nfeat, nhid, nclass, dropout, alpha, nheads, run):
+    def __init__(self, nfeat, nhid, nclass, dropout, alpha, nheads, run, dataset):
         """Dense version of GAT."""
         torch.manual_seed(run)
         super(GAT_STUDENT, self).__init__()
@@ -108,6 +108,7 @@ class GAT_STUDENT(nn.Module):
         self.LinearLayer = nn.Linear(nfeat,1)
         self.is_trained = False
         self.run = run
+        self.dataset = dataset
 
     def forward(self, x, adj):
         x = F.dropout(x, self.dropout, training=self.training)
@@ -122,7 +123,7 @@ class GAT_STUDENT(nn.Module):
         # Save weights of GAT model
         if self.is_trained:
             w_dict = {"w": self.LinearLayer.weight}
-            with open("gat_student_"+str(self.run)+"_W.pickle", 'wb') as f:
+            with open("gat_student_"+str(self.run)+"_"+str(self.dataset)+"_W.pickle", 'wb') as f:
               pickle.dump(w_dict, f)
               print("GAT Weights are saved:")
               print(self.LinearLayer.weight)

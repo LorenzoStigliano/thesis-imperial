@@ -118,7 +118,8 @@ def lsp_cross_validation_2(model_args, G_list, view, model_name, cv_number, n_st
                   seed = i,
                   run = run, 
                   number = i,
-                  total_number = model_args["n_students"]
+                  total_number = model_args["n_students"],
+                  dataset = model_args["dataset"]
               ).to(device)
             else:
               student_model = GAT_STUDENT_ENSAMBLE(
@@ -131,7 +132,8 @@ def lsp_cross_validation_2(model_args, G_list, view, model_name, cv_number, n_st
                   seed = i,
                   run = run, 
                   number = i,
-                  total_number = model_args["n_students"]
+                  total_number = model_args["n_students"],
+                  dataset = model_args["dataset"]
               ).to(device)  
             students.append(student_model)
 
@@ -378,7 +380,7 @@ def train(model_args, train_dataset, val_dataset, students, student_names, thres
     
     # Save Model (4)
     number = 0
-    for student_name, student_model in zip(student_names, [student_model_1, student_model_2, student_model_3, student_model_4, student_model_5]):
+    for student_name, student_model in zip(student_names, [student_model_1, student_model_2]):
       print(SAVE_DIR_MODEL_DATA+model_args['dataset']+"/"+model_args['backbone']+"/"+model_args['evaluation_method']+"/"+model_args['model_name']+"/models/"+student_name+".pt")
       torch.save(student_model, SAVE_DIR_MODEL_DATA+model_args['dataset']+"/"+model_args['backbone']+"/"+model_args['evaluation_method']+"/"+model_args['model_name']+"/models/"+student_name+".pt")
     
@@ -387,8 +389,9 @@ def train(model_args, train_dataset, val_dataset, students, student_names, thres
       
       if os.path.exists(path):
           os.remove(path)
-
-      shutil.move(model_args['model_name']+f'_number_{number}_run_{run}_W.pickle', path)  
+      
+      dataset_NAME = model_args['dataset']
+      shutil.move(model_args['model_name']+f'_number_{number}_run_{run}_{dataset_NAME}_W.pickle', path)  
   
       number+=1
 

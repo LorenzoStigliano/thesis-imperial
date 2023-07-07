@@ -75,7 +75,8 @@ def cross_validation(model_args, G_list, view, model_name, cv_number, run=0):
                 nhid = model_args["hidden_dim"],
                 nclass = num_classes,
                 dropout = model_args["dropout"],
-                run = run
+                run = run,
+                dataset = model_args["dataset"]
             ).to(device)
         
         elif model_args["model_name"]=='gat':
@@ -86,7 +87,8 @@ def cross_validation(model_args, G_list, view, model_name, cv_number, run=0):
                 dropout=model_args['dropout'], 
                 nheads=model_args['nb_heads'], 
                 alpha=model_args['alpha'],
-                run = run
+                run = run,
+                dataset = model_args["dataset"]
             ).to(device)   
         
         elif model_args["model_name"] == "gcn_student":
@@ -107,7 +109,8 @@ def cross_validation(model_args, G_list, view, model_name, cv_number, run=0):
                 dropout=model_args['dropout'], 
                 nheads=model_args['nb_heads'], 
                 alpha=model_args['alpha'],
-                run = run
+                run = run,
+                dataset = model_args["dataset"]
             ).to(device)   
         
         elif model_args["model_name"] == "mlp":
@@ -117,7 +120,8 @@ def cross_validation(model_args, G_list, view, model_name, cv_number, run=0):
                 hidden_dim=model_args["hidden_dim"], 
                 output_dim=model_args["output_dim"], 
                 dropout_ratio=model_args["dropout_ratio"],
-                run = run
+                run = run,
+                dataset = model_args["dataset"]
                 )
         
         if model_args["evaluation_method"] =='model_selection': 

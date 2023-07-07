@@ -87,7 +87,8 @@ def cross_validation(model_args, G_list, view, model_name, cv_number, run=0):
               nhid = model_args["hidden_dim"],
               nclass = num_classes,
               dropout = model_args["dropout"],
-              run = run
+              run = run,
+              dataset = model_args["dataset"]
           ).to(device)  
 
         if model_args["backbone"] == "gat":
@@ -98,7 +99,8 @@ def cross_validation(model_args, G_list, view, model_name, cv_number, run=0):
                 dropout=model_args['dropout'], 
                 nheads=model_args['nb_heads'], 
                 alpha=model_args['alpha'],
-                run = run
+                run = run,
+              dataset = model_args["dataset"]
             ).to(device)  
 
         if model_args["evaluation_method"] =='model_selection':
@@ -331,7 +333,7 @@ def train(model_args, train_dataset, val_dataset, student_model, threshold_value
     path = SAVE_DIR_MODEL_DATA+model_args['dataset']+"/"+model_args['backbone']+"/"+model_args['evaluation_method']+"/"+model_args['model_name']+'/weights/W_'+model_name+'.pickle'
     if os.path.exists(path):
         os.remove(path)
-    shutil.move("gcn_student_"+str(run)+'_W.pickle'.format(), path)
+    shutil.move("gcn_student_"+str(run)+"_"+str(model_args['dataset'])+'_W.pickle'.format(), path)
 
 def validate(dataset, model, model_args, threshold_value, model_name, teacher_model):
     """
