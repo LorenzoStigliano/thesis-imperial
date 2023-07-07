@@ -65,7 +65,8 @@ def cross_validation(model_args, G_list, view, model_name, cv_number, run=0):
                 nhid = model_args["hidden_dim"],
                 nclass = num_classes,
                 dropout = model_args["dropout"],
-                run = run
+                run = run,
+                dataset = model_args["dataset"]
             ).to(device)
         
         elif model_args["model_name"]=='gcn'and model_args["layers"]==3:
@@ -94,7 +95,8 @@ def cross_validation(model_args, G_list, view, model_name, cv_number, run=0):
                 nhid = model_args["hidden_dim"],
                 nclass = num_classes,
                 dropout = model_args["dropout"],
-                run = run
+                run = run,
+                dataset = model_args["dataset"]
             ).to(device) 
         
         elif model_args["model_name"]=='gat_student':
@@ -300,8 +302,7 @@ def train(model_args, train_dataset, val_dataset, model, threshold_value, model_
         
         if os.path.exists(path):
             os.remove(path)
-
-        shutil.move(model_args['model_name']+"_"+str(run)+'_W.pickle', path)
+        shutil.move(model_args['model_name']+"_"+str(run)+'_'+str(model_args["dataset"])+'_W.pickle', path)
 
 def validate(dataset, model, model_args, threshold_value, model_name):
     """

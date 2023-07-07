@@ -427,6 +427,69 @@ gcn_student_lsp_ensamble_4_args_4 = {
     "n_students":4 # TOTAL number of students in ensamble 
 }
 
+######################################## GCN BACKBONE MODEL PARAMETERS w/BreastMNIST ########################################
+
+gcn_BreastMNIST_args = {
+    "num_epochs":1, 
+    "lr": 1e-4, 
+    "weight_decay":5e-4, 
+    "hidden_dim":64,
+    "dropout":0,
+    "threshold":"median", # Threshold the graph adjacency matrix. Possible values: no_threshold, median, mean
+    "model_name":"gcn",
+    "backbone":"gcn",
+    "dataset":"BreastMNIST",
+    "layers":2,
+    "evaluation_method": "model_assessment" # model selection or model assessment
+}
+
+gcn_student_BreastMNIST_args = {
+    "num_epochs":1, 
+    "lr": 1e-5, 
+    "weight_decay":5e-4, 
+    "hidden_dim":64,
+    "dropout":0,
+    "threshold":"median", # Threshold the graph adjacency matrix. Possible values: no_threshold, median, mean
+    "model_name":"gcn_student",
+    "backbone":"gcn",
+    "dataset":"BreastMNIST",
+    "evaluation_method": "model_assessment", # model selection or model assessment
+    "alpha_ce": 1, 
+    "T": 3, 
+    "alpha_soft_ce": 2
+}
+
+######################################## GCN BACKBONE MODEL PARAMETERS w/PneumoniaMNIST ########################################
+
+gcn_PneumoniaMNIST_args = {
+    "num_epochs":1, 
+    "lr": 1e-6, 
+    "weight_decay":5e-4, 
+    "hidden_dim":64,
+    "dropout":0,
+    "threshold":"median", # Threshold the graph adjacency matrix. Possible values: no_threshold, median, mean
+    "model_name":"gcn",
+    "backbone":"gcn",
+    "dataset":"PneumoniaMNIST",
+    "layers":2,
+    "evaluation_method": "model_assessment" # model selection or model assessment
+}
+
+gcn_student_PneumoniaMNIST_args = {
+    "num_epochs":1, 
+    "lr": 1e-6, 
+    "weight_decay":5e-4, 
+    "hidden_dim":64,
+    "dropout":0,
+    "threshold":"median", # Threshold the graph adjacency matrix. Possible values: no_threshold, median, mean
+    "model_name":"gcn_student",
+    "backbone":"gcn",
+    "dataset":"PneumoniaMNIST",
+    "evaluation_method": "model_assessment", # model selection or model assessment
+    "alpha_ce": 1, 
+    "T": 3, 
+    "alpha_soft_ce": 2
+}
 
 ######################################## GAT BACKBONE MODEL PARAMETERS ########################################
 
@@ -459,3 +522,4 @@ gat_student_args = {
     "dataset":"gender_data",
     "backbone":"gat"
 }
+
