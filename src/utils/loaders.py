@@ -10,7 +10,7 @@ import numpy as np
 
 #TODO: make sure we can use these classes for data with more than 2 classes!
 
-def load_data(dataset, view, NormalizeInputGraphs=False, input_type='image'):
+def load_data(dataset, view, NormalizeInputGraphs=False):
     """
     Parameters
     ----------
@@ -53,10 +53,7 @@ def load_data(dataset, view, NormalizeInputGraphs=False, input_type='image'):
         #Create List of Dictionaries
         G_list=[]
         for i in range(len(labels)):
-            if input_type == 'adj':
-                adj = img_to_adj(images[i])
-            elif input_type == 'image':
-                adj = images[i]
+            adj = images[i]
             G_element = {"adj": adj,"label": labels[i], "id":  i}
             G_list.append(G_element)
         
@@ -123,82 +120,4 @@ class GraphSampler(torch.utils.data.Dataset):
         return {'adj':self.adj_all[idx],
                 'label':self.label_all[idx],
                 'id':self.id_all[idx]}
-
-def get_adjs(i, j, n):
-    """
-    Parameters
-    ----------
-    i : row of pixel
-    j : column of pixel
-    n : 1-D size of a squared image (nxn)
     
-    Description
-    ----------
-    This method returns the adjacency list of specific pixel
-
-    """
-    adj_list = []
-    # Upper-Left
-    uli, ulj = i - 1, j - 1
-    if 0 <= uli < n and 0 <= ulj < n:
-        adj_list.append((uli, ulj))
-    
-    # Up
-    ui, uj = i - 1, j
-    if 0 <= ui < n and 0 <= uj < n:
-        adj_list.append((ui, uj))
-    
-    # Upper-Right
-    uri, urj = i - 1, j + 1
-    if 0 <= uri < n and 0 <= urj < n:
-        adj_list.append((uri, urj))
-    
-    # Left
-    li, lj = i, j - 1
-    if 0 <= li < n and 0 <= lj < n:
-        adj_list.append((li, lj))
-    
-    # Right
-    ri, rj = i, j + 1
-    if 0 <= ri < n and 0 <= rj < n:
-        adj_list.append((ri, rj))
-
-    # Lower-Left
-    lli, llj = i + 1, j - 1
-    if 0 <= lli < n and 0 <= llj < n:
-        adj_list.append((lli, llj))
-
-    # Down
-    di, dj = i + 1, j
-    if 0 <= di < n and 0 <= dj < n:
-        adj_list.append((di, dj))
-    
-    # Lower-right
-    lri, lrj = i + 1, j + 1
-    if 0 <= lri < n and 0 <= lrj < n:
-        adj_list.append((lri, lrj))
-    
-    return adj_list
-
-def img_to_adj(image):
-    """
-    Parameters
-    ----------
-    image : nxn square image
-    
-    Description
-    ----------
-    This method returns the weighted adjacency matrix
-    Weigths are determined by the absolute differences of adjacent pixels
-
-    """
-    n = image.shape[0]
-    adj = np.zeros((n * n, n * n), np.float32)
-    for i in range(0,n):
-        for j in range(0 ,n):
-            adjList = get_adjs(i, j, n)
-            for u,v in adjList:
-                weight = np.abs(image[i, j] - image[u, v])
-                adj[n * i + j, n * u + v] = weight
-                adj[n * u + v, n * i + j] = weight
-    return adj

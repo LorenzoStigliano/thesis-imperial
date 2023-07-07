@@ -463,9 +463,9 @@ gcn_student_BreastMNIST_args = {
 
 gcn_PneumoniaMNIST_args = {
     "num_epochs":50, 
-    "lr": 1e-5, 
+    "lr": 1e-6, 
     "weight_decay":5e-4, 
-    "hidden_dim":48,
+    "hidden_dim":32,
     "dropout":0,
     "threshold":"median", # Threshold the graph adjacency matrix. Possible values: no_threshold, median, mean
     "model_name":"gcn",
