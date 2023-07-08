@@ -456,7 +456,24 @@ gcn_student_BreastMNIST_args = {
     "evaluation_method": "model_assessment", # model selection or model assessment
     "alpha_ce": 1, 
     "T": 3, 
-    "alpha_soft_ce": 0.2
+    "alpha_soft_ce": 0.8
+}
+
+gcn_fitnet_student_BreastMNIST_args = {
+    "num_epochs":50, 
+    "lr": 1e-5, 
+    "weight_decay":5e-4, 
+    "hidden_dim":64,
+    "dropout":0,
+    "threshold":"median", # Threshold the graph adjacency matrix. Possible values: no_threshold, median, mean
+    "model_name":"fitnet",
+    "backbone":"gcn",
+    "dataset":"BreastMNIST",
+    "evaluation_method": "model_assessment", # model selection or model assessment
+    "alpha_ce": 1, 
+    "T": 3, 
+    "alpha_soft_ce": 0.2,
+    "alpha_ht": 0.5
 }
 
 ######################################## GCN BACKBONE MODEL PARAMETERS w/PneumoniaMNIST ########################################
