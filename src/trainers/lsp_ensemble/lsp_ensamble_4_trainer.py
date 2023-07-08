@@ -30,7 +30,7 @@ class CrossEntropyLossForSoftTarget(nn.Module):
     def forward(self, y_pred, y_gt):
         y_pred_soft = y_pred.div(self.T)
         y_gt_soft = y_gt.div(self.T)
-        return -(self.softmax(y_gt_soft)*self.logsoftmax(y_pred_soft)).mean()
+        return -(self.softmax(y_gt_soft)*self.logsoftmax(y_pred_soft)).mean().mul(self.T^2)
     
 def lsp(node_embeddings, adjacency_matrix, sigma=1.0):
 

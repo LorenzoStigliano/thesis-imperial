@@ -30,7 +30,7 @@ class CrossEntropyLossForSoftTarget(nn.Module):
     def forward(self, y_pred, y_gt):
         y_pred_soft = y_pred.div(self.T)
         y_gt_soft = y_gt.div(self.T)
-        return -(self.softmax(y_gt_soft)*self.logsoftmax(y_pred_soft)).mean().mul(self.alpha)
+        return -(self.softmax(y_gt_soft)*self.logsoftmax(y_pred_soft)).mean().mul(self.alpha).mul(self.T^2)
 
 def cross_validation(model_args, G_list, view, model_name, cv_number, run=0):
     start = time.time() 

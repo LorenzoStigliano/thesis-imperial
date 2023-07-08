@@ -44,7 +44,7 @@ gcn_student_args = {
     "evaluation_method": "model_assessment", # model selection or model assessment
     "alpha_ce": 1, 
     "T": 3, 
-    "alpha_soft_ce": 2
+    "alpha_soft_ce": 0.2
 }
 
 gcn_lsp_student_args = {
@@ -78,7 +78,7 @@ gcn_mskd_student_args = {
     "evaluation_method": "model_assessment", # model selection or model assessment
     "alpha_ce": 1, 
     "T": 3, 
-    "alpha_soft_ce": 4,
+    "alpha_soft_ce": 0.4,
     "alpha_mskd": 2
 }
 
@@ -95,7 +95,7 @@ gcn_fitnet_student_args_0_4 = {
     "evaluation_method": "model_assessment", # model selection or model assessment
     "alpha_ce": 1, 
     "T": 3, 
-    "alpha_soft_ce": 2,
+    "alpha_soft_ce": 0.2,
     "alpha_ht": 0.5
 }
 
@@ -112,7 +112,7 @@ gcn_fitnet_student_args = {
     "evaluation_method": "model_assessment", # model selection or model assessment
     "alpha_ce": 1, 
     "T": 2, 
-    "alpha_soft_ce": 2,
+    "alpha_soft_ce": 0.5,
     "alpha_ht": 0.2
 }
 
@@ -130,8 +130,8 @@ gcn_student_ensamble_2_args = {
     "dataset":"gender_data",
     "evaluation_method": "model_assessment", # model selection or model assessment
     "alpha": 1, # ensamble ce loss
-    "beta": 2,  # ensamble kd loss
-    "gamma": 2, # sum of student ce loss
+    "beta": 0.2,  # ensamble kd loss
+    "gamma": 0.2, # sum of student ce loss
     "lambda":1, # disentanglement loss
     "T": 3, #Temperature parameter for soft logit target 
     "n_students":2 # TOTAL number of students in ensamble 
@@ -149,8 +149,8 @@ gcn_student_ensamble_3_args = {
     "dataset":"gender_data",
     "evaluation_method": "model_assessment", # model selection or model assessment
     "alpha": 1, # ensamble ce loss
-    "beta": 2,  # ensamble kd loss
-    "gamma": 2, # sum of student ce loss
+    "beta": 0.2,  # ensamble kd loss
+    "gamma": 0.2, # sum of student ce loss
     "lambda":1, # disentanglement loss
     "T": 3, #Temperature parameter for soft logit target 
     "n_students":3 # TOTAL number of students in ensamble 
@@ -168,8 +168,8 @@ gcn_student_ensamble_4_args = {
     "dataset":"gender_data",
     "evaluation_method": "model_assessment", # model selection or model assessment
     "alpha": 1, # ensamble ce loss
-    "beta": 2,  # ensamble kd loss
-    "gamma": 2, # sum of student ce loss
+    "beta": 0.2,  # ensamble kd loss
+    "gamma": 0.2, # sum of student ce loss
     "lambda":1, # disentanglement loss
     "T": 3, #Temperature parameter for soft logit target 
     "n_students":4 # TOTAL number of students in ensamble 
@@ -187,8 +187,8 @@ gcn_student_ensamble_5_args = {
     "dataset":"gender_data",
     "evaluation_method": "model_assessment", # model selection or model assessment
     "alpha": 1, # ensamble ce loss
-    "beta": 2,  # ensamble kd loss
-    "gamma": 2, # sum of student ce loss
+    "beta": 0.2,  # ensamble kd loss
+    "gamma": 0.2, # sum of student ce loss
     "lambda":1, # disentanglement loss
     "T": 3, #Temperature parameter for soft logit target 
     "n_students":5 # TOTAL number of students in ensamble 
@@ -209,7 +209,7 @@ gcn_student_lsp_ensamble_2_args = {
     "evaluation_method": "model_assessment", # model selection or model assessment
     "alpha": 1, # ensamble ce loss
     "beta": 2,  # ensamble kd loss
-    "gamma": 2, # sum of student ce loss
+    "gamma": 0.2, # sum of student ce loss
     "lambda":1, # disentanglement loss
     "T": 3, #Temperature parameter for soft logit target 
     "n_students":2 # TOTAL number of students in ensamble 
@@ -228,7 +228,7 @@ gcn_student_lsp_ensamble_3_args = {
     "evaluation_method": "model_assessment", # model selection or model assessment
     "alpha": 1, # ensamble ce loss
     "beta": 2,  # ensamble kd loss
-    "gamma": 2, # sum of student ce loss
+    "gamma": 0.2, # sum of student ce loss
     "lambda":1, # disentanglement loss
     "T": 3, #Temperature parameter for soft logit target 
     "n_students":3 # TOTAL number of students in ensamble 
@@ -247,7 +247,7 @@ gcn_student_lsp_ensamble_4_args = {
     "evaluation_method": "model_assessment", # model selection or model assessment
     "alpha": 1, # ensamble ce loss
     "beta": 2,  # ensamble kd loss
-    "gamma": 2, # sum of student ce loss
+    "gamma": 0.2, # sum of student ce loss
     "lambda":1, # disentanglement loss
     "T": 3, #Temperature parameter for soft logit target 
     "n_students":4 # TOTAL number of students in ensamble 
@@ -266,7 +266,7 @@ gcn_student_lsp_ensamble_5_args = {
     "evaluation_method": "model_assessment", # model selection or model assessment
     "alpha": 1, # ensamble ce loss
     "beta": 2,  # ensamble kd loss
-    "gamma": 2, # sum of student ce loss
+    "gamma": 0.2, # sum of student ce loss
     "lambda":1, # disentanglement loss
     "T": 3, #Temperature parameter for soft logit target 
     "n_students":5 # TOTAL number of students in ensamble 
@@ -286,8 +286,8 @@ gcn_student_ensamble_4_args_1 = {
     "dataset":"gender_data",
     "evaluation_method": "model_assessment", # model selection or model assessment
     "alpha": 0, # ensamble ce loss
-    "beta": 2,  # ensamble kd loss
-    "gamma": 2, # sum of student ce loss
+    "beta": 0.2,  # ensamble kd loss
+    "gamma": 0.2, # sum of student ce loss
     "lambda":1, # disentanglement loss
     "T": 3, #Temperature parameter for soft logit target 
     "n_students":4 # TOTAL number of students in ensamble 
@@ -306,7 +306,7 @@ gcn_student_ensamble_4_args_2 = {
     "evaluation_method": "model_assessment", # model selection or model assessment
     "alpha": 1, # ensamble ce loss
     "beta": 0,  # ensamble kd loss
-    "gamma": 2, # sum of student ce loss
+    "gamma": 0.2, # sum of student ce loss
     "lambda":1, # disentanglement loss
     "T": 3, #Temperature parameter for soft logit target 
     "n_students":4 # TOTAL number of students in ensamble 
@@ -324,7 +324,7 @@ gcn_student_ensamble_4_args_3 = {
     "dataset":"gender_data",
     "evaluation_method": "model_assessment", # model selection or model assessment
     "alpha": 1, # ensamble ce loss
-    "beta": 2,  # ensamble kd loss
+    "beta": 0.2,  # ensamble kd loss
     "gamma": 0, # sum of student ce loss
     "lambda":1, # disentanglement loss
     "T": 3, #Temperature parameter for soft logit target 
@@ -343,8 +343,8 @@ gcn_student_ensamble_4_args_4 = {
     "dataset":"gender_data",
     "evaluation_method": "model_assessment", # model selection or model assessment
     "alpha": 1, # ensamble ce loss
-    "beta": 2,  # ensamble kd loss
-    "gamma": 2, # sum of student ce loss
+    "beta": 0.2,  # ensamble kd loss
+    "gamma": 0.2, # sum of student ce loss
     "lambda":0, # disentanglement loss
     "T": 3, #Temperature parameter for soft logit target 
     "n_students":4 # TOTAL number of students in ensamble 
@@ -365,7 +365,7 @@ gcn_student_lsp_ensamble_4_args_1 = {
     "evaluation_method": "model_assessment", # model selection or model assessment
     "alpha": 0, # ensamble ce loss
     "beta": 2,  # ensamble kd loss
-    "gamma": 2, # sum of student ce loss
+    "gamma": 0.2, # sum of student ce loss
     "lambda":1, # disentanglement loss
     "T": 3, #Temperature parameter for soft logit target 
     "n_students":4 # TOTAL number of students in ensamble 
@@ -383,7 +383,7 @@ gcn_student_lsp_ensamble_4_args_2 = {
     "evaluation_method": "model_assessment", # model selection or model assessment
     "alpha": 1, # ensamble ce loss
     "beta": 0,  # ensamble kd loss
-    "gamma": 2, # sum of student ce loss
+    "gamma": 0.2, # sum of student ce loss
     "lambda":1, # disentanglement loss
     "T": 3, #Temperature parameter for soft logit target 
     "n_students":4 # TOTAL number of students in ensamble 
@@ -421,7 +421,7 @@ gcn_student_lsp_ensamble_4_args_4 = {
     "evaluation_method": "model_assessment", # model selection or model assessment
     "alpha": 1, # ensamble ce loss
     "beta": 2,  # ensamble kd loss
-    "gamma": 2, # sum of student ce loss
+    "gamma": 0.2, # sum of student ce loss
     "lambda":0, # disentanglement loss
     "T": 3, #Temperature parameter for soft logit target 
     "n_students":4 # TOTAL number of students in ensamble 
@@ -456,7 +456,7 @@ gcn_student_BreastMNIST_args = {
     "evaluation_method": "model_assessment", # model selection or model assessment
     "alpha_ce": 1, 
     "T": 3, 
-    "alpha_soft_ce": 2
+    "alpha_soft_ce": 0.2
 }
 
 ######################################## GCN BACKBONE MODEL PARAMETERS w/PneumoniaMNIST ########################################
@@ -488,7 +488,7 @@ gcn_student_PneumoniaMNIST_args = {
     "evaluation_method": "model_assessment", # model selection or model assessment
     "alpha_ce": 1, 
     "T": 3, 
-    "alpha_soft_ce": 2
+    "alpha_soft_ce": 0.3
 }
 
 ######################################## GAT BACKBONE MODEL PARAMETERS ########################################
