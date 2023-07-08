@@ -8,14 +8,14 @@ import sklearn.metrics as metrics
 from torch.autograd import Variable
 import torch.nn.functional as F
 
-from models.gcn.gcn import GCN
-from models.gcn.gcn_3_layers import GCN3
-from models.gcn.gcn_student import GCN_STUDENT
+from models.gcn import GCN
+from models.gcn_3_layers import GCN3
+from models.gcn_student import GCN_STUDENT
 
-from models.gat.gat import GAT
-from models.gat.gat_student import GAT_STUDENT
+from models.gat import GAT
+from models.gat_student import GAT_STUDENT
 
-from models.mlp.mlp import MLP
+from models.mlp import MLP
 
 from utils.helpers import *
 from utils.config import SAVE_DIR_MODEL_DATA

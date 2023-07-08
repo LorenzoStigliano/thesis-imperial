@@ -11,8 +11,8 @@ import torch.optim as optim
 from torch.autograd import Variable
 import sklearn.metrics as metrics
 
-from models.gcn.gcn_student_lsp_ensamble import GCN_STUDENT_ENSAMBLE
-from models.gat.gat_student_ensamble import GAT_STUDENT_ENSAMBLE
+from models.gcn_student_lsp_ensamble import GCN_STUDENT_ENSAMBLE
+from models.gat_student_ensamble import GAT_STUDENT_ENSAMBLE
 from models.model_config import * 
 from utils.helpers import *
 from utils.config import SAVE_DIR_MODEL_DATA
