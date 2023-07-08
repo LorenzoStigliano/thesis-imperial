@@ -454,14 +454,14 @@ gcn_student_BreastMNIST_args = {
     "backbone":"gcn",
     "dataset":"BreastMNIST",
     "evaluation_method": "model_assessment", # model selection or model assessment
-    "alpha_ce": 1, 
+    "alpha_ce": 0.8, 
     "T": 3, 
-    "alpha_soft_ce": 0.8
+    "alpha_soft_ce": 1
 }
 
 gcn_fitnet_student_BreastMNIST_args = {
     "num_epochs":50, 
-    "lr": 1e-5, 
+    "lr": 1e-4, 
     "weight_decay":5e-4, 
     "hidden_dim":64,
     "dropout":0,
@@ -470,10 +470,45 @@ gcn_fitnet_student_BreastMNIST_args = {
     "backbone":"gcn",
     "dataset":"BreastMNIST",
     "evaluation_method": "model_assessment", # model selection or model assessment
+    "alpha_ce": 2, 
+    "T": 3, 
+    "alpha_soft_ce": 0.8,
+    "alpha_ht": 0.1
+}
+
+gcn_lsp_student_BreastMNIST_args = {
+    "num_epochs":50, 
+    "lr": 1e-4, 
+    "weight_decay":5e-4, 
+    "hidden_dim":64,
+    "dropout":0,
+    "threshold":"median", # Threshold the graph adjacency matrix. Possible values: no_threshold, median, mean
+    "model_name":"lsp",
+    "backbone":"gcn",
+    "dataset":"BreastMNIST",
+    "evaluation_method": "model_assessment", # model selection or model assessment
     "alpha_ce": 1, 
     "T": 3, 
-    "alpha_soft_ce": 0.2,
-    "alpha_ht": 0.5
+    "alpha_soft_ce": 2,
+    "alpha_kd_lsp":2,
+    "alpha_weight": 0
+}
+
+gcn_mskd_student_BreastMNIST_args = {
+    "num_epochs":50, 
+    "lr":  1e-4, 
+    "weight_decay":5e-4, 
+    "hidden_dim":64,
+    "dropout":0,
+    "threshold":"median", # Threshold the graph adjacency matrix. Possible values: no_threshold, median, mean
+    "model_name":"mskd",
+    "backbone":"gcn",
+    "dataset":"BreastMNIST",
+    "evaluation_method": "model_assessment", # model selection or model assessment
+    "alpha_ce": 1, 
+    "T": 3, 
+    "alpha_soft_ce": 0.4,
+    "alpha_mskd": 2
 }
 
 ######################################## GCN BACKBONE MODEL PARAMETERS w/PneumoniaMNIST ########################################
@@ -506,6 +541,58 @@ gcn_student_PneumoniaMNIST_args = {
     "alpha_ce": 1, 
     "T": 3, 
     "alpha_soft_ce": 0.3
+}
+
+gcn_fitnet_student_PneumoniaMNIST_args = {
+    "num_epochs":50, 
+    "lr": 1e-6, 
+    "weight_decay":5e-4, 
+    "hidden_dim":64,
+    "dropout":0,
+    "threshold":"median", # Threshold the graph adjacency matrix. Possible values: no_threshold, median, mean
+    "model_name":"fitnet",
+    "backbone":"gcn",
+    "dataset":"PneumoniaMNIST",
+    "evaluation_method": "model_assessment", # model selection or model assessment
+    "alpha_ce": 2, 
+    "T": 3, 
+    "alpha_soft_ce": 0.8,
+    "alpha_ht": 0.1
+}
+
+gcn_lsp_student_PneumoniaMNIST_args = {
+    "num_epochs":50, 
+    "lr": 1e-6, 
+    "weight_decay":5e-4, 
+    "hidden_dim":64,
+    "dropout":0,
+    "threshold":"median", # Threshold the graph adjacency matrix. Possible values: no_threshold, median, mean
+    "model_name":"lsp",
+    "backbone":"gcn",
+    "dataset":"PneumoniaMNIST",
+    "evaluation_method": "model_assessment", # model selection or model assessment
+    "alpha_ce": 1, 
+    "T": 3, 
+    "alpha_soft_ce": 2,
+    "alpha_kd_lsp":2,
+    "alpha_weight": 0
+}
+
+gcn_mskd_student_PneumoniaMNIST_args = {
+    "num_epochs":50, 
+    "lr":  1e-6, 
+    "weight_decay":5e-4, 
+    "hidden_dim":64,
+    "dropout":0,
+    "threshold":"median", # Threshold the graph adjacency matrix. Possible values: no_threshold, median, mean
+    "model_name":"mskd",
+    "backbone":"gcn",
+    "dataset":"PneumoniaMNIST",
+    "evaluation_method": "model_assessment", # model selection or model assessment
+    "alpha_ce": 1, 
+    "T": 3, 
+    "alpha_soft_ce": 0.4,
+    "alpha_mskd": 2
 }
 
 ######################################## GAT BACKBONE MODEL PARAMETERS ########################################

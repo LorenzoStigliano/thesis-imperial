@@ -33,6 +33,10 @@ def lsp(node_embeddings, adjacency_matrix, sigma=1.0):
     
     # Compute the sum of similarities for each node's neighbors
     sum_similarities = torch.sum(adjacency_matrix * similarity_matrix, dim=1)
+
+    # Add epsilon to entries that are equal to zero
+    epsilon = 1e-5  # Small epsilon value
+    sum_similarities = sum_similarities + epsilon * torch.eq(sum_similarities, 0).float()
     
     # Compute the local structure by dividing each node's similarity by the sum
     local_structure = similarity_matrix / sum_similarities.unsqueeze(1)
@@ -148,8 +152,8 @@ def train(model_args, train_dataset, val_dataset, student_model, threshold_value
     This methods performs the training of the model on train dataset and calls evaluate() method for evaluation.
     """
     # Load teacher model
-    teacher_model_1 = torch.load(SAVE_DIR_MODEL_DATA+model_args['dataset']+"/"+model_args['backbone']+"/"+model_args['evaluation_method']+f"/{model_args['backbone']}_student/models/{model_args['backbone']}_student_MainModel_{cv_number}Fold_gender_data_{model_args['backbone']}_student_run_{run}_fixed_init_CV_{cv}_view_{view}.pt")
-    teacher_model_2 = torch.load(SAVE_DIR_MODEL_DATA+model_args['dataset']+"/"+model_args['backbone']+"/"+model_args['evaluation_method']+f"/{model_args['backbone']}/models/{model_args['backbone']}_MainModel_{cv_number}Fold_gender_data_{model_args['backbone']}_run_{run}_fixed_init_CV_{cv}_view_{view}.pt")
+    teacher_model_1 = torch.load(SAVE_DIR_MODEL_DATA+model_args['dataset']+"/"+model_args['backbone']+"/"+model_args['evaluation_method']+f"/{model_args['backbone']}_student/models/{model_args['backbone']}_student_MainModel_{cv_number}Fold_{model_args['dataset']}_{model_args['backbone']}_student_run_{run}_fixed_init_CV_{cv}_view_{view}.pt")
+    teacher_model_2 = torch.load(SAVE_DIR_MODEL_DATA+model_args['dataset']+"/"+model_args['backbone']+"/"+model_args['evaluation_method']+f"/{model_args['backbone']}/models/{model_args['backbone']}_MainModel_{cv_number}Fold_{model_args['dataset']}_{model_args['backbone']}_run_{run}_fixed_init_CV_{cv}_view_{view}.pt")
 
     teacher_model_1.is_trained = False
     teacher_model_2.is_trained = False
