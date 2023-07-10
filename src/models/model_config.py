@@ -511,6 +511,24 @@ gcn_mskd_student_BreastMNIST_args = {
     "alpha_mskd": 2
 }
 
+######################################## GAT BACKBONE MODEL PARAMETERS w/BreastMNIST ########################################
+
+
+gat_BreastMNIST_args = {
+    "num_epochs":50, 
+    "lr": 1e-3, 
+    "weight_decay":5e-4,
+    "threshold":"median", # Threshold the graph adjacency matrix. Possible values: no_threshold, median, mean
+    "hidden_dim":8,
+    "nb_heads":8, # Attention heads
+    "alpha":0.2, # Alpha for the leaky_relu.
+    "dropout": 0.1,
+    "model_name":"gat",
+    "evaluation_method": "model_assessment",
+    "dataset":"BreastMNIST",
+    "backbone":"gat"
+}
+
 ######################################## GCN BACKBONE MODEL PARAMETERS w/PneumoniaMNIST ########################################
 
 gcn_PneumoniaMNIST_args = {
@@ -538,9 +556,9 @@ gcn_student_PneumoniaMNIST_args = {
     "backbone":"gcn",
     "dataset":"PneumoniaMNIST",
     "evaluation_method": "model_assessment", # model selection or model assessment
-    "alpha_ce": 1, 
+    "alpha_ce": 0.6, 
     "T": 3, 
-    "alpha_soft_ce": 0.3
+    "alpha_soft_ce": 1
 }
 
 gcn_fitnet_student_PneumoniaMNIST_args = {
