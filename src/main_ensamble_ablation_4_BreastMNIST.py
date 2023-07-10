@@ -31,7 +31,7 @@ def train_main_model(dataset, model, view, cv_number, model_args, run=0):
 
     G_list = load_data(dataset, view, NormalizeInputGraphs=False)
 
-    new_folder(model_args["model_name"], model_args["evaluation_method"])
+    new_folder(model_args["model_name"], model_args["evaluation_method"], dataset=model_args["dataset"])
     
     if gcn_args["evaluation_method"] == "model_assessment":
             model_name += f"_run_{run}_fixed_init"
@@ -56,14 +56,22 @@ def train_main_model(dataset, model, view, cv_number, model_args, run=0):
 
 def parrallel_run(run):
     print(run)
-    datasets_asdnc = ['gender_data']
+    datasets_asdnc = ['BreastMNIST']
     views = [0, 2, 4, 5] #0, 2, 4, 5
+
     for dataset_i in datasets_asdnc:
-        for view_i in views:
-            models = [gcn_student_lsp_ensamble_4_args_1] #gcn_student_ensamble_4_args, gcn_student_ensamble_5_args]
+        if dataset_i == "gender_data": 
+            for view_i in views:
+                models = [gcn_student_lsp_ensamble_4_args_1] #gcn_student_ensamble_4_args, gcn_student_ensamble_5_args]
+                for model in models:
+                    for cv in [3, 5, 10]:
+                        train_main_model(dataset_i, model["model_name"], view_i, cv, model, run)
+                    
+        else:
+            models = [gcn_student_lsp_ensamble_4_BreastMNIST_args_4] # "gcn", "gcn_student" "gcn_3_args" args  gcn_student_args gat_args
             for model in models:
                 for cv in [3, 5, 10]:
-                    train_main_model(dataset_i, model["model_name"], view_i, cv, model, run)
+                    train_main_model(dataset_i, model["model_name"], -1, cv, model, run) 
 
 if __name__ == '__main__':
         

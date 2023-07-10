@@ -31,7 +31,7 @@ def train_main_model(dataset, model, view, cv_number, model_args, run=0):
 
     G_list = load_data(dataset, view, NormalizeInputGraphs=False)
 
-    new_folder(model_args["model_name"], model_args["evaluation_method"])
+    new_folder(model_args["model_name"], model_args["evaluation_method"], dataset=model_args["dataset"])
     
     if gcn_args["evaluation_method"] == "model_assessment":
             model_name += f"_run_{run}_fixed_init"
@@ -44,7 +44,7 @@ def train_main_model(dataset, model, view, cv_number, model_args, run=0):
         cross_validation_4(model_args, G_list, view, model_name, cv_number, n_students=4, run=run)
     if model_args["model_name"] == "gcn_student_ensamble_5":
         cross_validation_5(model_args, G_list, view, model_name, cv_number, n_students=5, run=run)
-    
+
     if model_args["model_name"] == "gcn_student_lsp_ensamble_2":
         lsp_cross_validation_2(model_args, G_list, view, model_name, cv_number, n_students=2, run=run)
     if model_args["model_name"] == "gcn_student_lsp_ensamble_3":
@@ -54,17 +54,24 @@ def train_main_model(dataset, model, view, cv_number, model_args, run=0):
     if model_args["model_name"] == "gcn_student_lsp_ensamble_5":
         lsp_cross_validation_5(model_args, G_list, view, model_name, cv_number, n_students=5, run=run)
 
-
 def parrallel_run(run):
     print(run)
     datasets_asdnc = ['gender_data']
     views = [0, 2, 4, 5] #0, 2, 4, 5
+
     for dataset_i in datasets_asdnc:
-        for view_i in views:
-            models = [gcn_student_lsp_ensamble_4_args_2] #gcn_student_ensamble_4_args, gcn_student_ensamble_5_args]
+        if dataset_i == "gender_data": 
+            for view_i in views:
+                models = [gcn_student_lsp_ensamble_4_args_3] #gcn_student_ensamble_4_args, gcn_student_ensamble_5_args]
+                for model in models:
+                    for cv in [3, 5, 10]:
+                        train_main_model(dataset_i, model["model_name"], view_i, cv, model, run)
+                    
+        else:
+            models = [gcn_student_lsp_ensamble_4_args_1] # "gcn", "gcn_student" "gcn_3_args" args  gcn_student_args gat_args
             for model in models:
                 for cv in [3, 5, 10]:
-                    train_main_model(dataset_i, model["model_name"], view_i, cv, model, run)
+                    train_main_model(dataset_i, model["model_name"], -1, cv, model, run) 
 
 if __name__ == '__main__':
         
