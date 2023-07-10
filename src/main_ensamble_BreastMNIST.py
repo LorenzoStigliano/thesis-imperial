@@ -43,8 +43,9 @@ def train_main_model(dataset, model, view, cv_number, model_args, run=0):
 
 def parrallel_run(run):
     print(run)
-    datasets_asdnc = ['gender_data']
+    datasets_asdnc = ['BreastMNIST']
     views = [0, 2, 4, 5] #0, 2, 4, 5
+    
     for dataset_i in datasets_asdnc:
         if dataset_i == "gender_data":
             for view_i in views:
@@ -58,7 +59,12 @@ def parrallel_run(run):
                     for cv in [3, 5, 10]:
                         train_main_model(dataset_i, model["model_name"], view_i, cv, model, run)
         else:
-            models = [gcn_fitnet_student_PneumoniaMNIST_args] # "gcn", "gcn_student" "gcn_3_args" args  gcn_student_args gat_args
+            models = [
+                gcn_student_ensamble_5_BreastMNIST_args,
+                gcn_student_ensamble_4_BreastMNIST_args,
+                gcn_student_ensamble_3_BreastMNIST_args,
+                gcn_student_ensamble_2_BreastMNIST_args
+            ]
             for model in models:
                 for cv in [3, 5, 10]:
                     train_main_model(dataset_i, model["model_name"], -1, cv, model, run) 

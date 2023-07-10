@@ -172,7 +172,7 @@ def train(model_args, train_dataset, val_dataset, students, student_names, thres
     This methods performs the training of the model on train dataset and calls evaluate() method for evaluation.
     """
     # Load teacher model
-    teacher_model = torch.load(SAVE_DIR_MODEL_DATA+model_args['dataset']+"/"+model_args['backbone']+"/"+model_args['evaluation_method']+f"/{model_args['backbone']}/models/{model_args['backbone']}_MainModel_{cv_number}Fold_gender_data_{model_args['backbone']}_run_{run}_fixed_init_CV_{cv}_view_{view}.pt")
+    teacher_model = torch.load(SAVE_DIR_MODEL_DATA+model_args['dataset']+"/"+model_args['backbone']+"/"+model_args['evaluation_method']+f"/{model_args['backbone']}/models/{model_args['backbone']}_MainModel_{cv_number}Fold_{model_args['dataset']}_{model_args['backbone']}_run_{run}_fixed_init_CV_{cv}_view_{view}.pt")
     teacher_model.is_trained = False
     teacher_model.eval()
 

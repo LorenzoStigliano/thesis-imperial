@@ -153,6 +153,7 @@ def new_folder(model, evaluation_method, backbone="gcn", dataset="gender_data"):
     ----------
     Creates GNN directories if not exist.
     """
+    print(SAVE_DIR_MODEL_DATA+dataset+"/"+backbone+"/"+evaluation_method+"/"+model)
     if not os.path.exists(SAVE_DIR_MODEL_DATA+dataset+"/"+backbone+"/"+evaluation_method+"/"+model):
         os.makedirs(SAVE_DIR_MODEL_DATA+dataset+"/"+backbone+"/"+evaluation_method+"/"+model)
         os.makedirs(SAVE_DIR_MODEL_DATA+dataset+"/"+backbone+"/"+evaluation_method+"/"+model+"/weights")
