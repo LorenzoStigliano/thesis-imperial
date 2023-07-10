@@ -12,8 +12,8 @@ from models.gcn import GCN
 from models.gcn_3_layers import GCN3
 from models.gcn_student import GCN_STUDENT
 
-from models.gat import GAT
-from models.gat_student import GAT_STUDENT
+from models.gat.gat import GAT
+from models.gat.gat_student import GAT_STUDENT
 
 from models.mlp import MLP
 

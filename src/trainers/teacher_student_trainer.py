@@ -12,7 +12,7 @@ from torch.autograd import Variable
 import sklearn.metrics as metrics
 
 from models.gcn_student import GCN_STUDENT
-from models.gat_student import GAT_STUDENT
+from models.gat.gat_student import GAT_STUDENT
 from models.model_config import * 
 from utils.helpers import *
 from utils.config import SAVE_DIR_MODEL_DATA
@@ -116,7 +116,6 @@ def train(model_args, train_dataset, val_dataset, student_model, threshold_value
     """
     # Load teacher model
     teacher_model = torch.load(SAVE_DIR_MODEL_DATA+model_args['dataset']+"/"+model_args['backbone']+"/"+model_args['evaluation_method']+f"/{model_args['backbone']}/models/{model_args['backbone']}_MainModel_{cv_number}Fold_{model_args['dataset']}_{model_args['backbone']}_run_{run}_fixed_init_CV_{cv}_view_{view}.pt")
-    
     teacher_model.is_trained = False
     teacher_model.eval()
 
