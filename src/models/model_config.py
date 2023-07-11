@@ -778,7 +778,7 @@ gcn_student_lsp_ensamble_5_BreastMNIST_args_1 = {
     "hidden_dim":64,
     "dropout":0,
     "threshold":"median", # Threshold the graph adjacency matrix. Possible values: no_threshold, median, mean
-    "model_name":"gcn_student_lsp_ensamble_4",
+    "model_name":"gcn_student_lsp_ensamble_5",
     "backbone":"gcn",
     "dataset":"BreastMNIST",
     "evaluation_method": "model_assessment", # model selection or model assessment
@@ -797,7 +797,7 @@ gcn_student_lsp_ensamble_5_BreastMNIST_args_2 = {
     "hidden_dim":64,
     "dropout":0,
     "threshold":"median", # Threshold the graph adjacency matrix. Possible values: no_threshold, median, mean
-    "model_name":"gcn_student_lsp_ensamble_4",
+    "model_name":"gcn_student_lsp_ensamble_5",
     "backbone":"gcn",
     "dataset":"BreastMNIST",
     "evaluation_method": "model_assessment", # model selection or model assessment
@@ -816,7 +816,7 @@ gcn_student_lsp_ensamble_5_BreastMNIST_args_3 = {
     "hidden_dim":64,
     "dropout":0,
     "threshold":"median", # Threshold the graph adjacency matrix. Possible values: no_threshold, median, mean
-    "model_name":"gcn_student_lsp_ensamble_4",
+    "model_name":"gcn_student_lsp_ensamble_5",
     "backbone":"gcn",
     "dataset":"BreastMNIST",
     "evaluation_method": "model_assessment", # model selection or model assessment
@@ -835,7 +835,7 @@ gcn_student_lsp_ensamble_5_BreastMNIST_args_4 = {
     "hidden_dim":64,
     "dropout":0,
     "threshold":"median", # Threshold the graph adjacency matrix. Possible values: no_threshold, median, mean
-    "model_name":"gcn_student_lsp_ensamble_4",
+    "model_name":"gcn_student_lsp_ensamble_5",
     "backbone":"gcn",
     "dataset":"BreastMNIST",
     "evaluation_method": "model_assessment", # model selection or model assessment
