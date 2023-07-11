@@ -109,7 +109,7 @@ def lsp_cross_validation_2(model_args, G_list, view, model_name, cv_number, n_st
         num_nodes = G_list[0]['adj'].shape[0]
         num_classes = 2 
         for i in range(n_students):
-            if model_args["backbone"] == "gcn":
+            if model_args["model_name"] == "gcn_student":
               student_model = GCN_STUDENT_ENSAMBLE(
                   nfeat = num_nodes,
                   nhid = model_args["hidden_dim"],

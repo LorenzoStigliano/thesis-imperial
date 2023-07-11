@@ -4,3 +4,4 @@ model_data/
 figures/
 __pycache__/
 to_depreciate/
+src/main_custom/
