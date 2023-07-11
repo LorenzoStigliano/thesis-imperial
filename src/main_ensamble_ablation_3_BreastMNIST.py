@@ -68,7 +68,7 @@ def parrallel_run(run):
                         train_main_model(dataset_i, model["model_name"], view_i, cv, model, run)
                     
         else:
-            models = [gcn_student_lsp_ensamble_4_BreastMNIST_args_3] # "gcn", "gcn_student" "gcn_3_args" args  gcn_student_args gat_args
+            models = [gcn_student_lsp_ensamble_5_BreastMNIST_args_3] # "gcn", "gcn_student" "gcn_3_args" args  gcn_student_args gat_args
             for model in models:
                 for cv in [3, 5, 10]:
                     train_main_model(dataset_i, model["model_name"], -1, cv, model, run) 

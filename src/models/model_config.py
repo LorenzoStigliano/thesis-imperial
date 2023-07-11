@@ -771,7 +771,7 @@ gcn_student_lsp_ensamble_5_BreastMNIST_args = {
 
 #ABLATION STUDY
 
-gcn_student_lsp_ensamble_4_BreastMNIST_args_1 = {
+gcn_student_lsp_ensamble_5_BreastMNIST_args_1 = {
     "num_epochs":50, 
     "lr": 1e-4, 
     "weight_decay":5e-4, 
@@ -787,10 +787,10 @@ gcn_student_lsp_ensamble_4_BreastMNIST_args_1 = {
     "gamma": 0.8, # sum of student ce loss
     "lambda":1, # disentanglement loss
     "T": 3, #Temperature parameter for soft logit target 
-    "n_students":4 # TOTAL number of students in ensamble 
+    "n_students":5 # TOTAL number of students in ensamble 
 }
 
-gcn_student_lsp_ensamble_4_BreastMNIST_args_2 = {
+gcn_student_lsp_ensamble_5_BreastMNIST_args_2 = {
     "num_epochs":50, 
     "lr": 1e-4, 
     "weight_decay":5e-4, 
@@ -806,10 +806,10 @@ gcn_student_lsp_ensamble_4_BreastMNIST_args_2 = {
     "gamma": 0.8, # sum of student ce loss
     "lambda":1, # disentanglement loss
     "T": 3, #Temperature parameter for soft logit target 
-    "n_students":4 # TOTAL number of students in ensamble 
+    "n_students":5 # TOTAL number of students in ensamble 
 }
 
-gcn_student_lsp_ensamble_4_BreastMNIST_args_3 = {
+gcn_student_lsp_ensamble_5_BreastMNIST_args_3 = {
     "num_epochs":50, 
     "lr": 1e-4, 
     "weight_decay":5e-4, 
@@ -825,10 +825,10 @@ gcn_student_lsp_ensamble_4_BreastMNIST_args_3 = {
     "gamma": 0, # sum of student ce loss
     "lambda":1, # disentanglement loss
     "T": 3, #Temperature parameter for soft logit target 
-    "n_students":4 # TOTAL number of students in ensamble 
+    "n_students":5 # TOTAL number of students in ensamble 
 }
 
-gcn_student_lsp_ensamble_4_BreastMNIST_args_4 = {
+gcn_student_lsp_ensamble_5_BreastMNIST_args_4 = {
     "num_epochs":50, 
     "lr": 1e-4, 
     "weight_decay":5e-4, 
@@ -844,7 +844,7 @@ gcn_student_lsp_ensamble_4_BreastMNIST_args_4 = {
     "gamma": 0.8, # sum of student ce loss
     "lambda":0, # disentanglement loss
     "T": 3, #Temperature parameter for soft logit target 
-    "n_students":4 # TOTAL number of students in ensamble 
+    "n_students":5 # TOTAL number of students in ensamble 
 }
 
 ######################################## GAT BACKBONE MODEL PARAMETERS w/BreastMNIST ########################################
