@@ -6,10 +6,6 @@ import shutil
 import numpy as np
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
-import torch.optim as optim
-from torch.autograd import Variable
-import sklearn.metrics as metrics
 
 from utils.builders import new_folder
 from utils.loaders import load_data
