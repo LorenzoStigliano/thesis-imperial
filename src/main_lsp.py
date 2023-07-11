@@ -39,7 +39,7 @@ def parrallel_run(run):
     for dataset_i in datasets_asdnc:
         if dataset_i == "gender_data":
             for view_i in views:
-                models = [gcn_lsp_student_args] #"gcn_student"
+                models = [gat_lsp_student_args] #"gcn_student"
                 for model in models:
                     for cv in [3, 5, 10]:
                         train_main_model(dataset_i, model["model_name"], view_i, cv, model, run)

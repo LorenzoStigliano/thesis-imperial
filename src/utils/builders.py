@@ -10,7 +10,7 @@ import scipy.io as sio
 #import torch.utils.data as data
 #import torchvision.transforms as transforms
 
-sys.path.append('/homes/ls1121/thesis-imperial/src/utils')
+sys.path.append('/Users/lorenzostigliano/Documents/University/Imperial/Summer Term/thesis-imperial/src/utils')
 
 from config import SAVE_DIR_MODEL_DATA
 
