@@ -77,7 +77,7 @@ def cross_validation_2(model_args, G_list, view, model_name, cv_number, n_studen
         num_classes = 2 
         
         for i in range(n_students):
-            if model_args["model_name"] == "gcn_student":
+            if model_args["model_name"] == "gcn_student_ensamble_2":
               student_model = GCN_STUDENT_ENSAMBLE(
                   nfeat = num_nodes,
                   nhid = model_args["hidden_dim"],

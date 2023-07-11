@@ -98,7 +98,7 @@ def cross_validation(model_args, G_list, view, model_name, cv_number, run=0):
         num_nodes = G_list[0]['adj'].shape[0]
         num_classes = 2 
 
-        if model_args["model_name"] == "gcn_student":
+        if model_args["model_name"] == "mskd":
           student_model = GCN_STUDENT(
               nfeat = num_nodes,
               nhid = model_args["hidden_dim"],
