@@ -44,7 +44,7 @@ gcn_student_args = {
     "evaluation_method": "model_assessment", # model selection or model assessment
     "alpha_ce": 1, 
     "T": 3, 
-    "alpha_soft_ce": 0.2
+    "alpha_soft_ce": 0.4
 }
 
 gcn_lsp_student_args = {
