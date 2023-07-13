@@ -559,7 +559,7 @@ gcn_student_BreastMNIST_args = {
     "evaluation_method": "model_assessment", # model selection or model assessment
     "alpha_ce": 0.8, 
     "T": 3, 
-    "alpha_soft_ce": 1
+    "alpha_soft_ce": 9
 }
 
 gcn_fitnet_student_BreastMNIST_args = {
