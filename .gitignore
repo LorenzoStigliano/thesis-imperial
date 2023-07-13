@@ -5,3 +5,4 @@ figures/
 __pycache__/
 to_depreciate/
 src/main_custom/
+src/hyperparameter_tuning/
