@@ -60,10 +60,10 @@ def parrallel_run(run):
                         train_main_model(dataset_i, model["model_name"], view_i, cv, model, run)
         else:
             models = [
-                gcn_student_ensamble_5_BreastMNIST_args,
-                gcn_student_ensamble_4_BreastMNIST_args,
-                gcn_student_ensamble_3_BreastMNIST_args,
-                gcn_student_ensamble_2_BreastMNIST_args
+                gat_student_ensamble_5_BreastMNIST_args,
+                gat_student_ensamble_4_BreastMNIST_args,
+                gat_student_ensamble_3_BreastMNIST_args,
+                gat_student_ensamble_2_BreastMNIST_args
             ]
             for model in models:
                 for cv in [3, 5, 10]:

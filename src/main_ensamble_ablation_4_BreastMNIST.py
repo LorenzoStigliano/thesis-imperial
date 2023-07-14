@@ -62,13 +62,13 @@ def parrallel_run(run):
     for dataset_i in datasets_asdnc:
         if dataset_i == "gender_data": 
             for view_i in views:
-                models = [gcn_student_lsp_ensamble_4_args_1] #gcn_student_ensamble_4_args, gcn_student_ensamble_5_args]
+                models = [gcn_student_lsp_ensamble_3_args_4] #gcn_student_ensamble_4_args, gcn_student_ensamble_5_args]
                 for model in models:
                     for cv in [3, 5, 10]:
                         train_main_model(dataset_i, model["model_name"], view_i, cv, model, run)
                     
         else:
-            models = [gcn_student_lsp_ensamble_5_BreastMNIST_args_4] # "gcn", "gcn_student" "gcn_3_args" args  gcn_student_args gat_args
+            models = [gcn_student_lsp_ensamble_3_BreastMNIST_args_4] # "gcn", "gcn_student" "gcn_3_args" args  gcn_student_args gat_args
             for model in models:
                 for cv in [3, 5, 10]:
                     train_main_model(dataset_i, model["model_name"], -1, cv, model, run) 

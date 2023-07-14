@@ -3,7 +3,7 @@ import random
 import numpy as np
 import torch
 
-from models.model_config import * 
+from models.model_config_hyperparameter_sensitivity import * 
 from trainers.ts_ensemble.ts_ensamble_2_trainer import cross_validation_2
 from trainers.ts_ensemble.ts_ensamble_3_trainer import cross_validation_3
 from trainers.ts_ensemble.ts_ensamble_4_trainer import cross_validation_4
@@ -62,7 +62,7 @@ def parrallel_run(run):
     for dataset_i in datasets_asdnc:
         if dataset_i == "gender_data": 
             for view_i in views:
-                models = [gcn_student_lsp_ensamble_4_args_3] #gcn_student_ensamble_4_args, gcn_student_ensamble_5_args]
+                models = [gcn_student_lsp_ensamble_4_args_1] #gcn_student_ensamble_4_args, gcn_student_ensamble_5_args]
                 for model in models:
                     for cv in [3, 5, 10]:
                         train_main_model(dataset_i, model["model_name"], view_i, cv, model, run)

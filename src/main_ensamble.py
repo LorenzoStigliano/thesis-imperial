@@ -49,10 +49,10 @@ def parrallel_run(run):
         if dataset_i == "gender_data":
             for view_i in views:
                 models = [
-                    gcn_student_ensamble_5_args,
-                    gcn_student_ensamble_4_args,
-                    gcn_student_ensamble_3_args,
-                    gcn_student_ensamble_2_args
+                    gat_student_ensamble_5_args,
+                    gat_student_ensamble_4_args,
+                    gat_student_ensamble_3_args,
+                    gat_student_ensamble_2_args
                 ] 
                 for model in models:
                     for cv in [3, 5, 10]:
