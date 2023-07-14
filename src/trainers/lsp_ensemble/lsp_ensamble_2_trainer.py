@@ -3,6 +3,7 @@ import torch
 import pickle
 import random
 import shutil 
+import psutil
 import numpy as np
 import torch
 import torch.nn as nn
@@ -206,6 +207,9 @@ def train(model_args, train_dataset, val_dataset, students, student_names, thres
     validation_loss_ensamble_ce = []
     validation_ensamble_soft_ce_loss = []
     validation_loss_within_student = []
+
+    time_per_epoch = []
+    memory_usage_per_epoch = []
     
     print(f"Size of Training Set: {str(len(train_dataset))}")
     print(f"Size of Validation Set: {str(len(val_dataset))}")
@@ -330,6 +334,12 @@ def train(model_args, train_dataset, val_dataset, students, student_names, thres
         validation_loss_ensamble_ce.append(val_loss_ensamble_ce)
         validation_ensamble_soft_ce_loss.append(val_ensamble_soft_ce_loss)
         validation_loss_within_student.append(val_loss_within_student)
+        time_per_epoch.append(total_time)
+        process = psutil.Process()
+        memory_usage_per_epoch.append(process.memory_info().rss / 1024 ** 2)
+      
+    print(f"Average Memory Usage: {np.mean(memory_usage_per_epoch)} MB, Std: {np.std(memory_usage_per_epoch)}")
+    print(f"Average Time: {np.mean(time_per_epoch)}, Std: {np.std(time_per_epoch)}")
     
     # Save final labels and predictions of model on train set for ensamble and indiviudal students in ensamble (5)
     simple_r = {'labels':labels_ensamble,'preds':preds_ensamble}

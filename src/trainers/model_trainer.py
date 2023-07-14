@@ -3,6 +3,7 @@ import torch
 import pickle
 import random
 import shutil 
+import psutil
 import numpy as np
 import sklearn.metrics as metrics
 from torch.autograd import Variable
@@ -170,6 +171,9 @@ def train(model_args, train_dataset, val_dataset, model, threshold_value, model_
     validation_f1=[]
     validation_recall=[]
     validation_precision=[]
+
+    time_per_epoch = []
+    memory_usage_per_epoch = []
     
     print(f"Size of Training Set: {str(len(train_dataset))}")
     print(f"Size of Validation Set: {str(len(val_dataset))}")
@@ -243,7 +247,6 @@ def train(model_args, train_dataset, val_dataset, model, threshold_value, model_
       print(f"Train accuracy: {result['acc']}")
       print(f"Train loss: {total_loss / len(train_dataset)}")
 
-      
       train_loss.append(total_loss / len(train_dataset))
       train_acc.append(result['acc'])
       train_f1.append(result['F1'])
@@ -257,7 +260,14 @@ def train(model_args, train_dataset, val_dataset, model, threshold_value, model_
       validation_precision.append(val_precision)
       
       validation_loss.append(val_loss)
-    
+
+      time_per_epoch.append(total_time)
+      process = psutil.Process()
+      memory_usage_per_epoch.append(process.memory_info().rss / 1024 ** 2)
+      
+    print(f"Average Memory Usage: {np.mean(memory_usage_per_epoch)} MB, Std: {np.std(memory_usage_per_epoch)}")
+    print(f"Average Time: {np.mean(time_per_epoch)}, Std: {np.std(time_per_epoch)}")
+
     #Save train metrics
     with open(SAVE_DIR_MODEL_DATA+model_args['dataset']+"/"+model_args['backbone']+"/"+model_args['evaluation_method']+"/"+model_args["model_name"]+"/metrics/"+model_name+"_train_acc.pickle", 'wb') as f:
       pickle.dump(train_acc, f)
