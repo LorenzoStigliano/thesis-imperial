@@ -3,7 +3,8 @@ import random
 import numpy as np
 import torch
 
-from models.model_config_hyperparameter_sensitivity import * from trainers.ts_ensemble.ts_ensamble_2_trainer import cross_validation_2
+from models.model_config_hyperparameter_sensitivity import * 
+from trainers.ts_ensemble.ts_ensamble_2_trainer import cross_validation_2
 from trainers.ts_ensemble.ts_ensamble_3_trainer import cross_validation_3
 from trainers.ts_ensemble.ts_ensamble_4_trainer import cross_validation_4
 from trainers.ts_ensemble.ts_ensamble_5_trainer import cross_validation_5
@@ -32,7 +33,7 @@ def train_main_model(dataset, model, view, cv_number, model_args, run=0):
 
     new_folder(model_args["model_name"], model_args["evaluation_method"], dataset=model_args["dataset"])
     
-    if gcn_args["evaluation_method"] == "model_assessment":
+    if model_args["evaluation_method"] == "model_assessment":
             model_name += f"_run_{run}_fixed_init"
     
     if model_args["model_name"] == "gcn_student_ensamble_2":
