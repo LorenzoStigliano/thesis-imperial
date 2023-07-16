@@ -450,7 +450,7 @@ gat_student_args = {
     "hidden_dim":64,
     "dropout":0,
     "threshold":"median", # Threshold the graph adjacency matrix. Possible values: no_threshold, median, mean
-    "model_name":"gcn_student",
+    "model_name":"gat_student",
     "backbone":"gat",
     "dataset":"gender_data",
     "evaluation_method": "model_assessment", # model selection or model assessment
