@@ -436,7 +436,7 @@ gat_args = {
     "hidden_dim":8,
     "nb_heads":8, # Attention heads
     "alpha":0.2, # Alpha for the leaky_relu.
-    "dropout": 0.1,
+    "dropout": 0,
     "model_name":"gat",
     "evaluation_method": "model_assessment",
     "dataset":"gender_data",
