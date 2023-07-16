@@ -436,7 +436,7 @@ gat_args = {
     "hidden_dim":8,
     "nb_heads":8, # Attention heads
     "alpha":0.2, # Alpha for the leaky_relu.
-    "dropout": 0,
+    "dropout": 0.1,
     "model_name":"gat",
     "evaluation_method": "model_assessment",
     "dataset":"gender_data",
@@ -448,6 +448,9 @@ gat_student_args = {
     "lr": 0.0001, 
     "weight_decay":5e-4, 
     "hidden_dim":64,
+    "hidden_dim":8,
+    "nb_heads":2, # Attention heads
+    "alpha":0.2,
     "dropout":0,
     "threshold":"median", # Threshold the graph adjacency matrix. Possible values: no_threshold, median, mean
     "model_name":"gat_student",
@@ -456,7 +459,7 @@ gat_student_args = {
     "evaluation_method": "model_assessment", # model selection or model assessment
     "alpha_ce": 1, 
     "T": 3, 
-    "alpha_soft_ce": 2
+    "alpha_soft_ce": 7
 }
 
 gat_lsp_student_args = {
