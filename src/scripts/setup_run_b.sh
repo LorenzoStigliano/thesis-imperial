@@ -12,10 +12,6 @@ export CPATH=/vol/cuda/10.1.243/include:$CPATH
 # Set LD_LIBRARY_PATH environment variable
 export LD_LIBRARY_PATH=/vol/cuda/10.1.243/lib64:$LD_LIBRARY_PATH
 
-#WE HAVE DATA FOR GAT teacher to GCN student:
-#python /homes/ls1121/thesis-imperial/src/main_lsp.py  --runs 0 1 2 3 4 5 6 7 8 9 --n_jobs 5 
-#python /homes/ls1121/thesis-imperial/src/main_fitnet.py  --runs 0 1 2 3 4 5 6 7 8 9 --n_jobs 5 
-#python /homes/ls1121/thesis-imperial/src/main_fitnet_1.py  --runs 0 1 2 3 4 5 6 7 8 9 --n_jobs 5
-# STILL NEED TO RUN:
-python /homes/ls1121/thesis-imperial/src/main_ensamble.py  --runs 0 1 2 3 4 5 6 7 8 9 --n_jobs 3  
-#TODO: #python /homes/ls1121/thesis-imperial/src/main_lsp_ensamble.py  --runs 0 1 2 3 4 5 6 7 8 9 --n_jobs 3 
+# STILL NEED TO RUN GAT -> GCN
+python /homes/ls1121/thesis-imperial/src/main_lsp_ensamble.py  --runs 0 1 2 3 4 5 6 7 8 9 --n_jobs 10
+python /homes/ls1121/thesis-imperial/src/main_mskd.py  --runs 0 1 2 3 4 5 6 7 8 9 --n_jobs 3

@@ -3,7 +3,7 @@ import random
 import numpy as np
 import torch
 
-from models.model_config import * 
+from models.model_config_GSP import * 
 from trainers.lsp_ensemble.lsp_ensamble_2_trainer import lsp_cross_validation_2
 from trainers.lsp_ensemble.lsp_ensamble_3_trainer import lsp_cross_validation_3
 from trainers.lsp_ensemble.lsp_ensamble_4_trainer import lsp_cross_validation_4

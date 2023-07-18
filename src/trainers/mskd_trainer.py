@@ -14,7 +14,6 @@ import sklearn.metrics as metrics
 
 from models.gcn_student import GCN_STUDENT
 from models.gat.gat_student import GAT_STUDENT
-from models.model_config import * 
 from utils.helpers import *
 from utils.config import SAVE_DIR_MODEL_DATA
 
@@ -109,7 +108,7 @@ def cross_validation(model_args, G_list, view, model_name, cv_number, run=0):
               dataset = model_args["dataset"]
           ).to(device)  
 
-        if model_args["model_name"] == "gat_student":
+        if model_args["model_name"] == "mskd_gat":
             student_model = GAT_STUDENT(
                 nfeat=num_nodes, 
                 nhid=model_args['hidden_dim'], 
@@ -381,7 +380,7 @@ def train(model_args, train_dataset, val_dataset, student_model, threshold_value
     path = SAVE_DIR_MODEL_DATA+model_args['dataset']+"/"+model_args['backbone']+"/"+model_args['evaluation_method']+"/"+model_args['model_name']+'/weights/W_'+model_name+'.pickle'
     if os.path.exists(path):
         os.remove(path)
-    shutil.move("gcn_student_"+str(run)+"_"+str(model_args['dataset'])+'_W.pickle'.format(), path)
+    shutil.move(str(model_args['student_type'])+"_student_"+str(run)+"_"+str(model_args['dataset'])+'_W.pickle'.format(), path)
 
 def validate(dataset, model, model_args, threshold_value, model_name, teacher_model_1, teacher_model_2):
     """

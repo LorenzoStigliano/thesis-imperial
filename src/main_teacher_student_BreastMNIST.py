@@ -3,7 +3,7 @@ import random
 import numpy as np
 import torch
 
-from models.model_config import * 
+from models.model_config_BreastMNIST import * 
 from trainers.teacher_student_trainer import cross_validation
 
 from utils.builders import new_folder
@@ -45,7 +45,7 @@ def parrallel_run(run):
                     for cv in [3, 5, 10]:
                         train_main_model(dataset_i, model["model_name"], view_i, cv, model, run)
         else:
-            models = [gat_student_BreastMNIST_args] # "gcn", "gcn_student" "gcn_3_args" args  gcn_student_args gat_args
+            models = [gat_gat_student_BreastMNIST_args] # "gcn", "gcn_student" "gcn_3_args" args  gcn_student_args gat_args
             for model in models:
                 for cv in [3, 5, 10]:
                     train_main_model(dataset_i, model["model_name"], -1, cv, model, run) 

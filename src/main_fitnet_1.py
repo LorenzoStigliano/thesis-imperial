@@ -3,7 +3,7 @@ import random
 import numpy as np
 import torch
 
-from models.model_config import * 
+from models.model_config_GSP import * 
 from trainers.fitnet_trainer import cross_validation
 
 from utils.builders import new_folder
@@ -28,7 +28,7 @@ def train_main_model(dataset, model, view, cv_number, model_args, run=0):
     if model_args["evaluation_method"] == "model_assessment":
             model_name += f"_run_{run}_fixed_init"
     
-    if model == "fitnet":
+    if model == "fitnet" or model == "fitnet_gat":
         cross_validation(model_args, G_list, view, model_name, cv_number, run)
 
 def parrallel_run(run):
@@ -37,7 +37,7 @@ def parrallel_run(run):
     views = [0, 4] #0, 2, 4, 5
     for dataset_i in datasets_asdnc:
         for view_i in views:
-            models = [gat_fitnet_student_args_0_4] #fitnet args 
+            models = [gat_gat_fitnet_student_args_0_4] #fitnet args 
             for model in models:
                 for cv in [3, 5, 10]:
                     train_main_model(dataset_i, model["model_name"], view_i, cv, model, run)

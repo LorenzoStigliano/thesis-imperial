@@ -3,7 +3,7 @@ import random
 import numpy as np
 import torch
 
-from models.model_config import * 
+from models.model_config_GSP import * 
 from trainers.lsp_trainer import cross_validation
 
 from utils.builders import new_folder
@@ -28,7 +28,7 @@ def train_main_model(dataset, model, view, cv_number, model_args, run=0):
     if model_args["evaluation_method"] == "model_assessment":
             model_name += f"_run_{run}_fixed_init"
     
-    if model_args["model_name"] == "lsp":
+    if model_args["model_name"] == "lsp" or model_args["model_name"] == "lsp_gat":
         cross_validation(model_args, G_list, view, model_name, cv_number, run)
 
 def parrallel_run(run):
@@ -39,7 +39,7 @@ def parrallel_run(run):
     for dataset_i in datasets_asdnc:
         if dataset_i == "gender_data":
             for view_i in views:
-                models = [gat_lsp_student_args] #"gcn_student"
+                models = [gat_gat_lsp_student_args] #"gcn_student"
                 for model in models:
                     for cv in [3, 5, 10]:
                         train_main_model(dataset_i, model["model_name"], view_i, cv, model, run)

@@ -14,7 +14,6 @@ import sklearn.metrics as metrics
 
 from models.gcn_student import GCN_STUDENT
 from models.gat.gat_student import GAT_STUDENT
-from models.model_config import * 
 from utils.helpers import *
 from utils.config import SAVE_DIR_MODEL_DATA
 
