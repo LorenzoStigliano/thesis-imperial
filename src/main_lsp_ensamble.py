@@ -26,7 +26,7 @@ def train_main_model(dataset, model, view, cv_number, model_args, run=0):
 
     G_list = load_data(dataset, view, NormalizeInputGraphs=False)
 
-    new_folder(model_args["model_name"], model_args["evaluation_method"])
+    new_folder(model_args["model_name"], model_args["evaluation_method"], backbone=model_args["backbone"], dataset=model_args["dataset"])
     
     if gcn_args["evaluation_method"] == "model_assessment":
             model_name += f"_run_{run}_fixed_init"
