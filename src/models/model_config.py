@@ -1022,6 +1022,24 @@ gat_BreastMNIST_args = {
     "backbone":"gat"
 }
 
+gat_student_gat_BreastMNIST_args = {
+    "num_epochs":50, 
+    "lr": 1e-6, 
+    "weight_decay":5e-4, 
+    "hidden_dim":2,
+    "nb_heads":2, # Attention heads
+    "alpha":0.2,
+    "dropout":0,
+    "threshold":"median", # Threshold the graph adjacency matrix. Possible values: no_threshold, median, mean
+    "model_name":"gat_student",
+    "backbone":"gat",
+    "dataset":"BreastMNIST",
+    "evaluation_method": "model_assessment", # model selection or model assessment
+    "alpha_ce": 0.8, 
+    "T": 3, 
+    "alpha_soft_ce": 9
+}
+
 gat_student_BreastMNIST_args = {
     "num_epochs":50, 
     "lr": 1e-5, 
