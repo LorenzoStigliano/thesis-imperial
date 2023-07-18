@@ -941,8 +941,8 @@ gcn_student_lsp_ensamble_3_BreastMNIST_args_1 = {
     "dataset":"BreastMNIST",
     "evaluation_method": "model_assessment", # model selection or model assessment
     "alpha": 0, # ensamble ce loss
-    "beta": 0.8,  # ensamble kd loss
-    "gamma": 0.8, # sum of student ce loss
+    "beta": 7,  # ensamble kd loss
+    "gamma": 7, # sum of student ce loss
     "lambda":1, # disentanglement loss
     "T": 3, #Temperature parameter for soft logit target 
     "n_students":3 # TOTAL number of students in ensamble 
