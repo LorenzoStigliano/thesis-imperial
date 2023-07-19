@@ -432,6 +432,24 @@ gat_gcn_lsp_student_BreastMNIST_args = {
     "alpha_weight": 0
 }
 
+gat_gcn_mskd_student_BreastMNIST_args = {
+    "num_epochs":50, 
+    "lr":  1e-4, 
+    "weight_decay":5e-4, 
+    "hidden_dim":64,
+    "dropout":0,
+    "threshold":"median", # Threshold the graph adjacency matrix. Possible values: no_threshold, median, mean
+    "model_name":"mskd",
+    'student_type':"gcn",
+    "backbone":"gat",
+    "dataset":"BreastMNIST",
+    "evaluation_method": "model_assessment", # model selection or model assessment
+    "alpha_ce": 1, 
+    "T": 3, 
+    "alpha_soft_ce": 4,
+    "alpha_mskd": 2
+}
+
 gat_gcn_student_ensamble_2_BreastMNIST_args = {
     "num_epochs":50, 
     "lr": 1e-4, 
