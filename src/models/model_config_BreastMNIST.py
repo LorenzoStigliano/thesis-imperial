@@ -875,3 +875,266 @@ gat_gat_student_lsp_ensamble_5_BreastMNIST_args = {
     "T": 3, #Temperature parameter for soft logit target 
     "n_students":5 # TOTAL number of students in ensamble 
 }
+
+#############################################################################################################################
+######################################## GCN TEACHER MODEL PARAMETERS w/BreastMNIST ########################################
+######################################## GAT STUDENT MODEL PARAMETERS w/BreastMNIST ########################################
+#############################################################################################################################
+
+gcn_gat_student_BreastMNIST_args = {
+    "num_epochs":50, 
+    "lr": 1e-6, 
+    "weight_decay":5e-4, 
+    "hidden_dim":2,
+    "nb_heads":2, # Attention heads
+    "alpha":0.2,
+    "dropout":0,
+    "threshold":"median", # Threshold the graph adjacency matrix. Possible values: no_threshold, median, mean
+    "model_name":"gat_student",
+    'student_type':"gat",
+    "backbone":"gcn",
+    "dataset":"BreastMNIST",
+    "evaluation_method": "model_assessment", # model selection or model assessment
+    "alpha_ce": 0.8, 
+    "T": 3, 
+    "alpha_soft_ce": 9
+}
+
+gcn_gat_fitnet_student_BreastMNIST_args = {
+    "num_epochs":50, 
+    "lr": 1e-4, 
+    "weight_decay":5e-4, 
+    "hidden_dim":2,
+    "nb_heads":2, # Attention heads
+    "alpha":0.2,
+    "dropout":0,
+    "threshold":"median", # Threshold the graph adjacency matrix. Possible values: no_threshold, median, mean
+    "model_name":"fitnet_gat",
+    'student_type':"gat",
+    "backbone":"gcn",
+    "dataset":"BreastMNIST",
+    "evaluation_method": "model_assessment", # model selection or model assessment
+    "alpha_ce": 2, 
+    "T": 3, 
+    "alpha_soft_ce": 7,
+    "alpha_ht": 0.1
+}
+
+gcn_gat_lsp_student_BreastMNIST_args = {
+    "num_epochs":50, 
+    "lr": 1e-4, 
+    "weight_decay":5e-4, 
+    "hidden_dim":2,
+    "nb_heads":2, # Attention heads
+    "alpha":0.2,
+    "dropout":0,
+    "threshold":"median", # Threshold the graph adjacency matrix. Possible values: no_threshold, median, mean
+    "model_name":"lsp_gat",
+    'student_type':"gat",
+    "backbone":"gcn",
+    "dataset":"BreastMNIST",
+    "evaluation_method": "model_assessment", # model selection or model assessment
+    "alpha_ce": 1, 
+    "T": 3, 
+    "alpha_soft_ce": 2,
+    "alpha_kd_lsp":2,
+    "alpha_weight": 0
+}
+
+gcn_gat_mskd_student_BreastMNIST_args = {
+    "num_epochs":50, 
+    "lr":  1e-4, 
+    "weight_decay":5e-4, 
+    "hidden_dim":2,
+    "nb_heads":2, # Attention heads
+    "alpha":0.2,
+    "dropout":0,
+    "threshold":"median", # Threshold the graph adjacency matrix. Possible values: no_threshold, median, mean
+    "model_name":"mskd_gat",
+    'student_type':"gat",
+    "backbone":"gcn",
+    "dataset":"BreastMNIST",
+    "evaluation_method": "model_assessment", # model selection or model assessment
+    "alpha_ce": 1, 
+    "T": 3, 
+    "alpha_soft_ce": 4,
+    "alpha_mskd": 2
+}
+
+gcn_gat_student_ensamble_2_BreastMNIST_args = {
+    "num_epochs":50, 
+    "lr": 1e-4, 
+    "weight_decay":5e-4, 
+    "hidden_dim":2,
+    "nb_heads":2, # Attention heads
+    "alpha":0.2,
+    "dropout":0,
+    "threshold":"median", # Threshold the graph adjacency matrix. Possible values: no_threshold, median, mean
+    "model_name":"gat_student_ensamble_2",
+    'student_type':"gat",
+    "backbone":"gcn",
+    "dataset":"BreastMNIST",
+    "evaluation_method": "model_assessment", # model selection or model assessment
+    "alpha": 2, # ensamble ce loss
+    "beta": 7,  # ensamble kd loss
+    "gamma": 7, # sum of student ce loss
+    "lambda":1, # disentanglement loss
+    "T": 3, #Temperature parameter for soft logit target 
+    "n_students":2 # TOTAL number of students in ensamble 
+}
+
+gcn_gat_student_ensamble_3_BreastMNIST_args = {
+    "num_epochs":50, 
+    "lr": 1e-4, 
+    "weight_decay":5e-4, 
+    "hidden_dim":2,
+    "nb_heads":2, # Attention heads
+    "alpha":0.2,
+    "dropout":0,
+    "threshold":"median", # Threshold the graph adjacency matrix. Possible values: no_threshold, median, mean
+    "model_name":"gat_student_ensamble_3",
+    'student_type':"gat",
+    "backbone":"gcn",
+    "dataset":"BreastMNIST",
+    "evaluation_method": "model_assessment", # model selection or model assessment
+    "alpha": 2, # ensamble ce loss
+    "beta": 7,  # ensamble kd loss
+    "gamma": 7, # sum of student ce loss
+    "lambda":1, # disentanglement loss
+    "T": 3, #Temperature parameter for soft logit target 
+    "n_students":3 # TOTAL number of students in ensamble 
+}
+
+gcn_gat_student_ensamble_4_BreastMNIST_args = {
+    "num_epochs":50, 
+    "lr": 1e-4, 
+    "weight_decay":5e-4, 
+    "hidden_dim":2,
+    "nb_heads":2, # Attention heads
+    "alpha":0.2,
+    "dropout":0,
+    "threshold":"median", # Threshold the graph adjacency matrix. Possible values: no_threshold, median, mean
+    "model_name":"gat_student_ensamble_4",
+    'student_type':"gat",
+    "backbone":"gcn",
+    "dataset":"BreastMNIST",
+    "evaluation_method": "model_assessment", # model selection or model assessment
+    "alpha": 2, # ensamble ce loss
+    "beta": 7,  # ensamble kd loss
+    "gamma": 7, # sum of student ce loss
+    "lambda":1, # disentanglement loss
+    "T": 3, #Temperature parameter for soft logit target 
+    "n_students":4 # TOTAL number of students in ensamble 
+}
+
+gcn_gat_student_ensamble_5_BreastMNIST_args = {
+    "num_epochs":50, 
+    "lr": 1e-4, 
+    "weight_decay":5e-4, 
+    "hidden_dim":2,
+    "nb_heads":2, # Attention heads
+    "alpha":0.2,
+    "dropout":0,
+    "threshold":"median", # Threshold the graph adjacency matrix. Possible values: no_threshold, median, mean
+    "model_name":"gat_student_ensamble_5",
+    'student_type':"gat",
+    "backbone":"gcn",
+    "dataset":"BreastMNIST",
+    "evaluation_method": "model_assessment", # model selection or model assessment
+    "alpha": 2, # ensamble ce loss
+    "beta": 7,  # ensamble kd loss
+    "gamma": 7, # sum of student ce loss
+    "lambda":1, # disentanglement loss
+    "T": 3, #Temperature parameter for soft logit target 
+    "n_students":5 # TOTAL number of students in ensamble 
+}
+
+# ENSAMBLE WITH LSP PARAMS
+
+gcn_gat_student_lsp_ensamble_2_BreastMNIST_args = {
+    "num_epochs":50, 
+    "lr": 1e-4, 
+    "weight_decay":5e-4, 
+    "hidden_dim":2,
+    "nb_heads":2, # Attention heads
+    "alpha":0.2,
+    "dropout":0,
+    "threshold":"median", # Threshold the graph adjacency matrix. Possible values: no_threshold, median, mean
+    "model_name":"gat_student_lsp_ensamble_2",
+    'student_type':"gat",
+    "backbone":"gcn",
+    "dataset":"BreastMNIST",
+    "evaluation_method": "model_assessment", # model selection or model assessment
+    "alpha": 2, # ensamble ce loss
+    "beta": 7,  # ensamble kd loss
+    "gamma": 7, # sum of student ce loss
+    "lambda":1, # disentanglement loss
+    "T": 3, #Temperature parameter for soft logit target 
+    "n_students":2 # TOTAL number of students in ensamble 
+}
+
+gcn_gat_student_lsp_ensamble_3_BreastMNIST_args = {
+    "num_epochs":50, 
+    "lr": 1e-4, 
+    "weight_decay":5e-4, 
+    "hidden_dim":2,
+    "nb_heads":2, # Attention heads
+    "alpha":0.2,
+    "dropout":0,
+    "threshold":"median", # Threshold the graph adjacency matrix. Possible values: no_threshold, median, mean
+    "model_name":"gat_student_lsp_ensamble_3",
+    'student_type':"gat",
+    "backbone":"gcn",
+    "dataset":"BreastMNIST",
+    "evaluation_method": "model_assessment", # model selection or model assessment
+    "alpha": 2, # ensamble ce loss
+    "beta": 7,  # ensamble kd loss
+    "gamma": 7, # sum of student ce loss
+    "lambda":1, # disentanglement loss
+    "T": 3, #Temperature parameter for soft logit target 
+    "n_students":3 # TOTAL number of students in ensamble 
+}
+
+gcn_gat_student_lsp_ensamble_4_BreastMNIST_args = {
+    "num_epochs":50, 
+    "lr": 1e-4, 
+    "weight_decay":5e-4, 
+    "hidden_dim":2,
+    "nb_heads":2, # Attention heads
+    "alpha":0.2,
+    "dropout":0,
+    "threshold":"median", # Threshold the graph adjacency matrix. Possible values: no_threshold, median, mean
+    "model_name":"gat_student_lsp_ensamble_4",
+    'student_type':"gat",
+    "backbone":"gcn",
+    "dataset":"BreastMNIST",
+    "evaluation_method": "model_assessment", # model selection or model assessment
+    "alpha": 2, # ensamble ce loss
+    "beta": 7,  # ensamble kd loss
+    "gamma": 7, # sum of student ce loss
+    "lambda":1, # disentanglement loss
+    "T": 3, #Temperature parameter for soft logit target 
+    "n_students":4 # TOTAL number of students in ensamble 
+}
+
+gcn_gat_student_lsp_ensamble_5_BreastMNIST_args = {
+    "num_epochs":50, 
+    "lr": 1e-4, 
+    "weight_decay":5e-4, 
+    "hidden_dim":2,
+    "nb_heads":2, # Attention heads
+    "alpha":0.2,
+    "dropout":0,
+    "threshold":"median", # Threshold the graph adjacency matrix. Possible values: no_threshold, median, mean
+    "model_name":"gat_student_lsp_ensamble_5",
+    'student_type':"gat",
+    "backbone":"gcn",
+    "dataset":"BreastMNIST",
+    "evaluation_method": "model_assessment", # model selection or model assessment
+    "alpha": 2, # ensamble ce loss
+    "beta": 7,  # ensamble kd loss
+    "gamma": 7, # sum of student ce loss
+    "lambda":1, # disentanglement loss
+    "T": 3, #Temperature parameter for soft logit target 
+    "n_students":5 # TOTAL number of students in ensamble 
+}

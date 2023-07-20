@@ -47,10 +47,10 @@ def parrallel_run(run):
     for dataset_i in datasets_asdnc:
         for view_i in views:
             models = [
-                gat_student_lsp_ensamble_5_args,
-                gat_student_lsp_ensamble_3_args,
-                gat_student_lsp_ensamble_4_args,
-                gat_student_lsp_ensamble_2_args
+                gat_gat_student_lsp_ensamble_2_args,
+                gat_gat_student_lsp_ensamble_3_args,
+                gat_gat_student_lsp_ensamble_4_args,
+                gat_gat_student_lsp_ensamble_5_args
             ] 
             for model in models:
                 for cv in [3, 5, 10]:

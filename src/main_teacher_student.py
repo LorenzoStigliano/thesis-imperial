@@ -3,7 +3,7 @@ import random
 import numpy as np
 import torch
 
-from models.model_config import * 
+from models.model_config_GSP import * 
 from trainers.teacher_student_trainer import cross_validation
 
 from utils.builders import new_folder

@@ -82,6 +82,7 @@ def cross_validation(model_args, G_list, view, model_name, cv_number, run=0):
               run = run,
               dataset = model_args["dataset"]
           ).to(device)  
+          print(student_model)
 
         if model_args["evaluation_method"] =='model_selection':
             #Here we leave out the test set since we are not evaluating we can see the performance on the test set after training

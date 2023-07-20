@@ -6,7 +6,7 @@ import numpy as np
 
 from trainers.model_trainer import cross_validation
 
-from models.model_config import * 
+from models.model_config_GSP import * 
 
 from utils.builders import new_folder
 from utils.loaders import load_data
@@ -62,7 +62,7 @@ def parrallel_run(run):
     for dataset_i in datasets:
         if dataset_i == "gender_data":
             for view_i in views:
-                models = [gat_args] # "gcn", "gcn_student" "gcn_3_args" args  gcn_student_args gat_args
+                models = [gat_gat_student_args] # "gcn", "gcn_student" "gcn_3_args" args  gcn_student_args gat_args
                 for model in models:
                     for cv in [3, 5, 10]:
                         train_main_model(dataset_i, model["model_name"], view_i, cv, model, run)
