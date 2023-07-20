@@ -779,7 +779,7 @@ gat_gat_fitnet_student_args_0_4 = {
     "alpha_ht": 0.5
 }
 
-gat_gat_fitnet_student_args = {
+gat_gat_fitnet_student_args = {s
     "num_epochs":50, 
     "lr": 0.001, 
     "weight_decay":5e-4, 

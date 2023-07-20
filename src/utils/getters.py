@@ -79,17 +79,26 @@ def get_metrics(dataset, model, analysis_type, training_type, cv_n, view, run, d
         elif "lsp_gat" == model:
             cv_path = SAVE_DIR_MODEL_DATA+f'{dataset}/{model_args["backbone"]}/model_assessment/{model}/metrics/MainModel_{training_type}_{dataset}_{model}_run_{run}_fixed_init_CV_{cv_n}_view_{view}_lsp_{dataset_split}_{metric}.pickle'    
         
+        elif "lsp_gcn" == model:
+            cv_path = SAVE_DIR_MODEL_DATA+f'{dataset}/{model_args["backbone"]}/model_assessment/{model}/metrics/MainModel_{training_type}_{dataset}_{"lsp"}_run_{run}_fixed_init_CV_{cv_n}_view_{view}_lsp_{dataset_split}_{metric}.pickle'    
+        
         elif "mskd" == model:
             cv_path = SAVE_DIR_MODEL_DATA+f'{dataset}/{model_args["backbone"]}/model_assessment/{model}/metrics/MainModel_{training_type}_{dataset}_{model}_run_{run}_fixed_init_CV_{cv_n}_view_{view}_{model}_{dataset_split}_{metric}.pickle'    
         
         elif "mskd_gat" == model:
             cv_path = SAVE_DIR_MODEL_DATA+f'{dataset}/{model_args["backbone"]}/model_assessment/{model}/metrics/MainModel_{training_type}_{dataset}_{model}_run_{run}_fixed_init_CV_{cv_n}_view_{view}_mskd_{dataset_split}_{metric}.pickle'    
         
+        elif "mskd_gcn" == model:
+            cv_path = SAVE_DIR_MODEL_DATA+f'{dataset}/{model_args["backbone"]}/model_assessment/{model}/metrics/MainModel_{training_type}_{dataset}_{"mskd"}_run_{run}_fixed_init_CV_{cv_n}_view_{view}_mskd_{dataset_split}_{metric}.pickle'    
+        
         elif "fitnet" == model:
             cv_path = SAVE_DIR_MODEL_DATA+f'{dataset}/{model_args["backbone"]}/model_assessment/{model}/metrics/MainModel_{training_type}_{dataset}_{model}_run_{run}_fixed_init_CV_{cv_n}_view_{view}_{model}_{dataset_split}_{metric}.pickle'    
 
         elif "fitnet_gat" == model:
             cv_path = SAVE_DIR_MODEL_DATA+f'{dataset}/{model_args["backbone"]}/model_assessment/{model}/metrics/MainModel_{training_type}_{dataset}_{model}_run_{run}_fixed_init_CV_{cv_n}_view_{view}_fitnet_{dataset_split}_{metric}.pickle'    
+
+        elif "fitnet_gcn" == model:
+            cv_path = SAVE_DIR_MODEL_DATA+f'{dataset}/{model_args["backbone"]}/model_assessment/{model}/metrics/MainModel_{training_type}_{dataset}_{"fitnet"}_run_{run}_fixed_init_CV_{cv_n}_view_{view}_fitnet_{dataset_split}_{metric}.pickle'    
 
         elif model_args != None:
             if "layers" in model_args.keys():
@@ -174,14 +183,23 @@ def get_weight(dataset, view, model, training_type, shot_n, cv_n, run, student, 
     elif "lsp_gat" == model:
         cv_path = SAVE_DIR_MODEL_DATA+f'{dataset}/{model_args["backbone"]}/'+'model_assessment/{}/weights/W_MainModel_{}_{}_{}_run_{}_fixed_init_CV_{}_view_{}_lsp.pickle'.format(model,training_type, dataset, model, run, cv_n, view)
 
+    elif "lsp_gcn" == model:
+        cv_path = SAVE_DIR_MODEL_DATA+f'{dataset}/{model_args["backbone"]}/'+'model_assessment/{}/weights/W_MainModel_{}_{}_{}_run_{}_fixed_init_CV_{}_view_{}_lsp.pickle'.format(model,training_type, dataset, "lsp", run, cv_n, view)
+
     elif "mskd" == model:
         cv_path = SAVE_DIR_MODEL_DATA+f'{dataset}/{model_args["backbone"]}/'+'model_assessment/{}/weights/W_MainModel_{}_{}_{}_run_{}_fixed_init_CV_{}_view_{}_mskd.pickle'.format(model,training_type, dataset, model, run, cv_n, view)
 
     elif "mskd_gat" == model:
         cv_path = SAVE_DIR_MODEL_DATA+f'{dataset}/{model_args["backbone"]}/'+'model_assessment/{}/weights/W_MainModel_{}_{}_{}_run_{}_fixed_init_CV_{}_view_{}_mskd.pickle'.format(model,training_type, dataset, model, run, cv_n, view)
 
+    elif "mskd_gcn" == model:
+        cv_path = SAVE_DIR_MODEL_DATA+f'{dataset}/{model_args["backbone"]}/'+'model_assessment/{}/weights/W_MainModel_{}_{}_{}_run_{}_fixed_init_CV_{}_view_{}_mskd.pickle'.format(model,training_type, dataset, "mskd", run, cv_n, view)
+
     elif "fitnet_gat" == model:
         cv_path = SAVE_DIR_MODEL_DATA+f'{dataset}/{model_args["backbone"]}/'+'model_assessment/{}/weights/W_MainModel_{}_{}_{}_run_{}_fixed_init_CV_{}_view_{}_fitnet.pickle'.format(model,training_type, dataset, model, run, cv_n, view)
+
+    elif "fitnet_gcn" == model:
+        cv_path = SAVE_DIR_MODEL_DATA+f'{dataset}/{model_args["backbone"]}/'+'model_assessment/{}/weights/W_MainModel_{}_{}_{}_run_{}_fixed_init_CV_{}_view_{}_fitnet.pickle'.format(model,training_type, dataset, "fitnet", run, cv_n, view)
 
     elif "fitnet" == model:
         cv_path = SAVE_DIR_MODEL_DATA+f'{dataset}/{model_args["backbone"]}/'+'model_assessment/{}/weights/W_MainModel_{}_{}_{}_run_{}_fixed_init_CV_{}_view_{}_fitnet.pickle'.format(model,training_type, dataset, model, run, cv_n, view)
