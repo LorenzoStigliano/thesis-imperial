@@ -461,6 +461,7 @@ gat_student_args = {
     "dropout":0,
     "threshold":"median", # Threshold the graph adjacency matrix. Possible values: no_threshold, median, mean
     "model_name":"gcn_student",
+    'student_type':"gcn",
     "backbone":"gat",
     "dataset":"gender_data",
     "evaluation_method": "model_assessment", # model selection or model assessment
@@ -477,6 +478,7 @@ gat_lsp_student_args = {
     "dropout":0,
     "threshold":"median", # Threshold the graph adjacency matrix. Possible values: no_threshold, median, mean
     "model_name":"lsp",
+    'student_type':"gcn",
     "backbone":"gat",
     "dataset":"gender_data",
     "evaluation_method": "model_assessment", # model selection or model assessment
@@ -495,6 +497,7 @@ gat_mskd_student_args = {
     "dropout":0,
     "threshold":"median", # Threshold the graph adjacency matrix. Possible values: no_threshold, median, mean
     "model_name":"mskd",
+    'student_type':"gcn",
     "backbone":"gat",
     "dataset":"gender_data",
     "evaluation_method": "model_assessment", # model selection or model assessment
@@ -512,6 +515,7 @@ gat_fitnet_student_args_0_4 = {
     "dropout":0,
     "threshold":"median", # Threshold the graph adjacency matrix. Possible values: no_threshold, median, mean
     "model_name":"fitnet",
+    'student_type':"gcn",
     "backbone":"gat",
     "dataset":"gender_data",
     "evaluation_method": "model_assessment", # model selection or model assessment
@@ -529,6 +533,7 @@ gat_fitnet_student_args = {
     "dropout":0,
     "threshold":"median", # Threshold the graph adjacency matrix. Possible values: no_threshold, median, mean
     "model_name":"fitnet",
+    'student_type':"gcn",
     "backbone":"gat",
     "dataset":"gender_data",
     "evaluation_method": "model_assessment", # model selection or model assessment
@@ -548,6 +553,7 @@ gat_student_ensamble_2_args = {
     "dropout":0,
     "threshold":"median", # Threshold the graph adjacency matrix. Possible values: no_threshold, median, mean
     "model_name":"gcn_student_ensamble_2",
+    'student_type':"gcn",
     "backbone":"gat",
     "dataset":"gender_data",
     "evaluation_method": "model_assessment", # model selection or model assessment
@@ -567,6 +573,7 @@ gat_student_ensamble_3_args = {
     "dropout":0,
     "threshold":"median", # Threshold the graph adjacency matrix. Possible values: no_threshold, median, mean
     "model_name":"gcn_student_ensamble_3",
+    'student_type':"gcn",
     "backbone":"gat",
     "dataset":"gender_data",
     "evaluation_method": "model_assessment", # model selection or model assessment
@@ -586,6 +593,7 @@ gat_student_ensamble_4_args = {
     "dropout":0,
     "threshold":"median", # Threshold the graph adjacency matrix. Possible values: no_threshold, median, mean
     "model_name":"gcn_student_ensamble_4",
+    'student_type':"gcn",
     "backbone":"gat",
     "dataset":"gender_data",
     "evaluation_method": "model_assessment", # model selection or model assessment
@@ -605,6 +613,7 @@ gat_student_ensamble_5_args = {
     "dropout":0,
     "threshold":"median", # Threshold the graph adjacency matrix. Possible values: no_threshold, median, mean
     "model_name":"gcn_student_ensamble_5",
+    'student_type':"gcn",
     "backbone":"gat",
     "dataset":"gender_data",
     "evaluation_method": "model_assessment", # model selection or model assessment
@@ -626,6 +635,7 @@ gat_student_lsp_ensamble_2_args = {
     "dropout":0,
     "threshold":"median", # Threshold the graph adjacency matrix. Possible values: no_threshold, median, mean
     "model_name":"gcn_student_lsp_ensamble_2",
+    'student_type':"gcn",
     "backbone":"gat",
     "dataset":"gender_data",
     "evaluation_method": "model_assessment", # model selection or model assessment
@@ -645,6 +655,7 @@ gat_student_lsp_ensamble_3_args = {
     "dropout":0,
     "threshold":"median", # Threshold the graph adjacency matrix. Possible values: no_threshold, median, mean
     "model_name":"gcn_student_lsp_ensamble_3",
+    'student_type':"gcn",
     "backbone":"gat",
     "dataset":"gender_data",
     "evaluation_method": "model_assessment", # model selection or model assessment
@@ -664,6 +675,7 @@ gat_student_lsp_ensamble_4_args = {
     "dropout":0,
     "threshold":"median", # Threshold the graph adjacency matrix. Possible values: no_threshold, median, mean
     "model_name":"gcn_student_lsp_ensamble_4",
+    'student_type':"gcn",
     "backbone":"gat",
     "dataset":"gender_data",
     "evaluation_method": "model_assessment", # model selection or model assessment
@@ -683,6 +695,7 @@ gat_student_lsp_ensamble_5_args = {
     "dropout":0,
     "threshold":"median", # Threshold the graph adjacency matrix. Possible values: no_threshold, median, mean
     "model_name":"gcn_student_lsp_ensamble_5",
+    'student_type':"gcn",
     "backbone":"gat",
     "dataset":"gender_data",
     "evaluation_method": "model_assessment", # model selection or model assessment
