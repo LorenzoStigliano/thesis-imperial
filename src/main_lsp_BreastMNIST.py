@@ -3,7 +3,7 @@ import random
 import numpy as np
 import torch
 
-from models.model_config_BreastMNIST import * 
+from models_config.model_config_BreastMNIST import * 
 from trainers.lsp_trainer import cross_validation
 
 from utils.builders import new_folder

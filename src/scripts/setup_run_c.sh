@@ -13,8 +13,4 @@ export CPATH=/vol/cuda/10.1.243/include:$CPATH
 export LD_LIBRARY_PATH=/vol/cuda/10.1.243/lib64:$LD_LIBRARY_PATH
 
 # GCN->GAT FOR BreastMNIST 
-python /homes/ls1121/thesis-imperial/src/main_teacher_student_BreastMNIST.py  --runs 0 1 2 3 4 5 6 7 8 9 --n_jobs 10 
 python /homes/ls1121/thesis-imperial/src/main_lsp_BreastMNIST.py  --runs 0 1 2 3 4 5 6 7 8 9 --n_jobs 10 
-python /homes/ls1121/thesis-imperial/src/main_fitnet_BreastMNIST.py  --runs 0 1 2 3 4 5 6 7 8 9 --n_jobs 10 
-python /homes/ls1121/thesis-imperial/src/main_mskd_BreastMNIST.py  --runs 0 1 2 3 4 5 6 7 8 9 --n_jobs 10 
-python /homes/ls1121/thesis-imperial/src/main_lsp_ensamble_BreastMNIST.py  --runs 0 1 2 3 4 5 6 7 8 9 --n_jobs 10 
