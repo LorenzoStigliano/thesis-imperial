@@ -347,7 +347,7 @@ def train(model_args, train_dataset, val_dataset, student_model, threshold_value
     path = SAVE_DIR_MODEL_DATA+model_args['dataset']+"/"+model_args['backbone']+"/"+model_args['evaluation_method']+"/"+model_args['model_name']+'/weights/W_'+model_name+'.pickle'
     if os.path.exists(path):
         os.remove(path)
-    shutil.move(str(model_args['backbone'])+"_student_"+str(run)+"_"+str(model_args['dataset'])+'_W.pickle'.format(), path)
+    shutil.move(str(model_args['student_type'])+"_student_"+str(run)+"_"+str(model_args['dataset'])+'_W.pickle'.format(), path)
 
 def validate(dataset, model, model_args, threshold_value, model_name, teacher_model):
     """
