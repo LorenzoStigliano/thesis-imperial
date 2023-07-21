@@ -12,7 +12,8 @@ export CPATH=/vol/cuda/10.1.243/include:$CPATH
 # Set LD_LIBRARY_PATH environment variable
 export LD_LIBRARY_PATH=/vol/cuda/10.1.243/lib64:$LD_LIBRARY_PATH
 
-#GAT->GAT FOR GSP 
-python /homes/ls1121/thesis-imperial/src/main_cross_validation.py  --runs 0 1 2 3 4 5 6 7 8 9 --n_jobs 10 
-python /homes/ls1121/thesis-imperial/src/main_teacher_student.py  --runs 0 1 2 3 4 5 6 7 8 9 --n_jobs 10 
-python /homes/ls1121/thesis-imperial/src/main_lsp_ensamble.py  --runs 0 1 2 3 4 5 6 7 8 9 --n_jobs 10 
+#LSP FOR OUR METHOD 
+python /homes/ls1121/thesis-imperial/src/main_lsp_ensamble_1.py  --runs 0 1 2 3 4 5 6 7 8 9 --n_jobs 10 
+python /homes/ls1121/thesis-imperial/src/main_lsp_ensamble_4.py  --runs 0 1 2 3 4 5 6 7 8 9 --n_jobs 10 
+python /homes/ls1121/thesis-imperial/src/main_lsp_ensamble_2.py  --runs 0 1 2 3 4 5 6 7 8 9 --n_jobs 10 
+python /homes/ls1121/thesis-imperial/src/main_lsp_ensamble_3.py  --runs 0 1 2 3 4 5 6 7 8 9 --n_jobs 10 

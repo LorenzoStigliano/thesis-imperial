@@ -3,7 +3,7 @@ import random
 import numpy as np
 import torch
 
-from models.model_config_GSP import * 
+from models_config.model_config_GSP import * 
 from trainers.fitnet_trainer import cross_validation
 
 from utils.builders import new_folder
@@ -37,7 +37,7 @@ def parrallel_run(run):
     views = [0, 4] #0, 2, 4, 5
     for dataset_i in datasets_asdnc:
         for view_i in views:
-            models = [gat_gat_fitnet_student_args_0_4] #fitnet args 
+            models = [gcn_gat_fitnet_student_args_0_4] #fitnet args 
             for model in models:
                 for cv in [3, 5, 10]:
                     train_main_model(dataset_i, model["model_name"], view_i, cv, model, run)

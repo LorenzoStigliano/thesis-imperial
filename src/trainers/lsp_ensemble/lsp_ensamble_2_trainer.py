@@ -261,7 +261,7 @@ def train(model_args, train_dataset, val_dataset, students, student_names, thres
             ypred_1, node_embeddings_student_1 = student_model_1(features, adj)
             ypred_2, node_embeddings_student_2 = student_model_2(features, adj)
             y_pred_ensamble = torch.unsqueeze(sum(ypred_1 + ypred_2)/2, dim=0)
-            node_embeddings_ensamble = torch.unsqueeze(sum(node_embeddings_student_1 + node_embeddings_student_2)/2, dim=0)
+            node_embeddings_ensamble = (node_embeddings_student_1 + node_embeddings_student_2)/2
 
             ls_teacher = extract_ls_vectors(lsp(node_embeddings_teacher, adj),adj)
             ls_ensamble = extract_ls_vectors(lsp(node_embeddings_ensamble, adj),adj)

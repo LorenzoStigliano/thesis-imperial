@@ -248,7 +248,7 @@ def train(model_args, train_dataset, val_dataset, students, student_names, thres
             ypred_4, node_embeddings_student_4 = student_model_4(features, adj)
             ypred_5, node_embeddings_student_5 = student_model_5(features, adj)
             y_pred_ensamble = torch.unsqueeze(sum(ypred_1 + ypred_2 + ypred_3 + ypred_4 + ypred_5)/5, dim=0)
-            node_embeddings_ensamble = torch.unsqueeze(sum(node_embeddings_student_1 + node_embeddings_student_2 + node_embeddings_student_3+node_embeddings_student_4+node_embeddings_student_5)/5, dim=0)
+            node_embeddings_ensamble = (node_embeddings_student_1 + node_embeddings_student_2 + node_embeddings_student_3+node_embeddings_student_4+node_embeddings_student_5)/5
 
             # Compute loss (foward propagation)
             loss_teacher_student = criterion_soft(ypred_1, y_soft) + criterion_soft(ypred_2, y_soft) + criterion_soft(ypred_3, y_soft) + criterion_soft(ypred_4, y_soft) + criterion_soft(ypred_5, y_soft)

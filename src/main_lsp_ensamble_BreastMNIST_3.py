@@ -3,7 +3,7 @@ import random
 import numpy as np
 import torch
 
-from models_config.model_config_GSP import * 
+from models.model_config_BreastMNIST import * 
 from trainers.lsp_ensemble.lsp_ensamble_2_trainer import lsp_cross_validation_2
 from trainers.lsp_ensemble.lsp_ensamble_3_trainer import lsp_cross_validation_3
 from trainers.lsp_ensemble.lsp_ensamble_4_trainer import lsp_cross_validation_4
@@ -28,7 +28,7 @@ def train_main_model(dataset, model, view, cv_number, model_args, run=0):
 
     new_folder(model_args["model_name"], model_args["evaluation_method"], backbone=model_args["backbone"], dataset=model_args["dataset"])
     
-    if gcn_args["evaluation_method"] == "model_assessment":
+    if model_args["evaluation_method"] == "model_assessment":
             model_name += f"_run_{run}_fixed_init"
             
     if model_args["model_name"] == "gcn_student_lsp_ensamble_2" or model_args["model_name"] == "gat_student_lsp_ensamble_2":
@@ -39,22 +39,32 @@ def train_main_model(dataset, model, view, cv_number, model_args, run=0):
         lsp_cross_validation_4(model_args, G_list, view, model_name, cv_number, n_students=4, run=run)
     if model_args["model_name"] == "gcn_student_lsp_ensamble_5" or model_args["model_name"] == "gat_student_lsp_ensamble_5":
         lsp_cross_validation_5(model_args, G_list, view, model_name, cv_number, n_students=5, run=run)
-
 def parrallel_run(run):
     print(run)
-    datasets_asdnc = ['gender_data']
+    datasets_asdnc = ['BreastMNIST']
     views = [0, 2, 4, 5] #0, 2, 4, 5
     for dataset_i in datasets_asdnc:
-        for view_i in views:
+        if dataset_i == "gender_data": 
+            for view_i in views:
+                models = [
+                    gat_gat_student_lsp_ensamble_5_BreastMNIST_args,
+                    gat_gat_student_lsp_ensamble_4_BreastMNIST_args,
+                    gat_gat_student_lsp_ensamble_3_BreastMNIST_args,
+                    gat_gat_student_lsp_ensamble_2_BreastMNIST_args
+                ] 
+                for model in models:
+                    for cv in [3, 5, 10]:
+                        train_main_model(dataset_i, model["model_name"], view_i, cv, model, run)
+        else:
             models = [
-                gcn_gat_student_lsp_ensamble_5_args,
-                gcn_gat_student_lsp_ensamble_3_args,
-                gcn_gat_student_lsp_ensamble_4_args,
-                gcn_gat_student_lsp_ensamble_5_args
-            ] 
+                gcn_gat_student_lsp_ensamble_5_BreastMNIST_args,
+                gcn_gat_student_lsp_ensamble_4_BreastMNIST_args,
+                gcn_gat_student_lsp_ensamble_3_BreastMNIST_args,
+                gcn_gat_student_lsp_ensamble_2_BreastMNIST_args
+            ]
             for model in models:
                 for cv in [3, 5, 10]:
-                    train_main_model(dataset_i, model["model_name"], view_i, cv, model, run)
+                    train_main_model(dataset_i, model["model_name"], -1, cv, model, run) 
 
 if __name__ == '__main__':
         

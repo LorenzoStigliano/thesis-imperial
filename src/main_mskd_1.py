@@ -4,7 +4,7 @@ import numpy as np
 import torch
 
 from models_config.model_config_GSP import * 
-from trainers.lsp_trainer import cross_validation
+from trainers.mskd_trainer import cross_validation
 
 from utils.builders import new_folder
 from utils.loaders import load_data
@@ -23,31 +23,24 @@ def train_main_model(dataset, model, view, cv_number, model_args, run=0):
 
     G_list = load_data(dataset, view, NormalizeInputGraphs=False)
 
-    new_folder(model, model_args["evaluation_method"], backbone=model_args["backbone"], dataset=model_args["dataset"])
+    new_folder(model, model_args["evaluation_method"], backbone=model_args["backbone"])
     
     if model_args["evaluation_method"] == "model_assessment":
             model_name += f"_run_{run}_fixed_init"
     
-    if model_args["model_name"] == "lsp" or model_args["model_name"] == "lsp_gat":
+    if model_args["model_name"] == "mskd" or model_args["model_name"] == "mskd_gat":
         cross_validation(model_args, G_list, view, model_name, cv_number, run)
 
 def parrallel_run(run):
     print(run)
     datasets_asdnc = ['gender_data']
     views = [0, 2, 4, 5] #0, 2, 4, 5
-
     for dataset_i in datasets_asdnc:
-        if dataset_i == "gender_data":
-            for view_i in views:
-                models = [gcn_gat_lsp_student_args] #"gcn_student"
-                for model in models:
-                    for cv in [3, 5, 10]:
-                        train_main_model(dataset_i, model["model_name"], view_i, cv, model, run)
-        else:
-            models = [gcn_lsp_student_BreastMNIST_args] # "gcn", "gcn_student" "gcn_3_args" args  gcn_student_args gat_args
+        for view_i in views:
+            models = [gcn_gat_mskd_student_args] #"gcn_student", "gcn_student_teacher_weight"
             for model in models:
                 for cv in [3, 5, 10]:
-                    train_main_model(dataset_i, model["model_name"], -1, cv, model, run) 
+                    train_main_model(dataset_i, model["model_name"], view_i, cv, model, run)
 
 if __name__ == '__main__':
         
