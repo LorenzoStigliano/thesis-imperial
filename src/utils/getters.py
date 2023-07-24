@@ -176,6 +176,9 @@ def get_weight(dataset, view, model, training_type, shot_n, cv_n, run, student, 
     
     elif "gcn_student" == model:
         cv_path = SAVE_DIR_MODEL_DATA+f'{dataset}/{model_args["backbone"]}/'+'model_assessment/{}/weights/W_MainModel_{}_{}_{}_run_{}_fixed_init_CV_{}_view_{}.pickle'.format(model,training_type, dataset, model, run, cv_n, view)
+    
+    elif "gcn_student_vanilla_hyperparameter" == model:
+        cv_path = SAVE_DIR_MODEL_DATA+f'{dataset}/{model_args["backbone"]}/'+'model_assessment/gcn_student_vanilla_hyperparameter/weights/W_MainModel_{}_{}_{}_run_{}_fixed_init_CV_{}_view_{}_with_teacher.pickle'.format(training_type, dataset, "gcn_student", run, cv_n, view)
 
     elif "lsp" == model:
         cv_path = SAVE_DIR_MODEL_DATA+f'{dataset}/{model_args["backbone"]}/'+'model_assessment/{}/weights/W_MainModel_{}_{}_{}_run_{}_fixed_init_CV_{}_view_{}_lsp.pickle'.format(model,training_type, dataset, model, run, cv_n, view)

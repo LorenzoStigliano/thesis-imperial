@@ -13,9 +13,5 @@ export CPATH=/vol/cuda/10.1.243/include:$CPATH
 export LD_LIBRARY_PATH=/vol/cuda/10.1.243/lib64:$LD_LIBRARY_PATH
 
 #GCN -> GAT GSP 
-python /homes/ls1121/thesis-imperial/src/main_fitnet_1.py  --runs 0 1 2 3 4 5 6 7 8 9 --n_jobs 10
-python /homes/ls1121/thesis-imperial/src/main_fitnet.py  --runs 0 1 2 3 4 5 6 7 8 9 --n_jobs 10
-python /homes/ls1121/thesis-imperial/src/main_lsp.py  --runs 0 1 2 3 4 5 6 7 8 9 --n_jobs 10
+python /homes/ls1121/thesis-imperial/src/main_teacher_student.py  --runs 7 --n_jobs 1
 python /homes/ls1121/thesis-imperial/src/main_mskd_1.py  --runs 0 1 2 3 4 5 6 7 8 9 --n_jobs 10
-#GAT -> GAT GSP 
-python /homes/ls1121/thesis-imperial/src/main_mskd.py  --runs 0 1 2 3 4 5 6 7 8 9 --n_jobs 10
