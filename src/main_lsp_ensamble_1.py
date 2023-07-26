@@ -3,11 +3,11 @@ import random
 import numpy as np
 import torch
 
-from models_config.model_config_GSP import * 
-from trainers.lsp_ensemble.lsp_ensamble_2_trainer import lsp_cross_validation_2
-from trainers.lsp_ensemble.lsp_ensamble_3_trainer import lsp_cross_validation_3
-from trainers.lsp_ensemble.lsp_ensamble_4_trainer import lsp_cross_validation_4
-from trainers.lsp_ensemble.lsp_ensamble_5_trainer import lsp_cross_validation_5
+from models_config.model_config_hyperparameter_sensitivity_T import * 
+from trainers.lsp_ensemble_temp.lsp_ensamble_2_trainer import lsp_cross_validation_2
+from trainers.lsp_ensemble_temp.lsp_ensamble_3_trainer import lsp_cross_validation_3
+from trainers.lsp_ensemble_temp.lsp_ensamble_4_trainer import lsp_cross_validation_4
+from trainers.lsp_ensemble_temp.lsp_ensamble_5_trainer import lsp_cross_validation_5
 
 from utils.builders import new_folder
 from utils.loaders import load_data
@@ -28,7 +28,7 @@ def train_main_model(dataset, model, view, cv_number, model_args, run=0):
 
     new_folder(model_args["model_name"], model_args["evaluation_method"], backbone=model_args["backbone"], dataset=model_args["dataset"])
     
-    if gcn_args["evaluation_method"] == "model_assessment":
+    if model_args["evaluation_method"] == "model_assessment":
             model_name += f"_run_{run}_fixed_init"
             
     if model_args["model_name"] == "gcn_student_lsp_ensamble_2" or model_args["model_name"] == "gat_student_lsp_ensamble_2":
@@ -47,10 +47,11 @@ def parrallel_run(run):
     for dataset_i in datasets_asdnc:
         for view_i in views:
             models = [
-                gcn_student_lsp_ensamble_2_args,
-                gcn_student_lsp_ensamble_3_args,
-                gcn_student_lsp_ensamble_4_args,
-                gcn_student_lsp_ensamble_5_args
+                gcn_student_lsp_ensamble_4_args_1,
+                gcn_student_lsp_ensamble_4_args_2,
+                gcn_student_lsp_ensamble_4_args_3,
+                gcn_student_lsp_ensamble_4_args_4,
+                gcn_student_lsp_ensamble_4_args_5
             ] 
             for model in models:
                 for cv in [3, 5, 10]:
