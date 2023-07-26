@@ -1,7 +1,7 @@
 # HYPERPARAMETER SENSITIVITY FOT LAMBDA 
 
 gcn_student_lsp_ensamble_4_args_1 = {
-    "num_epochs":1, 
+    "num_epochs":50, 
     "lr": 0.0001, # 0.0001 when training without teacher
     "weight_decay":5e-4, 
     "hidden_dim":64,
