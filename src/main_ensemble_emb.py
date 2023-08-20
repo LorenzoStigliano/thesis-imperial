@@ -60,10 +60,7 @@ def parrallel_run(run, dataset):
     else:
         #ADD MODEL CONFIG HERE 
         models = [
-            gcn_student_ensamble_2_BreastMNIST_args,
-            gcn_student_ensamble_3_BreastMNIST_args,
-            gcn_student_ensamble_4_BreastMNIST_args,
-            gcn_student_ensamble_5_BreastMNIST_args
+            gcn_student_emb_ensamble_3_BreastMNIST_args
         ] 
         for model in models:
             for cv in [3, 5, 10]:

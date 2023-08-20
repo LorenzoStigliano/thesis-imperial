@@ -170,6 +170,26 @@ gcn_student_ensamble_5_BreastMNIST_args = {
     "n_students":5 # TOTAL number of students in ensamble 
 }
 
+# ENSAMBLE WITH EMB PARAMS
+gcn_student_emb_ensamble_3_BreastMNIST_args = {
+    "num_epochs":50, 
+    "lr": 1e-4, 
+    "weight_decay":5e-4, 
+    "hidden_dim":64,
+    "dropout":0,
+    "threshold":"median", # Threshold the graph adjacency matrix. Possible values: no_threshold, median, mean
+    "model_name":"gcn_student_emb_ensamble_3",
+    "backbone":"gcn",
+    "dataset":"BreastMNIST",
+    "evaluation_method": "model_assessment", # model selection or model assessment
+    "alpha": 2, # ensamble ce loss
+    "beta": 7,  # ensamble kd loss
+    "gamma": 7, # sum of student ce loss
+    "lambda":1, # disentanglement loss
+    "T": 3, #Temperature parameter for soft logit target 
+    "n_students":3 # TOTAL number of students in ensamble 
+}
+
 # ENSAMBLE WITH LSP PARAMS
 
 gcn_student_lsp_ensamble_2_BreastMNIST_args = {
