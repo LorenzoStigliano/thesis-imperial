@@ -60,6 +60,7 @@ gcn_lsp_student_args = {
     "threshold":"median", # Threshold the graph adjacency matrix. Possible values: no_threshold, median, mean
     "model_name":"lsp",
     "backbone":"gcn",
+    'student_type':"gcn",
     "dataset":"gender_data",
     "evaluation_method": "model_assessment", # model selection or model assessment
     "alpha_ce": 1, 
@@ -76,6 +77,7 @@ gcn_mskd_student_args = {
     "dropout":0,
     "threshold":"median", # Threshold the graph adjacency matrix. Possible values: no_threshold, median, mean
     "model_name":"mskd",
+    'student_type':"gcn",
     "backbone":"gcn",
     "dataset":"gender_data",
     "evaluation_method": "model_assessment", # model selection or model assessment
@@ -93,6 +95,7 @@ gcn_fitnet_student_args_0_4 = {
     "dropout":0,
     "threshold":"median", # Threshold the graph adjacency matrix. Possible values: no_threshold, median, mean
     "model_name":"fitnet",
+    'student_type':"gcn",
     "backbone":"gcn",
     "dataset":"gender_data",
     "evaluation_method": "model_assessment", # model selection or model assessment
@@ -110,6 +113,7 @@ gcn_fitnet_student_args = {
     "dropout":0,
     "threshold":"median", # Threshold the graph adjacency matrix. Possible values: no_threshold, median, mean
     "model_name":"fitnet",
+    'student_type':"gcn",
     "backbone":"gcn",
     "dataset":"gender_data",
     "evaluation_method": "model_assessment", # model selection or model assessment

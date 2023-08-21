@@ -28,7 +28,7 @@ def train_main_model(dataset, model, view, cv_number, model_args, run=0):
 
     G_list = load_data(dataset, view, SAVE_DIR_DATA, NormalizeInputGraphs=False)
 
-    new_folder(model_args["model_name"], model_args["evaluation_method"], SAVE_DIR_DATA, backbone=model_args["backbone"], dataset=model_args["dataset"])
+    new_folder(model_args["model_name"], model_args["evaluation_method"], SAVE_DIR_MODEL_DATA, backbone=model_args["backbone"], dataset=model_args["dataset"])
     
     if model_args["evaluation_method"] == "model_assessment":
             model_name += f"_run_{run}_fixed_init"
@@ -45,7 +45,7 @@ def train_main_model(dataset, model, view, cv_number, model_args, run=0):
 def parrallel_run(run, dataset):
     print(run)
     views = [0, 2, 4, 5] #0, 2, 4, 5
-   if dataset == "gender_data":
+    if dataset == "gender_data":
         for view_i in views:
             #ADD MODEL CONFIG HERE 
             models = [

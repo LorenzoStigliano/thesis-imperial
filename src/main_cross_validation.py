@@ -42,18 +42,18 @@ def train_main_model(dataset, model, view, cv_number, model_args, run=0):
     new_folder(model, model_args["evaluation_method"], SAVE_DIR_MODEL_DATA, dataset=model_args["dataset"], backbone=model_args["backbone"])
         
     if model=='gcn' and model_args["layers"]==2:
-        if model_args["evaluation_method"] == "model_assessment":
+        if model_args["evaluation_method"] == "model_assessment" or  model_args["evaluation_method"] == "model_selection":
             model_name += f"_run_{run}_fixed_init"
         cross_validation(model_args, G_list, view, model_name, cv_number, run)
     
     elif model=='gcn' and model_args["layers"]!=2:
-        if model_args["evaluation_method"] == "model_assessment":
+        if model_args["evaluation_method"] == "model_assessment" or  model_args["evaluation_method"] == "model_selection":
             layers = model_args["layers"]
             model_name += f"_run_{run}_fixed_init_layers_{str(layers)}"
         cross_validation(model_args, G_list, view, model_name, cv_number, run)
     
     elif model=='gcn_student' or model=='gat' or model=='gat_student':
-        if model_args["evaluation_method"] == "model_assessment":
+        if model_args["evaluation_method"] == "model_assessment" or  model_args["evaluation_method"] == "model_selection":
             model_name += f"_run_{run}_fixed_init"
         cross_validation(model_args, G_list, view, model_name, cv_number, run)
 

@@ -122,14 +122,14 @@ def cross_validation(model_args, G_list, view, model_name, cv_number, run=0):
 
         if model_args["evaluation_method"] =='model_selection':
             #Here we leave out the test set since we are not evaluating we can see the performance on the test set after training
-            train(model_args, train_dataset, val_dataset, student_model, threshold_value, name,cv, view, cv_number)
+            train(model_args, train_dataset, val_dataset, student_model, threshold_value, name,  cv, view, cv_number, run)
             #See performance on the held-out test set 
             dataset_sampler = GraphSampler(test_set)
             test_dataset = torch.utils.data.DataLoader(
                 dataset_sampler, 
                 batch_size = 1,  
                 shuffle = False) 
-            test(test_dataset, student_model, model_args, threshold_value, name)
+            test(test_dataset, student_model, model_args, threshold_value)
 
         if model_args["evaluation_method"] =='model_assessment':
             #Here we join the train and validation dataset
@@ -498,7 +498,7 @@ def validate(dataset, model, model_args, threshold_value, model_name, teacher_mo
 
     return val_total_loss, val_ce_loss, val_mskd_loss, result['acc'], result['prec'], result['recall'], result['F1']
 
-def test(dataset, model, model_args, threshold_value, model_name):
+def test(dataset, model, model_args, threshold_value):
     """
     Parameters
     ----------
@@ -533,20 +533,23 @@ def test(dataset, model, model_args, threshold_value, model_name):
         
         if model_args["threshold"] in ["median", "mean"]:
             adj = torch.where(adj > threshold_value, torch.tensor([1.0]).to(device), torch.tensor([0.0]).to(device))
-        
-        ypred, _ = model(features, adj)
-        
-        total_loss += model.loss(ypred, label).item()
+
+        # Ground truth label 
+        y_gt = label.to(device)
+        # Predict
+        ypred, node_embeddings_student = model(features, adj)
+        #Save pred
         _, indices = torch.max(ypred, 1)
         preds.append(indices.cpu().data.numpy())
 
     labels = np.hstack(labels)
     preds = np.hstack(preds)
 
-    simple_r = {'labels':labels,'preds':preds}
-    # Save labels and predictions of model on test set 
-    with open(SAVE_DIR_MODEL_DATA+model_args['dataset']+"/"+model_args['backbone']+"/"+model_args['evaluation_method']+"/"+model_args["model_name"]+"/labels_and_preds/"+model_name+"_test.pickle", 'wb') as f:
-      pickle.dump(simple_r, f)
+    result = {
+                'prec': metrics.precision_score(labels, preds),
+                'recall': metrics.recall_score(labels, preds),
+                'acc': metrics.accuracy_score(labels, preds),
+                'F1': metrics.f1_score(labels, preds)
+    }
 
-    print('Held-out test set loss: {}'.format(total_loss / len(dataset)))
-    print("Test accuracy:", metrics.accuracy_score(labels, preds))    
+    print(f"Test accuracy: {result['acc']}")
