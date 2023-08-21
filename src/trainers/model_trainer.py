@@ -16,8 +16,6 @@ from models.gcn_student import GCN_STUDENT
 from models.gat.gat import GAT
 from models.gat.gat_student import GAT_STUDENT
 
-from models.mlp import MLP
-
 from utils.helpers import *
 from utils.config import SAVE_DIR_MODEL_DATA
 
@@ -113,18 +111,7 @@ def cross_validation(model_args, G_list, view, model_name, cv_number, run=0):
                 run = run,
                 dataset = model_args["dataset"]
             ).to(device)   
-        
-        elif model_args["model_name"] == "mlp":
-            model = MLP(
-                num_layers=model_args["num_layers"], 
-                input_dim=num_nodes, 
-                hidden_dim=model_args["hidden_dim"], 
-                output_dim=model_args["output_dim"], 
-                dropout_ratio=model_args["dropout_ratio"],
-                run = run,
-                dataset = model_args["dataset"]
-                )
-        
+    
         if model_args["evaluation_method"] =='model_selection': 
             train(model_args, train_dataset, val_dataset, model, threshold_value, model_name+"_CV_"+str(i)+"_view_"+str(view), run)
             #See performance on the held-out test set 
