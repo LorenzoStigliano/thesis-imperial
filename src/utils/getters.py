@@ -4,9 +4,30 @@ import io
 import numpy as np 
 from config import SAVE_DIR_MODEL_DATA
 
-############ GETTERS FOR LABELS OF MODELS ############
+########################################################################################
+################################## GETTERS FOR LABELS OF MODELS ########################
+########################################################################################
 
 def get_labels_and_preds(dataset, model, analysis_type, training_type, cv_n, view, run, dataset_split, student=0, model_args=None):
+    """
+    Get labels and predictions for a specific analysis type, model, and training configuration.
+
+    Parameters:
+        dataset (str): Name of the dataset.
+        model (str): Name of the GNN model or KD method.
+        analysis_type (str): Type of analysis ("model_assessment" or other).
+        training_type (str): Type of training configuration (e.g., "3Fold", "5Fold", "10Fold").
+        cv_n (int): Index of the cross-validation fold.
+        view (int): Index of the data view.
+        run (int): Index of the model training run.
+        dataset_split (str): Split of the dataset ("train", "val", or "test").
+        student (int, optional): Index of the student in the ensemble (default is 0).
+        model_args (dict, optional): Dictionary containing model-specific arguments (default is None).
+
+    Returns:
+        labels_and_preds (dict) A dictionary containing labels and model predictions if analysis_type is "model_assessment",
+        otherwise returns None.
+    """"
     if analysis_type == "model_assessment":
         if "ensamble" in model:
             alpha = str(model_args["alpha"])
@@ -33,16 +54,34 @@ def get_labels_and_preds(dataset, model, analysis_type, training_type, cv_n, vie
         
         else:
             cv_path = SAVE_DIR_MODEL_DATA+f'{dataset}/{model_args["backbone"]}/model_assessment/{model}/labels_and_preds/MainModel_{training_type}_{dataset}_{model}_run_{run}_fixed_init_CV_{cv_n}_view_{view}_{dataset_split}.pickle'   
-    #TODO: model_selection
     else:
         return 
     with open(cv_path,'rb') as f:
         labels_and_preds = pickle.load(f)
     return labels_and_preds
 
-############ GETTERS FOR METRICS OF MODELS ############
+########################################################################################
+################################## GETTERS FOR METRICS OF MODELS #######################
+########################################################################################
 
 def extract_metrics(dataset, model, analysis_type, training_type, view, run, dataset_split, metric, model_args=None):
+    """
+    Extract and aggregate metrics across cross-validation folds for a specific analysis.
+
+    Parameters:
+        dataset (str): Name of the dataset.
+        model (str): Name of the GNN model or KD method.
+        analysis_type (str): Type of analysis ("model_assessment" or other).
+        training_type (str): Type of training configuration (e.g., "3Fold", "5Fold", "10Fold").
+        view (int): Index of the data view.
+        run (int): Index of the model training run.
+        dataset_split (str): Split of the dataset ("train", "val", or "test").
+        metric (str): Name of the metric to extract.
+        model_args (dict, optional): Dictionary containing model-specific arguments (default is None).
+
+    Returns:
+        metrics (numpy.ndarray): Array of aggregated metrics across cross-validation folds.
+    """
     metrics = []
     if training_type == '3Fold':
         for cv_i in range(3):
@@ -57,6 +96,25 @@ def extract_metrics(dataset, model, analysis_type, training_type, view, run, dat
     return metrics
 
 def get_metrics(dataset, model, analysis_type, training_type, cv_n, view, run, dataset_split, metric, model_args=None):
+    """
+    Get model evaluation metrics from saved files.
+
+    Parameters:
+        dataset (str): Name of the dataset.
+        model (str): Name of the GNN model or KD method.
+        analysis_type (str): Type of analysis ("model_assessment" or other).
+        training_type (str): Type of training configuration (e.g., "3Fold", "5Fold", "10Fold").
+        cv_n (int): Index of the cross-validation fold.
+        view (int): Index of the data view.
+        run (int): Index of the model training run.
+        dataset_split (str): Split of the dataset ("train", "val", or "test").
+        metric (str): Name of the metric to extract.
+        model_args (dict, optional): Dictionary containing model-specific arguments (default is None).
+
+    Returns:
+        metrics (dict): Dictionary containing model evaluation metrics if analysis_type is "model_assessment",
+            otherwise returns None.
+    """
     if analysis_type == "model_assessment": 
         if "teacher" in model:
             if "weight" in model:
@@ -113,22 +171,62 @@ def get_metrics(dataset, model, analysis_type, training_type, cv_n, view, run, d
                     cv_path = SAVE_DIR_MODEL_DATA+f'{dataset}/{model_args["backbone"]}/model_assessment/{model}/metrics/MainModel_{training_type}_{dataset}_{model}_run_{run}_fixed_init_CV_{cv_n}_view_{view}_{dataset_split}_{metric}.pickle'   
         else:
             cv_path = SAVE_DIR_MODEL_DATA+f'{dataset}/{model_args["backbone"]}/model_assessment/{model}/metrics/MainModel_{training_type}_{dataset}_{model}_run_{run}_fixed_init_CV_{cv_n}_view_{view}_{dataset_split}_{metric}.pickle'   
-    #TODO: model_selection
     else:
         return 
     with open(cv_path,'rb') as f:
         metrics = pickle.load(f)
     return metrics
 
-############ GETTERS FOR WEIGHTS OF MODELS ############
+########################################################################################
+################################## GETTERS FOR WEIGHTS OF MODELS #######################
+########################################################################################
 
 class CPU_Unpickler(pickle.Unpickler):
+    """
+    Unpickler class to load torch objects on CPU.
+
+    This custom unpickler is designed to load torch objects from pickled data while
+    mapping them to the CPU. It specifically handles the case where the module is
+    'torch.storage' and the name is '_load_from_bytes'.
+
+    Usage:
+    custom_unpickler = CPU_Unpickler(file, fix_imports=False, encoding="latin1")
+    object = custom_unpickler.load()
+    """
     def find_class(self, module, name):
+        """
+        Find and return the class to load from pickled data.
+
+        Parameters:
+            module (str): Name of the module.
+            name (str): Name of the class.
+
+        Returns:
+            class: The class to load from pickled data, or super's find_class result.
+        """
         if module == 'torch.storage' and name == '_load_from_bytes':
             return lambda b: torch.load(io.BytesIO(b), map_location='cpu')
         else: return super().find_class(module, name)
 
 def extract_weights(dataset, view, model, training_type, run, student=0, model_args=None):
+    """
+    Extract and average model weights from different cross-validation folds.
+
+    This function extracts model weights from different cross-validation folds and
+    averages them to provide a consolidated set of weights.
+
+    Parameters:
+        dataset (str): Name of the dataset.
+        view (int): Index of the data view.
+        model (str): Name of the GNN model.
+        training_type (str): Type of training configuration (e.g., "3Fold", "5Fold", "10Fold").
+        run (int): Index of the model training run.
+        student (int, optional): Index of the student in the ensemble (default is 0).
+        model_args (dict, optional): Dictionary containing model-specific arguments (default is None).
+
+    Returns:
+        weights (np.ndarray): Averaged model weights.
+    """
     runs = []
     if training_type == '3Fold':
         for cv_i in range(3):
@@ -144,6 +242,25 @@ def extract_weights(dataset, view, model, training_type, run, student=0, model_a
     return weights
 
 def get_weight(dataset, view, model, training_type, shot_n, cv_n, run, student, model_args=None):
+    """
+    Get model weights from specified configuration.
+
+    This function retrieves model weights from a specified configuration and returns them.
+
+    Parameters:
+        dataset (str): Name of the dataset.
+        view (int): Index of the data view.
+        model (str): Name of the GNN model.
+        training_type (str): Type of training configuration (e.g., "3Fold", "5Fold", "10Fold").
+        shot_n (int): Not used.
+        cv_n (int): Index of the cross-validation fold.
+        run (int): Index of the model training run.
+        student (int): Index of the student in the ensemble.
+        model_args (dict, optional): Dictionary containing model-specific arguments (default is None).
+
+    Returns:
+        weights_vector (np.ndarray): Model weights vector.
+    """
     if "ensamble" in model:
         
         alpha = str(model_args["alpha"])

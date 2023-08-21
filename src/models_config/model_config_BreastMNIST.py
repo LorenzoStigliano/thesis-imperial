@@ -1,4 +1,28 @@
+"""
+Model Configuration File for BreastMNIST
 
+This file contains example configuration parameters for training and evaluating graph neural network (GNN) models.
+These parameters are defined here as templates but are hard-coded in their corresponding 'main*.py' files for specific
+experiments and tasks.
+
+The 'model_config' file serves as a reference for the configuration parameters used in training and evaluation of GNN models.
+Each configuration defines hyperparameters and settings that shape the behavior of the GNN model during training and testing.
+The 'main*.py' scripts that perform the actual training and evaluation import these configurations and use them for execution.
+
+It's important to customize these configurations based on the requirements of the specific GNN model, dataset, and task.
+By centralizing these parameters, it becomes easier to manage and experiment with different configurations without
+directly modifying the main code.
+
+Usage:
+    To use this 'model_config' file, select or modify the example configurations provided below to match your specific
+    GNN model and application. These configurations will then be imported and used in the 'main*.py' scripts for
+    training and evaluation.
+
+Note:
+    These example configurations should be adjusted according to the specific GNN model and application.
+    Parameters like 'num_epochs', 'hidden_dim', 'dropout', 'threshold', and others should be customized
+    based on the nature of the problem being tackled.
+"""
 #############################################################################################################################
 ######################################## GCN TEACHER MODEL PARAMETERS w/BreastMNIST ########################################
 ######################################## GCN STUDENT MODEL PARAMETERS w/BreastMNIST ########################################

@@ -21,6 +21,17 @@ from utils.config import SAVE_DIR_MODEL_DATA
 device = torch.device('cpu')
 
 def lsp(node_embeddings, adjacency_matrix, sigma=1.0):
+    """
+    Computes the Local Structure Preservation (LSP) matrix for node embeddings.
+    
+    Parameters:
+      node_embeddings (Tensor): Node embedding matrix.
+      adjacency_matrix (Tensor): Binary adjacency matrix.
+      sigma (float): Sigma parameter for the RBF kernel. Default is 1.0.
+    
+    Returns:
+      local_structure (Tensor): Local Structure Preservation matrix.
+    """
 
     # Compute the squared Euclidean distance matrix between node embeddings
     squared_distances = torch.cdist(node_embeddings, node_embeddings, p=2).pow(2)
@@ -44,6 +55,16 @@ def lsp(node_embeddings, adjacency_matrix, sigma=1.0):
     return local_structure
 
 def extract_ls_vectors(local_structure, adjacency_matrix):
+    """
+    Extracts the local structure vectors from the local structure matrix.
+    
+    Parameters:
+      local_structure (Tensor): Local Structure Preservation matrix.
+      adjacency_matrix (Tensor): Binary adjacency matrix.
+    
+    Returns:
+      non_zero_rows (list of Tensors): List of non-zero rows from the local structure vectors.
+    """
     # Create a sparse mask tensor from the adjacency matrix
     mask = adjacency_matrix.to_sparse().to_dense()
     
@@ -58,6 +79,17 @@ def extract_ls_vectors(local_structure, adjacency_matrix):
     return non_zero_rows
 
 def cross_validation(model_args, G_list, view, model_name, cv_number, run=0):
+    """
+    Performs cross-validation training and evaluation of the model.
+    
+    Parameters:
+      model_args (dict): Model configuration parameters.
+      G_list (list): List of graph data for different views.
+      view (int): View index for the current cross-validation.
+      model_name (str): Name of the model being trained.
+      cv_number (int): Number of cross-validation folds.
+      run (int, optional): Run number. Default is 0.
+    """
     start = time.time() 
     print("Run : ",run)
     print("--------------------------------------------------------------------------")
@@ -126,17 +158,20 @@ def cross_validation(model_args, G_list, view, model_name, cv_number, run=0):
 
 def train(model_args, train_dataset, val_dataset, student_model, threshold_value, model_name, cv, view, cv_number, run=0, alpha=2):
     """
-    Parameters
-    ----------
-    model_args : arguments
-    train_dataset : dataloader (dataloader for the validation/test dataset).
-    val_dataset : dataloader (dataloader for the validation/test dataset).
-    model : nn model (GCN model).
-    threshold_value : float (threshold for adjacency matrices).
+    Performs model training on the training dataset.
     
-    Description
-    ----------
-    This methods performs the training of the model on train dataset and calls evaluate() method for evaluation.
+    Parameters:
+      model_args (dict): Model configuration parameters.
+      train_dataset (dataloader): Dataloader for the training dataset.
+      val_dataset (dataloader): Dataloader for the validation dataset.
+      student_model (nn.Module): Student model to be trained.
+      threshold_value (float): Threshold value for adjacency matrices.
+      model_name (str): Name of the model being trained.
+      cv (int): Cross-validation fold index.
+      view (int): View index for the current training.
+      cv_number (int): Number of cross-validation folds.
+      run (int, optional): Run number. Default is 0.
+      alpha (int, optional): Alpha value for adjusting the loss. Default is 2.
     """
     # Load teacher model
     teacher_model = torch.load(SAVE_DIR_MODEL_DATA+model_args['dataset']+"/"+model_args['backbone']+"/"+model_args['evaluation_method']+f"/{model_args['backbone']}/models/{model_args['backbone']}_MainModel_{cv_number}Fold_{model_args['dataset']}_{model_args['backbone']}_run_{run}_fixed_init_CV_{cv}_view_{view}.pt")
@@ -351,20 +386,24 @@ def train(model_args, train_dataset, val_dataset, student_model, threshold_value
 
 def validate(dataset, model, model_args, threshold_value, model_name, teacher_model):
     """
-    Parameters
-    ----------
-    dataset : dataloader (dataloader for the validation/test dataset).
-    model : nn model (GCN model).
-    model_args : arguments
-    threshold_value : float (threshold for adjacency matrices).
+    Performs model validation on the validation dataset.
     
-    Description
-    ----------
-    This methods performs the evaluation of the model on test/validation dataset
+    Parameters:
+      dataset (dataloader): Dataloader for the validation dataset.
+      model (nn.Module): Trained model to be evaluated.
+      model_args (dict): Model configuration parameters.
+      threshold_value (float): Threshold value for adjacency matrices.
+      model_name (str): Name of the model being trained.
+      teacher_model (nn.Module): Teacher model for obtaining soft labels.
     
-    Returns
-    -------
-    test accuracy.
+    Returns:
+      val_total_loss (float): Validation loss.
+      val_ce_loss (float): Validation Cross Entropy loss.
+      val_soft_ce_loss (float): Validation Soft Cross Entropy loss.
+      val_acc (float): Validation accuracy.
+      val_precision (float): Validation precision.
+      val_recall (float): Validation recall.
+      val_f1 (float): Validation F1-score.
     """
     model.eval()
     labels = []
@@ -445,20 +484,13 @@ def validate(dataset, model, model_args, threshold_value, model_name, teacher_mo
 
 def test(dataset, model, model_args, threshold_value):
     """
-    Parameters
-    ----------
-    dataset : dataloader (dataloader for the validation/test dataset).
-    model : nn model (GCN model).
-    model_args : arguments
-    threshold_value : float (threshold for adjacency matrices).
+    Performs model evaluation on the test dataset.
     
-    Description
-    ----------
-    This methods performs the evaluation of the model on test/validation dataset
-    
-    Returns
-    -------
-    test accuracy.
+    Parameters:
+      dataset (dataloader): Dataloader for the test dataset.
+      model (nn.Module): Trained model to be evaluated.
+      model_args (dict): Model configuration parameters.
+      threshold_value (float): Threshold value for adjacency matrices.
     """
     model.eval()
     labels = []

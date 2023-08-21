@@ -12,9 +12,15 @@ import torchvision.transforms as transforms
 
 def dump_data_MEDMNIST(save_dir, dataset):
     """
-    #1. download and save data all together to a directory and split labels 
+    Download, preprocess, and save MEDMNIST dataset to a directory while splitting labels.
 
-    USAGE:
+    This function downloads the specified MEDMNIST dataset, preprocesses it, and saves the data along with the corresponding labels to a specified directory.
+
+    Parameters:
+        save_dir (str): Directory where the dataset will be saved.
+        dataset (str): Name of the MEDMNIST dataset to download (e.g., 'BreastMNIST').
+
+    Usage:
     dump_data_MEDMNIST(SAVE_DIR_DATA, 'BreastMNIST')
     """
     data_flag=dataset
@@ -62,6 +68,21 @@ def dump_data_MEDMNIST(save_dir, dataset):
         pickle.dump(labels, f)
 
 def dump_data_gender_data(data_dir, save_dir, dataset):
+    """
+    Load and preprocess gender-related data from MAT files and save to a directory.
+
+    This function reads gender-related data from MAT files located in the specified directory,
+    preprocesses the data (including adjacency tensors, ages, and labels), and saves them
+    along with the corresponding labels and ages to a specified directory.
+
+    Parameters:
+        data_dir (str): Directory containing the MAT files to be processed.
+        save_dir (str): Directory where the preprocessed data will be saved.
+        dataset (str): Name of the dataset (used for creating subdirectories).
+
+    Usage:
+    dump_data_gender_data(DATA_DIR, SAVE_DIR_DATA, 'GenderData')
+    """
 
   adjs, ages, labels = [], [], []
 
@@ -88,13 +109,22 @@ def dump_data_gender_data(data_dir, save_dir, dataset):
 
 def new_folder(model, evaluation_method, SAVE_DIR_MODEL_DATA, backbone="gcn", dataset="gender_data"):
     """
-    Parameters
-    ----------
-    model : GNN model (diffpool, gat, gcn, gunet or sag)
-    
-    Description
-    ----------
-    Creates GNN directories if not exist.
+    Create directories for storing GNN model-related data.
+
+    This function creates directories for a specified GNN model, evaluation method, backbone,
+    and dataset. The directories are organized to store various data related to the model,
+    such as weights, training and validation loss, trained models, labels and predictions,
+    and metrics.
+
+    Parameters:
+    model (str): Name of the model or KD method (gcn, gcn_student,...).
+    evaluation_method (str): Name of the evaluation method.
+    SAVE_DIR_MODEL_DATA (str): Directory where the model-related data will be saved.
+    backbone (str, optional): Name of the GNN backbone (default is "gcn").
+    dataset (str, optional): Name of the dataset (default is "gender_data").
+
+    Usage:
+    new_folder("gcn", "evaluation_method", SAVE_DIR_MODEL_DATA, backbone="gcn", dataset="gender_data")
     """
     print(SAVE_DIR_MODEL_DATA+dataset+"/"+backbone+"/"+evaluation_method+"/"+model)
     if not os.path.exists(SAVE_DIR_MODEL_DATA+dataset+"/"+backbone+"/"+evaluation_method+"/"+model):

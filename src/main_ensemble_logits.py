@@ -18,7 +18,17 @@ import joblib
 from joblib import Parallel, delayed
 
 def train_main_model(dataset, model, view, cv_number, model_args, run=0):
-    
+     """
+    Train the main GNN model on the given dataset using cross-validation.
+
+    Parameters:
+        dataset (str): Name of the dataset.
+        model (str): Name of the GNN model.
+        view (int): View number (for multi-view datasets) or -1 for single-view datasets.
+        cv_number (int): Number of folds for cross-validation.
+        model_args (dict): Dictionary containing model configuration arguments.
+        run (int, optional): Random seed for reproducibility. Defaults to 0.
+    """
     torch.manual_seed(run)
     np.random.seed(run)
     random.seed(run)   
@@ -44,6 +54,16 @@ def train_main_model(dataset, model, view, cv_number, model_args, run=0):
 
 
 def parrallel_run(run, dataset):
+    """
+    Execute training of GNN models in parallel for the specified run and dataset.
+
+    Parameters:
+        run (int): Seed for the current run.
+        dataset (str): Name of the dataset.
+
+    Note:
+        This function is meant to be used in parallel processing for training models.
+    """
     print(run)
     views = [0, 2, 4, 5] #0, 2, 4, 5
     if dataset == "gender_data":

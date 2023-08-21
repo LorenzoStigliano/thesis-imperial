@@ -26,15 +26,15 @@ device = torch.device('cpu')
 
 def cross_validation(model_args, G_list, view, model_name, cv_number, run=0):
     """
-    Parameters
-    ----------
-    model_args : Arguments
-    Description
-    ----------
-    Initiates the model and performs train/test or train/validation splits and calls train() to execute training and evaluation.
-    Returns
-    -------
-    test_accs : test accuracies (list)
+    Performs cross-validation training and evaluation of the model.
+    
+    Parameters:
+        model_args (dict): Model configuration parameters.
+        G_list (list): List of graph data for different views.
+        view (int): View index for the current cross-validation.
+        model_name (str): Name of the model being trained.
+        cv_number (int): Number of cross-validation folds.
+        run (int, optional): Run number. Default is 0.
     """
     start = time.time() 
     print("Run :", run)
@@ -143,17 +143,16 @@ def cross_validation(model_args, G_list, view, model_name, cv_number, run=0):
 
 def train(model_args, train_dataset, val_dataset, model, threshold_value, model_name, run):
     """
-    Parameters
-    ----------
-    model_args : arguments
-    train_dataset : dataloader (dataloader for the validation/test dataset).
-    val_dataset : dataloader (dataloader for the validation/test dataset).
-    model : nn model (GCN model).
-    threshold_value : float (threshold for adjacency matrices).
+    Trains the graph neural network model and evaluates on the validation data.
     
-    Description
-    ----------
-    This methods performs the training of the model on train dataset and calls evaluate() method for evaluation.
+    Parameters:
+        model_args (dict): Model configuration parameters.
+        train_dataset (dataloader): Dataloader for the training dataset.
+        val_dataset (dataloader): Dataloader for the validation dataset.
+        model (nn.Module): Graph neural network model to be trained.
+        threshold_value (float): Threshold value for adjacency matrices.
+        model_name (str): Name of the model being trained.
+        run (int): Run number.
     """
     params = list(model.parameters()) 
     optimizer = torch.optim.Adam(params, lr=model_args["lr"], weight_decay=model_args['weight_decay'])
@@ -319,20 +318,21 @@ def train(model_args, train_dataset, val_dataset, model, threshold_value, model_
 
 def validate(dataset, model, model_args, threshold_value, model_name):
     """
-    Parameters
-    ----------
-    dataset : dataloader (dataloader for the validation/test dataset).
-    model : nn model (GCN model).
-    model_args : arguments
-    threshold_value : float (threshold for adjacency matrices).
+    Evaluates the graph neural network model on the validation data.
     
-    Description
-    ----------
-    This methods performs the evaluation of the model on test/validation dataset
+    Parameters:
+        dataset (dataloader): Dataloader for the validation dataset.
+        model (nn.Module): Graph neural network model to be evaluated.
+        model_args (dict): Model configuration parameters.
+        threshold_value (float): Threshold value for adjacency matrices.
+        model_name (str): Name of the model being evaluated.
     
-    Returns
-    -------
-    test accuracy.
+    Returns:
+        val_loss (float): Validation loss.
+        val_acc (float): Validation accuracy.
+        val_precision (float): Validation precision.
+        val_recall (float): Validation recall.
+        val_f1 (float): Validation F1 score.
     """
     model.eval()
     labels = []
@@ -400,20 +400,16 @@ def validate(dataset, model, model_args, threshold_value, model_name):
 
 def test(dataset, model, model_args, threshold_value):
     """
-    Parameters
-    ----------
-    dataset : dataloader (dataloader for the validation/test dataset).
-    model : nn model (GCN model).
-    model_args : arguments
-    threshold_value : float (threshold for adjacency matrices).
+    Evaluates the graph neural network model on the test data.
     
-    Description
-    ----------
-    This methods performs the evaluation of the model on test/validation dataset
+    Parameters:
+        dataset (dataloader): Dataloader for the test dataset.
+        model (nn.Module): Graph neural network model to be evaluated.
+        model_args (dict): Model configuration parameters.
+        threshold_value (float): Threshold value for adjacency matrices.
     
-    Returns
-    -------
-    test accuracy.
+    Returns:
+        None
     """
     model.eval()
     labels = []

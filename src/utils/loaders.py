@@ -8,16 +8,16 @@ import numpy as np
 
 def load_data(dataset, view, SAVE_DIR_DATA, NormalizeInputGraphs=False):
     """
-    Parameters
-    ----------
+    Load data for the specified dataset and view.
 
-    Description
-    ----------
-    This methods loads the adjacency matrices representing the args.view -th view in dataset
-    
-    Returns
-    -------
-    List of dictionaries{adj, label, id}
+    Parameters:
+        dataset (str): Name of the dataset ('gender_data' or other).
+        view (int): Index of the view to load.
+        SAVE_DIR_DATA (str): Directory where data is stored.
+        NormalizeInputGraphs (bool, optional): Whether to normalize input graphs (default is False).
+
+    Returns:
+        list: List of dictionaries, each containing 'adj', 'label', and 'id' keys.
     """
     if dataset =='gender_data':
         with open(SAVE_DIR_DATA+dataset+'/'+dataset+'_edges','rb') as f:
@@ -56,12 +56,29 @@ def load_data(dataset, view, SAVE_DIR_DATA, NormalizeInputGraphs=False):
         return G_list        
 
 def minmax_sc(x):
+    """
+    Apply min-max scaling to input data.
+
+    Parameters:
+        x (numpy.ndarray): Input data.
+
+    Returns:
+        numpy.ndarray: Scaled data.
+    """
     min_max_scaler = preprocessing.MinMaxScaler()
     x = min_max_scaler.fit_transform(x)
     return x
 
 class GraphSampler(torch.utils.data.Dataset):
-    
+    """
+    Custom dataset class for graph data.
+
+    Parameters:
+        G_list (list): List of dictionaries containing graph data.
+
+    Returns:
+        dict: A dictionary containing graph adjacency, labels, and ID.
+    """
     def __init__(self, G_list):
         self.adj_all = []
         self.label_all = []

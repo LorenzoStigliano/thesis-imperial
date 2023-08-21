@@ -12,10 +12,12 @@ from analysis import view_specific_rep, view_reproducibility_analysis, view_metr
 
 def plot_random_sample(dataset, views, save_fig=False):
     """
-    Function to plot a random sample on a specified dataset and view
+    Plot a random sample from a specified dataset and views.
 
-    USAGE:
-    plot_random_sample("gender_data", [0,1], True)
+    Parameters:
+        dataset (str): Name of the dataset.
+        views (list): List of views to plot.
+        save_fig (bool, optional): Whether to save the figures (default is False).
     """
 
     sample_index = random.choice(range(len(load_data(dataset, 1, False))))
@@ -40,11 +42,17 @@ def plot_random_sample(dataset, views, save_fig=False):
 
 def plot_learning_curves(dataset, views, model, evaluation_method, folds, with_teacher=False, save_fig=False, run=0):
     """
-    USAGE:
-    plot_learning_curves(dataset="gender_data", evaluation_method='model_selection', views=[0, 2, 4, 5], model="gcn", folds=3, save_fig=True)
+    Plot learning curves for a specified dataset, views, and model.
 
-    for model in [ "gcn", "gat", "diffpool", "gunet", "sag"]:
-        plot_learning_curves(dataset="gender_data", views=[0, 1], model=model, folds=3, save_fig=True)
+    Parameters:
+        dataset (str): Name of the dataset.
+        views (list): List of views to plot.
+        model (str): Model name.
+        evaluation_method (str): Evaluation method.
+        folds (int): Number of folds.
+        with_teacher (bool, optional): Whether to include teacher model (default is False).
+        save_fig (bool, optional): Whether to save the figures (default is False).
+        run (int, optional): Run number (default is 0).
     """
     for view in views:
         if folds == 3:
@@ -112,8 +120,17 @@ def plot_learning_curves(dataset, views, model, evaluation_method, folds, with_t
 
 def plot_metric_curves(dataset, views, model, evaluation_method, folds, metric, with_teacher=False, save_fig=False):
     """
-    USAGE: 
-    plot_metric_curves(dataset="gender_data", evaluation_method='model_selection', views=[0, 2, 4, 5], model="gcn", folds=3, metric='acc', save_fig=True)
+    Plot metric curves for a specified dataset, views, and model.
+
+    Parameters:
+        dataset (str): Name of the dataset.
+        views (list): List of views to plot.
+        model (str): Model name.
+        evaluation_method (str): Evaluation method.
+        folds (int): Number of folds.
+        metric (str): Metric to plot.
+        with_teacher (bool, optional): Whether to include teacher model (default is False).
+        save_fig (bool, optional): Whether to save the figures (default is False).
     """
     for view in views:
         if folds == 3:
@@ -191,9 +208,15 @@ def plot_metric_curves(dataset, views, model, evaluation_method, folds, metric, 
             
 def plot_bar_chart(dataset, views, models, folds, metric, save_fig=False):
     """
-    USAGE:
+    Plot bar charts for a specified dataset, views, models, and metric.
 
-    plot_bar_chart(dataset="gender_data", views=[0, 1], models=[ "gcn", "gat", "diffpool", "gunet", "sag"], folds=3, metric="acc", save_fig=True)
+    Parameters:
+        dataset (str): Name of the dataset.
+        views (list): List of views to plot.
+        models (list): List of model names.
+        folds (int): Number of folds.
+        metric (str): Metric to plot.
+        save_fig (bool, optional): Whether to save the figures (default is False).
     """
     for view in views:
         
@@ -264,8 +287,15 @@ def plot_bar_chart(dataset, views, models, folds, metric, save_fig=False):
 
 def plot_bar_chart_rep(dataset, views, models, CV, run, save_fig=False):
     """
-    USAGE:
-    plot_bar_chart_rep(dataset="gender_data", views=[0, 2, 4, 5], models=["gcn", "gcn_student","gcn_student_teacher",  "gcn_student_teacher_weight"], CV=["3Fold", "5Fold", "10Fold"], run=5, save_fig=False)
+    Plot bar charts for reproducibility scores across different runs.
+
+    Parameters:
+        dataset (str): Name of the dataset.
+        views (list): List of views to plot.
+        models (list): List of model names.
+        CV (list): List of CV types.
+        run (int): Run number.
+        save_fig (bool, optional): Whether to save the figures (default is False).
     """
     plt.rcParams["figure.figsize"] = (10,5)
 
@@ -321,8 +351,17 @@ def plot_bar_chart_rep(dataset, views, models, CV, run, save_fig=False):
 
 def plot_bar_chart_reproducibility_mulitple_runs(dataset, views, models, CV, runs, students=0, model_args=None, save_fig=False):
     """
-    USAGE:
-    plot_bar_chart_reproducibility_mulitple_runs(dataset="gender_data", views=[0, 2, 4, 5], models=["gcn", "gcn_student","gcn_student_teacher"], CV=["3Fold", "5Fold", "10Fold"], runs=[i for i in range(10)], save_fig=True)
+    Plot bar charts for reproducibility scores across multiple runs.
+
+    Parameters:
+        dataset (str): Name of the dataset.
+        views (list): List of views to plot.
+        models (list): List of model names.
+        CV (list): List of CV types.
+        runs (list): List of run numbers.
+        students (int, optional): Number of student models (default is 0).
+        model_args (dict, optional): Model arguments (default is None).
+        save_fig (bool, optional): Whether to save the figures (default is False).
     """
     plt.rcParams["figure.figsize"] = (20,8)
 
@@ -374,14 +413,19 @@ def plot_bar_chart_reproducibility_mulitple_runs(dataset, views, models, CV, run
 
 def plot_bar_chart_metric_multiple_runs(dataset, view, models, CV, runs, metric, dataset_split, analysis_type, model_args=None, save_fig=False):
     """
-    USAGE:
+    Plot bar charts for metric scores across multiple runs.
 
-    ["acc", "f1", "recall", "precision"]
-    for view in [0,2,4,5]:
-        plot_bar_chart_metric_multiple_runs(dataset="gender_data", view=view, models=["gcn", "gcn_student","gcn_student_teacher"], CV=["3Fold", "5Fold", "10Fold"], runs=[i for i in range(10)], metric="acc", dataset_split="val", analysis_type="model_assessment", save_fig=True)
-        plot_bar_chart_metric_multiple_runs(dataset="gender_data", view=view, models=["gcn", "gcn_student","gcn_student_teacher",  "gcn_student_teacher_weight"], CV=["3Fold", "5Fold", "10Fold"], runs=[i for i in range(10)], metric="f1", dataset_split="val", analysis_type="model_assessment", save_fig=True)
-        plot_bar_chart_metric_multiple_runs(dataset="gender_data", view=view, models=["gcn", "gcn_student","gcn_student_teacher",  "gcn_student_teacher_weight"], CV=["3Fold", "5Fold", "10Fold"], runs=[i for i in range(10)], metric="recall", dataset_split="val", analysis_type="model_assessment", save_fig=True)
-        plot_bar_chart_metric_multiple_runs(dataset="gender_data", view=view, models=["gcn", "gcn_student","gcn_student_teacher",  "gcn_student_teacher_weight"], CV=["3Fold", "5Fold", "10Fold"], runs=[i for i in range(10)], metric="precision", dataset_split="val", analysis_type="model_assessment", save_fig=True)    
+    Parameters:
+        dataset (str): Name of the dataset.
+        view (int): View to plot.
+        models (list): List of model names.
+        CV (list): List of CV types.
+        runs (list): List of run numbers.
+        metric (str): Metric to plot.
+        dataset_split (str): Dataset split ('train', 'val', 'test').
+        analysis_type (str): Analysis type ('model_selection', 'model_assessment').
+        model_args (dict, optional): Model arguments (default is None).
+        save_fig (bool, optional): Whether to save the figures (default is False).
     """
     barWidth = 1/(len(models)+1)
 

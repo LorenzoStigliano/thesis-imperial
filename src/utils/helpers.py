@@ -8,6 +8,15 @@ import torch.utils.data
 device = torch.device('cpu')
 
 class GraphSampler(torch.utils.data.Dataset):
+    """
+    Custom dataset class for graph data.
+
+    Parameters:
+        G_list (list): List of dictionaries containing graph data.
+
+    Returns:
+        dict: A dictionary containing graph adjacency, labels, and ID.
+    """
     
     def __init__(self, G_list):
         self.adj_all = []
@@ -27,8 +36,18 @@ class GraphSampler(torch.utils.data.Dataset):
                 'label':self.label_all[idx],
                 'id':self.id_all[idx]}
 
-# Returns train, validation and test sets.
 def datasets_splits(folds, args, val_idx):
+    """
+    Split the dataset into training, validation, and test sets.
+
+    Parameters:
+        folds (list): List of graph folds.
+        args (dict): Dictionary containing arguments.
+        val_idx (int): Index of the validation fold.
+
+    Returns:
+        list, list, list: Lists containing train, validation, and test graphs.
+    """
     train = []
     validation = []
     test = []
@@ -44,6 +63,17 @@ def datasets_splits(folds, args, val_idx):
     return train, validation, test
 
 def model_selection_split(train, validation, args):
+    """
+    Split the dataset for model selection.
+
+    Parameters:
+        train (list): List of training graphs split indicies.
+        validation (list): List of validation graphs split indicies.
+        args (dict): Dictionary containing arguments.
+
+    Returns:
+        DataLoader, DataLoader, float: DataLoader objects for train and validation sets, and threshold value.
+    """
     print('Num training graphs: ', len(train), '; Num test graphs: ', len(validation))
     
     # minibatch
@@ -68,6 +98,18 @@ def model_selection_split(train, validation, args):
     return train_dataset_loader, val_dataset_loader, threshold_value
     
 def model_assessment_split(train, validation, test, args):
+    """
+    Split the dataset for model assessment.
+
+    Parameters:
+        train (list): List of training graphs split indicies.
+        validation (list): List of validation graphs split indicies.
+        test (list): List of test graphs split indicies.
+        args (dict): Dictionary containing arguments.
+
+    Returns:
+        DataLoader, DataLoader, float: DataLoader objects for train and test sets, and threshold value.
+    """
     
     train.extend(validation)
     print('Num training graphs: ', len(train), '; Num test graphs: ', len(test))
@@ -95,6 +137,16 @@ def model_assessment_split(train, validation, test, args):
 
 # Splits the dataset into k-folds     
 def stratify_splits(graphs, cv_number):
+    """
+    Stratify the dataset into k-folds.
+
+    Parameters:
+        graphs (list): List of graphs.
+        cv_number (int): Number of folds.
+
+    Returns:
+        list: List of graph folds.
+    """
     graphs_0 = []
     graphs_1 = []
     for i in range(len(graphs)):
@@ -122,6 +174,15 @@ def stratify_splits(graphs, cv_number):
     return folds
 
 def get_stats(list_train):
+    """
+    Calculate statistics of training features.
+
+    Parameters:
+        list_train (list): List of training graphs.
+
+    Returns:
+        float, float: Mean and median of training features.
+    """
     train_features = []
     for i in range(len(list_train)):
         ut_x_indexes = np.triu_indices(list_train[i]['adj'].shape[0], k=1)

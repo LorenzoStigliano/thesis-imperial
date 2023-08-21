@@ -21,6 +21,12 @@ from utils.config import SAVE_DIR_MODEL_DATA
 device = torch.device('cpu')
 
 class CrossEntropyLossForSoftTarget(nn.Module):
+    """
+    Initializes the CrossEntropyLossForSoftTarget module.
+    
+    Parameters:
+      T (float): Temperature parameter for softening the labels. Default is 3.
+    """
     def __init__(self, T=3):
         super(CrossEntropyLossForSoftTarget, self).__init__()
         self.T = T
@@ -32,7 +38,17 @@ class CrossEntropyLossForSoftTarget(nn.Module):
         return -(self.softmax(y_gt_soft)*self.logsoftmax(y_pred_soft)).mean()
     
 def lsp(node_embeddings, adjacency_matrix, sigma=1.0):
-
+    """
+    Computes the Local Structure Preservation (LSP) matrix for node embeddings.
+    
+    Parameters:
+      node_embeddings (Tensor): Node embedding matrix.
+      adjacency_matrix (Tensor): Binary adjacency matrix.
+      sigma (float): Sigma parameter for the RBF kernel. Default is 1.0.
+    
+    Returns:
+      local_structure (Tensor): Local Structure Preservation matrix.
+    """
     # Compute the squared Euclidean distance matrix between node embeddings
     squared_distances = torch.cdist(node_embeddings, node_embeddings, p=2).pow(2)
     
@@ -51,6 +67,16 @@ def lsp(node_embeddings, adjacency_matrix, sigma=1.0):
     return local_structure
 
 def extract_ls_vectors(local_structure, adjacency_matrix):
+    """
+    Extracts the local structure vectors from the local structure matrix.
+    
+    Parameters:
+      local_structure (Tensor): Local Structure Preservation matrix.
+      adjacency_matrix (Tensor): Binary adjacency matrix.
+    
+    Returns:
+      non_zero_rows (list of Tensors): List of non-zero rows from the local structure vectors.
+    """
     # Create a sparse mask tensor from the adjacency matrix
     mask = adjacency_matrix.to_sparse().to_dense()
     
@@ -66,14 +92,38 @@ def extract_ls_vectors(local_structure, adjacency_matrix):
     
 def weight_similarity_loss(w_teacher, w_student):
     """
-    Compute the KL loss between the weights of the last layer
+    Compute the cosine similarity loss between the weights of the last layers
     of two networks.
-    """    
+
+    Parameters:
+        w_teacher (torch.Tensor): Weights of the teacher network's last layer.
+        w_student (torch.Tensor): Weights of the student network's last layer.
+
+    Returns:
+        loss (torch.Tensor): Cosine similarity loss between the two sets of weights.
+            The loss measures the cosine similarity between the teacher and student weights
+            of the last layers, encouraging similarity between their weight vectors.
+    """
     # Concatenate and compute the cosine similarity
     loss = nn.CosineSimilarity()
     return loss(w_student, w_teacher).abs()
 
 def lsp_cross_validation_2(model_args, G_list, view, model_name, cv_number, n_students, run=0):
+    """
+    Perform cross-validation on student models.
+
+    Parameters:
+        model_args (dict): Dictionary containing model hyperparameters and settings.
+        G_list (list): List of graph data.
+        view (int): View index.
+        model_name (str): Name of the model.
+        cv_number (int): Number of cross-validation folds.
+        n_students (int): Number of student models.
+        run (int, optional): Run number. Defaults to 0.
+
+    Description:
+        This function performs cross-validation by training and evaluating student models.
+    """
     start = time.time() 
     print("Run : ",run)
     print("--------------------------------------------------------------------------")
@@ -158,17 +208,23 @@ def lsp_cross_validation_2(model_args, G_list, view, model_name, cv_number, n_st
 
 def train(model_args, train_dataset, val_dataset, students, student_names, threshold_value, model_name, cv, view, cv_number, run=0):
     """
-    Parameters
-    ----------
-    model_args : arguments
-    train_dataset : dataloader (dataloader for the validation/test dataset).
-    val_dataset : dataloader (dataloader for the validation/test dataset).
-    model : nn model (GCN model).
-    threshold_value : float (threshold for adjacency matrices).
-    
-    Description
-    ----------
-    This methods performs the training of the model on train dataset and calls evaluate() method for evaluation.
+    Perform training of RepKD.
+
+    Parameters:
+        model_args (dict): Dictionary containing model hyperparameters and settings.
+        train_dataset (dataloader): Dataloader for the training dataset.
+        val_dataset (dataloader): Dataloader for the validation/test dataset.
+        students (list): List of student model instances.
+        student_names (list): List of student model names.
+        threshold_value (float): Threshold value for adjacency matrices.
+        model_name (str): Name of the model.
+        cv (int): Cross-validation fold number.
+        view (int): View index.
+        cv_number (int): Number of cross-validation folds.
+        run (int, optional): Run number. Defaults to 0.
+
+    Description:
+        This function performs training of the student models and evaluates their performance.
     """
     # Load teacher model
     teacher_model = torch.load(SAVE_DIR_MODEL_DATA+model_args['dataset']+"/"+model_args['backbone']+"/"+model_args['evaluation_method']+f"/{model_args['backbone']}/models/{model_args['backbone']}_MainModel_{cv_number}Fold_{model_args['dataset']}_{model_args['backbone']}_run_{run}_fixed_init_CV_{cv}_view_{view}.pt")
@@ -408,20 +464,25 @@ def train(model_args, train_dataset, val_dataset, students, student_names, thres
 
 def validate(dataset, students, model_args, threshold_value, model_name, teacher_model):
     """
-    Parameters
-    ----------
-    dataset : dataloader (dataloader for the validation/test dataset).
-    model : nn model (GCN model).
-    model_args : arguments
-    threshold_value : float (threshold for adjacency matrices).
-    
-    Description
-    ----------
-    This methods performs the evaluation of the model on test/validation dataset
-    
-    Returns
-    -------
-    test accuracy.
+    Perform validation of student models on the provided dataset.
+
+    Parameters:
+        dataset (dataloader): Dataloader for the validation/test dataset.
+        students (list): List of student model instances.
+        model_args (dict): Dictionary containing model hyperparameters and settings.
+        threshold_value (float): Threshold value for adjacency matrices.
+        model_name (str): Name of the model.
+        teacher_model (nn.Module): Teacher model instance.
+
+    Description:
+        This function evaluates the performance of the student models on the provided dataset and returns validation loss.
+
+    Returns:
+        val_total_loss (float): Total validation loss.
+        val_loss_teacher_student (float): Validation loss for teacher-student soft CE.
+        val_loss_ensamble_ce (float): Validation loss for ensemble cross-entropy.
+        val_ensamble_soft_ce_loss (float): Validation loss for ensemble soft cross-entropy.
+        val_loss_within_student (float): Validation loss for weight similarity within students.
     """
     student_model_1 = students[0].eval()
     student_model_2 = students[1].eval()
@@ -530,20 +591,16 @@ def validate(dataset, students, model_args, threshold_value, model_name, teacher
 
 def test(dataset, students, model_args, threshold_value):
     """
-    Parameters
-    ----------
-    dataset : dataloader (dataloader for the validation/test dataset).
-    model : nn model (GCN model).
-    model_args : arguments
-    threshold_value : float (threshold for adjacency matrices).
-    
-    Description
-    ----------
-    This methods performs the evaluation of the model on test/validation dataset
-    
-    Returns
-    -------
-    test accuracy.
+    Perform test of student models on the provided dataset.
+
+    Parameters:
+        dataset (dataloader): Dataloader for the validation/test dataset.
+        students (list): List of student model instances.
+        model_args (dict): Dictionary containing model hyperparameters and settings.
+        threshold_value (float): Threshold value for adjacency matrices.
+
+    Description:
+        This function evaluates the performance of the student models on the test dataset.
     """
     student_model_1 = students[0].eval()
     student_model_2 = students[1].eval()

@@ -21,6 +21,12 @@ from utils.config import SAVE_DIR_MODEL_DATA
 device = torch.device('cpu')
 
 class CrossEntropyLossForSoftTarget(nn.Module):
+    """
+    Initializes the CrossEntropyLossForSoftTarget module.
+    
+    Parameters:
+      T (float): Temperature parameter for softening the labels. Default is 3.
+    """
     def __init__(self, T=3):
         super(CrossEntropyLossForSoftTarget, self).__init__()
         self.T = T
@@ -33,14 +39,42 @@ class CrossEntropyLossForSoftTarget(nn.Module):
     
 def weight_similarity_loss(w_teacher, w_student):
     """
-    Compute the KL loss between the weights of the last layer
+    Compute the cosine similarity loss between the weights of the last layers
     of two networks.
-    """    
+
+    Parameters:
+        w_teacher (torch.Tensor): Weights of the teacher network's last layer.
+        w_student (torch.Tensor): Weights of the student network's last layer.
+
+    Returns:
+        loss (torch.Tensor): Cosine similarity loss between the two sets of weights.
+            The loss measures the cosine similarity between the teacher and student weights
+            of the last layers, encouraging similarity between their weight vectors.
+    """
     # Concatenate and compute the cosine similarity
     loss = nn.CosineSimilarity()
     return loss(w_student, w_teacher).abs()
 
 def emb_cross_validation_3(model_args, G_list, view, model_name, cv_number, n_students, run=0):
+    """
+    Perform cross-validation training and evaluation of student models with node embeddings.
+
+    Parameters:
+        model_args (dict): Dictionary containing model hyperparameters and settings.
+        G_list (list): List of graph data representations.
+        view (int): View index.
+        model_name (str): Name of the model.
+        cv_number (int): Number of cross-validation folds.
+        n_students (int): Number of student models.
+        run (int, optional): Run number for tracking experiments. Default is 0.
+
+    Description:
+        This function performs cross-validation training and evaluation of student models with node embeddings. It trains
+        the models, performs evaluations, and saves results and models for each fold and student.
+
+    Note:
+        This function calls the 'train' and 'validate' functions to perform training and validation.
+    """
     start = time.time() 
     print("Run : ",run)
     print("--------------------------------------------------------------------------")
@@ -125,17 +159,24 @@ def emb_cross_validation_3(model_args, G_list, view, model_name, cv_number, n_st
 
 def train(model_args, train_dataset, val_dataset, students, student_names, threshold_value, model_name, cv, view, cv_number, run=0):
     """
-    Parameters
-    ----------
-    model_args : arguments
-    train_dataset : dataloader (dataloader for the validation/test dataset).
-    val_dataset : dataloader (dataloader for the validation/test dataset).
-    model : nn model (GCN model).
-    threshold_value : float (threshold for adjacency matrices).
-    
-    Description
-    ----------
-    This methods performs the training of the model on train dataset and calls evaluate() method for evaluation.
+    Train the student models using provided datasets and perform evaluation.
+
+    Parameters:
+        model_args (dict): Dictionary containing model hyperparameters and settings.
+        train_dataset (dataloader): Dataloader for the training dataset.
+        val_dataset (dataloader): Dataloader for the validation dataset.
+        students (list): List of student model instances.
+        student_names (list): List of names for the student models.
+        threshold_value (float): Threshold value for adjacency matrices.
+        model_name (str): Name of the model.
+        cv (int): Current cross-validation fold.
+        view (int): View index.
+        cv_number (int): Number of cross-validation folds.
+        run (int, optional): Run number for tracking experiments. Default is 0.
+
+    Description:
+        This function trains the student models using the provided training dataset, performs evaluation on the
+        validation dataset, and saves the results.
     """
     # Load teacher model
     teacher_model = torch.load(SAVE_DIR_MODEL_DATA+model_args['dataset']+"/"+model_args['backbone']+"/"+model_args['evaluation_method']+f"/{model_args['backbone']}/models/{model_args['backbone']}_MainModel_{cv_number}Fold_{model_args['dataset']}_{model_args['backbone']}_run_{run}_fixed_init_CV_{cv}_view_{view}.pt")
@@ -386,20 +427,25 @@ def train(model_args, train_dataset, val_dataset, students, student_names, thres
 
 def validate(dataset, students, model_args, threshold_value, model_name, teacher_model):
     """
-    Parameters
-    ----------
-    dataset : dataloader (dataloader for the validation/test dataset).
-    model : nn model (GCN model).
-    model_args : arguments
-    threshold_value : float (threshold for adjacency matrices).
-    
-    Description
-    ----------
-    This methods performs the evaluation of the model on test/validation dataset
-    
-    Returns
-    -------
-    test accuracy.
+    Perform validation of student models on the provided dataset.
+
+    Parameters:
+        dataset (dataloader): Dataloader for the validation/test dataset.
+        students (list): List of student model instances.
+        model_args (dict): Dictionary containing model hyperparameters and settings.
+        threshold_value (float): Threshold value for adjacency matrices.
+        model_name (str): Name of the model.
+        teacher_model (nn.Module): Teacher model instance.
+
+    Description:
+        This function evaluates the performance of the student models on the provided dataset and returns validation loss.
+
+    Returns:
+        val_total_loss (float): Total validation loss.
+        val_loss_teacher_student (float): Validation loss for teacher-student soft CE.
+        val_loss_ensamble_ce (float): Validation loss for ensemble cross-entropy.
+        val_ensamble_soft_ce_loss (float): Validation loss for ensemble soft cross-entropy.
+        val_loss_within_student (float): Validation loss for weight similarity within students.
     """
     student_model_1 = students[0].eval()
     student_model_2 = students[1].eval()
@@ -514,20 +560,16 @@ def validate(dataset, students, model_args, threshold_value, model_name, teacher
 
 def test(dataset, students, model_args, threshold_value):
     """
-    Parameters
-    ----------
-    dataset : dataloader (dataloader for the validation/test dataset).
-    model : nn model (GCN model).
-    model_args : arguments
-    threshold_value : float (threshold for adjacency matrices).
-    
-    Description
-    ----------
-    This methods performs the evaluation of the model on test/validation dataset
-    
-    Returns
-    -------
-    test accuracy.
+    Perform evaluation of student models on the provided dataset.
+
+    Parameters:
+        dataset (dataloader): Dataloader for the validation/test dataset.
+        students (list): List of student model instances.
+        model_args (dict): Dictionary containing model hyperparameters and settings.
+        threshold_value (float): Threshold value for adjacency matrices.
+
+    Description:
+        This function evaluates the performance of the student models on the provided dataset and prints test accuracy.
     """
     student_model_1 = students[0].eval()
     student_model_2 = students[1].eval()

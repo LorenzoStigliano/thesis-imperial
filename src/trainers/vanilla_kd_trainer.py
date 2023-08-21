@@ -21,6 +21,13 @@ from utils.config import SAVE_DIR_MODEL_DATA
 device = torch.device('cpu')
 
 class CrossEntropyLossForSoftTarget(nn.Module):
+    """
+    Initializes the CrossEntropyLossForSoftTarget module.
+    
+    Parameters:
+      T (float): Temperature parameter for softening the labels. Default is 3.
+      alpha (float): Weight parameter for adjusting the loss. Default is 2.
+    """
     def __init__(self, T=3, alpha=2):
         super(CrossEntropyLossForSoftTarget, self).__init__()
         self.T = T
@@ -28,11 +35,32 @@ class CrossEntropyLossForSoftTarget(nn.Module):
         self.softmax = nn.Softmax(dim=-1)
         self.logsoftmax = nn.LogSoftmax(dim=-1)
     def forward(self, y_pred, y_gt):
+        """
+        Computes the forward pass of the loss function.
+        
+        Parameters:
+          y_pred (tensor): Predicted logits from the model.
+          y_gt (tensor): Ground truth labels (softened).
+        
+        Returns:
+          loss (tensor): Computed loss value.
+        """
         y_pred_soft = y_pred.div(self.T)
         y_gt_soft = y_gt.div(self.T)
         return -(self.softmax(y_gt_soft)*self.logsoftmax(y_pred_soft)).mean().mul(self.alpha)
     
 def cross_validation(model_args, G_list, view, model_name, cv_number, run=0):
+    """
+    Perform cross-validation training and evaluation of the model.
+    
+    Parameters:
+        model_args (dict): Model configuration parameters.
+        G_list (list): List of graph data for different views.
+        view (int): View index for the current cross-validation.
+        model_name (str): Name of the model being trained.
+        cv_number (int): Number of cross-validation folds.
+        run (int, optional): Run number. Default is 0.
+    """
     start = time.time() 
     print("Run : ",run)
     print("--------------------------------------------------------------------------")
@@ -103,17 +131,20 @@ def cross_validation(model_args, G_list, view, model_name, cv_number, run=0):
 
 def train(model_args, train_dataset, val_dataset, student_model, threshold_value, model_name, cv, view, cv_number, run=0, alpha=2):
     """
-    Parameters
-    ----------
-    model_args : arguments
-    train_dataset : dataloader (dataloader for the validation/test dataset).
-    val_dataset : dataloader (dataloader for the validation/test dataset).
-    model : nn model (GCN model).
-    threshold_value : float (threshold for adjacency matrices).
+    Train the model on the training dataset and evaluate on the validation dataset.
     
-    Description
-    ----------
-    This methods performs the training of the model on train dataset and calls evaluate() method for evaluation.
+    Parameters:
+        model_args (dict): Model configuration parameters.
+        train_dataset (dataloader): Dataloader for the training dataset.
+        val_dataset (dataloader): Dataloader for the validation dataset.
+        student_model (nn.Module): Student graph neural network model to be trained.
+        threshold_value (float): Threshold value for adjacency matrices.
+        model_name (str): Name of the model being trained.
+        cv (int): Cross-validation fold number.
+        view (int): View index.
+        cv_number (int): Number of cross-validation folds.
+        run (int, optional): Run number. Default is 0.
+        alpha (int, optional): Weight for the loss. Default is 2.
     """
     # Load teacher model
     teacher_model = torch.load(SAVE_DIR_MODEL_DATA+model_args['dataset']+"/"+model_args['backbone']+"/"+model_args['evaluation_method']+f"/{model_args['backbone']}/models/{model_args['backbone']}_MainModel_{cv_number}Fold_{model_args['dataset']}_{model_args['backbone']}_run_{run}_fixed_init_CV_{cv}_view_{view}.pt")
@@ -322,20 +353,24 @@ def train(model_args, train_dataset, val_dataset, student_model, threshold_value
 
 def validate(dataset, model, model_args, threshold_value, model_name, teacher_model):
     """
-    Parameters
-    ----------
-    dataset : dataloader (dataloader for the validation/test dataset).
-    model : nn model (GCN model).
-    model_args : arguments
-    threshold_value : float (threshold for adjacency matrices).
+    Evaluate the model on the validation dataset.
     
-    Description
-    ----------
-    This methods performs the evaluation of the model on test/validation dataset
+    Parameters:
+        dataset (dataloader): Dataloader for the validation/test dataset.
+        model (nn.Module): Graph convolutional network (GCN) model.
+        model_args (dict): Arguments for configuring the model.
+        threshold_value (float): Threshold value for adjacency matrices.
+        model_name (str): Name of the model being evaluated.
+        teacher_model (nn.Module): Teacher model for knowledge distillation.
     
-    Returns
-    -------
-    test accuracy.
+    Returns:
+        val_total_loss (float): Validation total loss.
+        val_ce_loss (float): Validation cross-entropy loss.
+        val_soft_ce_loss (float): Validation soft cross-entropy loss.
+        val_acc (float): Validation accuracy.
+        val_prec (float): Validation precision.
+        val_recall (float): Validation recall.
+        val_f1 (float): Validation F1 score.
     """
     model.eval()
     labels = []
@@ -406,20 +441,13 @@ def validate(dataset, model, model_args, threshold_value, model_name, teacher_mo
 
 def test(dataset, model, model_args, threshold_value):
     """
-    Parameters
-    ----------
-    dataset : dataloader (dataloader for the validation/test dataset).
-    model : nn model (GCN model).
-    model_args : arguments
-    threshold_value : float (threshold for adjacency matrices).
+    Evaluate the model on the test/validation dataset.
     
-    Description
-    ----------
-    This methods performs the evaluation of the model on test/validation dataset
-    
-    Returns
-    -------
-    test accuracy.
+    Parameters:
+        dataset (dataloader): Dataloader for the validation/test dataset.
+        model (nn.Module): Graph convolutional network (GCN) model.
+        model_args (dict): Arguments for configuring the model.
+        threshold_value (float): Threshold value for adjacency matrices.
     """
     model.eval()
     labels = []
