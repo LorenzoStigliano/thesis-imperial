@@ -5,10 +5,10 @@ import torch
 
 from models_config.model_config_GSP import * 
 from models_config.model_config_BreastMNIST import * 
-from trainers.ts_ensemble.ts_ensamble_2_trainer import cross_validation_2
-from trainers.ts_ensemble.ts_ensamble_3_trainer import cross_validation_3
-from trainers.ts_ensemble.ts_ensamble_4_trainer import cross_validation_4
-from trainers.ts_ensemble.ts_ensamble_5_trainer import cross_validation_5
+from trainers.logits_ensemble.logits_ensamble_2_trainer import cross_validation_2
+from trainers.logits_ensemble.logits_ensamble_3_trainer import cross_validation_3
+from trainers.logits_ensemble.logits_ensamble_4_trainer import cross_validation_4
+from trainers.logits_ensemble.logits_ensamble_5_trainer import cross_validation_5
 
 from utils.builders import new_folder
 from utils.loaders import load_data
@@ -30,7 +30,7 @@ def train_main_model(dataset, model, view, cv_number, model_args, run=0):
 
     new_folder(model_args["model_name"], model_args["evaluation_method"], SAVE_DIR_MODEL_DATA, backbone=model_args["backbone"], dataset=model_args["dataset"])
     
-    if gcn_args["evaluation_method"] == "model_assessment":
+    if model_args["evaluation_method"] == "model_assessment" or  model_args["evaluation_method"] == "model_selection":
             model_name += f"_run_{run}_fixed_init"
     
     if model_args["model_name"] == "gcn_student_ensamble_2":

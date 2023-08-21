@@ -31,7 +31,7 @@ def train_main_model(dataset, model, view, cv_number, model_args, run=0):
 
     new_folder(model_args["model_name"], model_args["evaluation_method"], SAVE_DIR_MODEL_DATA, backbone=model_args["backbone"], dataset=model_args["dataset"])
     
-    if gcn_args["evaluation_method"] == "model_assessment":
+    if model_args["evaluation_method"] == "model_assessment" or  model_args["evaluation_method"] == "model_selection":
             model_name += f"_run_{run}_fixed_init"
             
     if model_args["model_name"] == "gcn_student_lsp_ensamble_2" or model_args["model_name"] == "gat_student_lsp_ensamble_2":

@@ -2,7 +2,7 @@ import time
 import torch
 import pickle
 import random
-import shutil 
+import shutil
 import psutil
 import numpy as np
 import torch
@@ -14,7 +14,6 @@ import sklearn.metrics as metrics
 
 from models.gcn_student_ensamble import GCN_STUDENT_ENSAMBLE
 from models.gat.gat_student_ensamble import GAT_STUDENT_ENSAMBLE
-from models.model_config import * 
 from utils.helpers import *
 from utils.config import SAVE_DIR_MODEL_DATA
 
@@ -41,7 +40,7 @@ def weight_similarity_loss(w_teacher, w_student):
     loss = nn.CosineSimilarity()
     return loss(w_student, w_teacher).abs()
 
-def cross_validation_3(model_args, G_list, view, model_name, cv_number, n_students, run=0):
+def cross_validation_2(model_args, G_list, view, model_name, cv_number, n_students, run=0):
     start = time.time() 
     print("Run : ",run)
     print("--------------------------------------------------------------------------")
@@ -78,7 +77,7 @@ def cross_validation_3(model_args, G_list, view, model_name, cv_number, n_studen
         num_classes = 2 
         
         for i in range(n_students):
-            if model_args["model_name"] == "gcn_student_ensamble_3":
+            if model_args["model_name"] == "gcn_student_ensamble_2":
               student_model = GCN_STUDENT_ENSAMBLE(
                   nfeat = num_nodes,
                   nhid = model_args["hidden_dim"],
@@ -117,7 +116,7 @@ def cross_validation_3(model_args, G_list, view, model_name, cv_number, n_studen
                 dataset_sampler, 
                 batch_size = 1,  
                 shuffle = False) 
-            test(test_dataset, students, model_args, threshold_value, name)
+            test(test_dataset, students, model_args, threshold_value)
 
         if model_args["evaluation_method"] =='model_assessment':
             #Here we join the train and validation dataset
@@ -148,7 +147,6 @@ def train(model_args, train_dataset, val_dataset, students, student_names, thres
     teacher_model.to(device)
     student_model_1 = students[0].to(device)
     student_model_2 = students[1].to(device)
-    student_model_3 = students[2].to(device)
 
     # Define Loss
     criterion = nn.CrossEntropyLoss(reduction='mean')
@@ -157,7 +155,6 @@ def train(model_args, train_dataset, val_dataset, students, student_names, thres
     # Define optimizer
     optimizer_1 = optim.Adam(student_model_1.parameters(), lr=model_args["lr"], weight_decay=model_args['weight_decay'])
     optimizer_2 = optim.Adam(student_model_2.parameters(), lr=model_args["lr"], weight_decay=model_args['weight_decay'])
-    optimizer_3 = optim.Adam(student_model_3.parameters(), lr=model_args["lr"], weight_decay=model_args['weight_decay'])
     
     # Metrics 
     # total train loss 
@@ -188,7 +185,6 @@ def train(model_args, train_dataset, val_dataset, students, student_names, thres
         
         student_model_1.train()
         student_model_2.train()
-        student_model_3.train()
 
         total_time = 0
         total_loss = 0
@@ -200,7 +196,6 @@ def train(model_args, train_dataset, val_dataset, students, student_names, thres
         preds_ensamble, labels_ensamble  = [], []
         preds_1, labels_1 = [], []
         preds_2, labels_2 = [], []
-        preds_3, labels_3 = [], []
 
         for _, data in enumerate(train_dataset):
             begin_time = time.time()
@@ -208,7 +203,6 @@ def train(model_args, train_dataset, val_dataset, students, student_names, thres
             # Initialize gradients
             optimizer_1.zero_grad()
             optimizer_2.zero_grad()
-            optimizer_3.zero_grad()
 
             # Transfer device
             adj = Variable(data['adj'].float(), requires_grad=False).to(device)
@@ -225,7 +219,6 @@ def train(model_args, train_dataset, val_dataset, students, student_names, thres
             # extract student weight
             student_weights_1 = student_model_1.LinearLayer.weight
             student_weights_2 = student_model_2.LinearLayer.weight
-            student_weights_3 = student_model_3.LinearLayer.weight
 
             y_gt = label.to(device)
 
@@ -235,12 +228,11 @@ def train(model_args, train_dataset, val_dataset, students, student_names, thres
             # Predict
             ypred_1 = student_model_1(features, adj)
             ypred_2 = student_model_2(features, adj)
-            ypred_3 = student_model_3(features, adj)
-            y_pred_ensamble = torch.unsqueeze(sum(ypred_1 + ypred_2 + ypred_3)/3, dim=0)
+            y_pred_ensamble = torch.unsqueeze(sum(ypred_1 + ypred_2)/2, dim=0)
 
             # Compute loss (foward propagation)
-            loss_teacher_student = criterion_soft(ypred_1, y_soft) + criterion_soft(ypred_2, y_soft) + criterion_soft(ypred_3, y_soft)
-            loss_within_student = weight_similarity_loss(student_weights_1, student_weights_2) + weight_similarity_loss(student_weights_1, student_weights_3) + weight_similarity_loss(student_weights_2, student_weights_3)
+            loss_teacher_student = criterion_soft(ypred_1, y_soft) + criterion_soft(ypred_2, y_soft) 
+            loss_within_student = weight_similarity_loss(student_weights_1, student_weights_2)
             loss_ensamble_soft_ce = criterion_soft(y_pred_ensamble, y_soft)
             loss_ensamble_ce = criterion(y_pred_ensamble, y_gt)
 
@@ -251,7 +243,6 @@ def train(model_args, train_dataset, val_dataset, students, student_names, thres
             # Update parameters
             optimizer_1.step()
             optimizer_2.step()
-            optimizer_3.step()
 
             total_loss += loss.item()
             t_loss_teacher_student += loss_teacher_student.item()
@@ -266,7 +257,6 @@ def train(model_args, train_dataset, val_dataset, students, student_names, thres
         if epoch==model_args["num_epochs"]-1:
               student_model_1.is_trained = True
               student_model_2.is_trained = True
-              student_model_3.is_trained = True
 
               # Get the predictions of the ensamble and the individual models
               _, indices = torch.max(y_pred_ensamble, 1)
@@ -280,10 +270,6 @@ def train(model_args, train_dataset, val_dataset, students, student_names, thres
               _, indices = torch.max(ypred_2, 1)
               preds_2.append(indices.cpu().data.numpy())
               labels_2.append(data['label'].long().numpy())
-
-              _, indices = torch.max(ypred_3, 1)
-              preds_3.append(indices.cpu().data.numpy())
-              labels_3.append(data['label'].long().numpy())
               
         print("---------------------------------")
         print(f"Time taken for epoch {epoch}: {total_time}")
@@ -325,10 +311,6 @@ def train(model_args, train_dataset, val_dataset, students, student_names, thres
     with open(SAVE_DIR_MODEL_DATA+model_args['dataset']+"/"+model_args['backbone']+"/"+model_args['evaluation_method']+"/"+model_args["model_name"]+"/labels_and_preds/"+model_name+"_train_student_1.pickle", 'wb') as f:
       pickle.dump(simple_r, f)
     
-    simple_r = {'labels':np.hstack(labels_3),'preds':np.hstack(preds_3)}
-    with open(SAVE_DIR_MODEL_DATA+model_args['dataset']+"/"+model_args['backbone']+"/"+model_args['evaluation_method']+"/"+model_args["model_name"]+"/labels_and_preds/"+model_name+"_train_student_2.pickle", 'wb') as f:
-      pickle.dump(simple_r, f) 
-    
     # Save training loss of GNN model (5)
     los_p = {'loss':total_train_loss}
     with open(SAVE_DIR_MODEL_DATA+model_args['dataset']+"/"+model_args['backbone']+"/"+model_args['evaluation_method']+"/"+model_args['model_name']+"/training_loss/training_loss_ensemble_"+model_name+".pickle", 'wb') as f:
@@ -363,18 +345,16 @@ def train(model_args, train_dataset, val_dataset, students, student_names, thres
     with open(SAVE_DIR_MODEL_DATA+model_args['dataset']+"/"+model_args['backbone']+"/"+model_args['evaluation_method']+"/"+model_args['model_name']+"/validation_loss/validation_loss_within_student_"+model_name+".pickle", 'wb') as f:
       pickle.dump(los_p, f)    
     
-    # Save Model (3)
+    # Save Model (2)
     number = 0
-    for student_name, student_model in zip(student_names, [student_model_1, student_model_2, student_model_3]):
+    for student_name, student_model in zip(student_names, [student_model_1, student_model_2]):
       print(SAVE_DIR_MODEL_DATA+model_args['dataset']+"/"+model_args['backbone']+"/"+model_args['evaluation_method']+"/"+model_args['model_name']+"/models/"+student_name+".pt")
       torch.save(student_model, SAVE_DIR_MODEL_DATA+model_args['dataset']+"/"+model_args['backbone']+"/"+model_args['evaluation_method']+"/"+model_args['model_name']+"/models/"+student_name+".pt")
-    
-      # Save weights
+
       path = SAVE_DIR_MODEL_DATA+model_args['dataset']+"/"+model_args['backbone']+"/"+model_args['evaluation_method']+"/"+model_args['model_name']+'/weights/W_'+student_name+'.pickle'
-      
       if os.path.exists(path):
           os.remove(path)
-
+      
       dataset_NAME = model_args['dataset']
       shutil.move(model_args['model_name']+f'_number_{number}_run_{run}_{dataset_NAME}_W.pickle', path)  
       
@@ -401,7 +381,6 @@ def validate(dataset, students, model_args, threshold_value, model_name, teacher
     """
     student_model_1 = students[0].eval()
     student_model_2 = students[1].eval()
-    student_model_3 = students[2].eval()
 
     t_loss_teacher_student = 0
     t_loss_ensamble_ce = 0
@@ -412,11 +391,9 @@ def validate(dataset, students, model_args, threshold_value, model_name, teacher
     preds_ensamble, labels_ensamble  = [], []
     preds_1, labels_1 = [], []
     preds_2, labels_2 = [], []
-    preds_3, labels_3 = [], []
     
     student_weights_1 = student_model_1.LinearLayer.weight
     student_weights_2 = student_model_2.LinearLayer.weight
-    student_weights_3 = student_model_3.LinearLayer.weight
 
     criterion = nn.CrossEntropyLoss(reduction='mean')
     criterion_soft = CrossEntropyLossForSoftTarget(T=model_args["T"])
@@ -436,16 +413,14 @@ def validate(dataset, students, model_args, threshold_value, model_name, teacher
         
         ypred_1 = student_model_1(features, adj)
         ypred_2 = student_model_2(features, adj)
-        ypred_3 = student_model_3(features, adj)
-        y_pred_ensamble = torch.unsqueeze(sum(ypred_1 + ypred_2 + ypred_3)/3, dim=0)
+        y_pred_ensamble = torch.unsqueeze(sum(ypred_1 + ypred_2 )/2, dim=0)
 
         # Ground truth label 
         y_gt = label.to(device)
         # Compute soft label
         y_soft, _ = teacher_model(features, adj)
-
-        loss_teacher_student = criterion_soft(ypred_1, y_soft) + criterion_soft(ypred_2, y_soft) + criterion_soft(ypred_3, y_soft)
-        loss_within_student = weight_similarity_loss(student_weights_1, student_weights_2) + weight_similarity_loss(student_weights_1, student_weights_3) + weight_similarity_loss(student_weights_2, student_weights_3) 
+        loss_teacher_student = criterion_soft(ypred_1, y_soft) + criterion_soft(ypred_2, y_soft) 
+        loss_within_student = weight_similarity_loss(student_weights_1, student_weights_2)
         loss_ensamble_soft_ce = criterion_soft(y_pred_ensamble, y_soft)
         loss_ensamble_ce = criterion(y_pred_ensamble, y_gt)
 
@@ -469,10 +444,6 @@ def validate(dataset, students, model_args, threshold_value, model_name, teacher
         _, indices = torch.max(ypred_2, 1)
         preds_2.append(indices.cpu().data.numpy())
         labels_2.append(data['label'].long().numpy())
-
-        _, indices = torch.max(ypred_3, 1)
-        preds_3.append(indices.cpu().data.numpy())
-        labels_3.append(data['label'].long().numpy())
     
     simple_r = {'labels':labels_ensamble,'preds':preds_ensamble}
     # Save labels and predictions of model on test set  (4)
@@ -489,11 +460,6 @@ def validate(dataset, students, model_args, threshold_value, model_name, teacher
     with open(SAVE_DIR_MODEL_DATA+model_args['dataset']+"/"+model_args['backbone']+"/"+model_args['evaluation_method']+"/"+model_args["model_name"]+"/labels_and_preds/"+model_name+"_val_student_1.pickle", 'wb') as f:
       pickle.dump(simple_r, f)   
 
-    simple_r = {'labels':labels_3,'preds':preds_3}
-    # Save labels and predictions of model on test set 
-    with open(SAVE_DIR_MODEL_DATA+model_args['dataset']+"/"+model_args['backbone']+"/"+model_args['evaluation_method']+"/"+model_args["model_name"]+"/labels_and_preds/"+model_name+"_val_student_2.pickle", 'wb') as f:
-      pickle.dump(simple_r, f)   
-
     val_total_loss = total_loss / len(dataset)
     val_loss_teacher_student = t_loss_teacher_student / len(dataset)
     val_loss_ensamble_ce = t_loss_ensamble_ce / len(dataset)
@@ -502,12 +468,11 @@ def validate(dataset, students, model_args, threshold_value, model_name, teacher
     print(f"Validation accuracy ensamble: {metrics.accuracy_score(np.hstack(labels_ensamble), np.hstack(preds_ensamble))}")
     print(f"Validation accuracy model 1: {metrics.accuracy_score(np.hstack(labels_1), np.hstack(preds_1))}")
     print(f"Validation accuracy model 2: {metrics.accuracy_score(np.hstack(labels_2), np.hstack(preds_2))}")
-    print(f"Validation accuracy model 3: {metrics.accuracy_score(np.hstack(labels_3), np.hstack(preds_3))}")
     print(f"Validation Loss: {val_total_loss}")
 
     return val_total_loss, val_loss_teacher_student, val_loss_ensamble_ce, val_ensamble_soft_ce_loss, val_loss_within_student
 
-def test(dataset, model, model_args, threshold_value, model_name):
+def test(dataset, students, model_args, threshold_value):
     """
     Parameters
     ----------
@@ -524,14 +489,15 @@ def test(dataset, model, model_args, threshold_value, model_name):
     -------
     test accuracy.
     """
-    model.eval()
-    labels = []
-    preds = []
-    total_loss = 0
+    student_model_1 = students[0].eval()
+    student_model_2 = students[1].eval()
+
+    preds_ensamble, labels_ensamble  = [], []
+    preds_1, labels_1 = [], []
+    preds_2, labels_2 = [], []
 
     for _, data in enumerate(dataset):
         adj = Variable(data['adj'].float(), requires_grad=False).to(device)
-        labels.append(data['label'].long().numpy())
         label = Variable(data['label'].long()).to(device)        
         
         adj = torch.squeeze(adj)
@@ -543,31 +509,26 @@ def test(dataset, model, model_args, threshold_value, model_name):
         if model_args["threshold"] in ["median", "mean"]:
             adj = torch.where(adj > threshold_value, torch.tensor([1.0]).to(device), torch.tensor([0.0]).to(device))
         
-        if model_args["model_name"] == 'diffpool':
-            batch_num_nodes=np.array([adj.shape[1]])
-            features = torch.unsqueeze(features, 0)
-            assign_input = np.identity(adj.shape[1])
-            assign_input = Variable(torch.from_numpy(assign_input).float(), requires_grad=False).to(device)
-            assign_input = torch.unsqueeze(assign_input, 0)
-            ypred= model(features, adj, batch_num_nodes, assign_x=assign_input)
-        
-        elif model_args["model_name"] == "mlp":
-            features = torch.mean(features, axis=1)
-            ypred = model(features)[1]
-        else:
-            ypred = model(features, adj)
-        
-        total_loss += model.loss(ypred, label).item()
-        _, indices = torch.max(ypred, 1)
-        preds.append(indices.cpu().data.numpy())
+        ypred_1 = student_model_1(features, adj)
+        ypred_2 = student_model_2(features, adj)
+        y_pred_ensamble = torch.unsqueeze(sum(ypred_1 + ypred_2 )/2, dim=0)
 
-    labels = np.hstack(labels)
-    preds = np.hstack(preds)
+        # Ground truth label 
+        y_gt = label.to(device)
+        # Get the predictions of the ensamble and the individual models
+        _, indices = torch.max(y_pred_ensamble, 1)
+        preds_ensamble.append(indices.cpu().data.numpy())
+        labels_ensamble.append(data['label'].long().numpy())
 
-    simple_r = {'labels':labels,'preds':preds}
-    # Save labels and predictions of model on test set 
-    with open(SAVE_DIR_MODEL_DATA+model_args['dataset']+"/"+model_args['backbone']+"/"+model_args['evaluation_method']+"/"+model_args["model_name"]+"/labels_and_preds/"+model_name+"_test.pickle", 'wb') as f:
-      pickle.dump(simple_r, f)
+        _, indices = torch.max(ypred_1, 1)
+        preds_1.append(indices.cpu().data.numpy())
+        labels_1.append(data['label'].long().numpy())
 
-    print('Held-out test set loss: {}'.format(total_loss / len(dataset)))
-    print("Test accuracy:", metrics.accuracy_score(labels, preds))    
+        _, indices = torch.max(ypred_2, 1)
+        preds_2.append(indices.cpu().data.numpy())
+        labels_2.append(data['label'].long().numpy())
+
+    print(f"Test accuracy ensamble: {metrics.accuracy_score(np.hstack(labels_ensamble), np.hstack(preds_ensamble))}")
+    print(f"Test accuracy model 1: {metrics.accuracy_score(np.hstack(labels_1), np.hstack(preds_1))}")
+    print(f"Test accuracy model 2: {metrics.accuracy_score(np.hstack(labels_2), np.hstack(preds_2))}")
+
