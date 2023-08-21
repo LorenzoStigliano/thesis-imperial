@@ -84,28 +84,28 @@ def dump_data_gender_data(data_dir, save_dir, dataset):
     dump_data_gender_data(DATA_DIR, SAVE_DIR_DATA, 'GenderData')
     """
 
-  adjs, ages, labels = [], [], []
+    adjs, ages, labels = [], [], []
 
-  for file in os.listdir(data_dir):
-      if ".mat" in file:
-          mat = sio.loadmat(data_dir+str(file))
-          tensor = mat['Tensor'].squeeze()
-          age = mat['age'][0][0]
-          gender = mat['gender'][0][0] if mat['gender'][0][0] == 1 else 0
+    for file in os.listdir(data_dir):
+        if ".mat" in file:
+            mat = sio.loadmat(data_dir+str(file))
+            tensor = mat['Tensor'].squeeze()
+            age = mat['age'][0][0]
+            gender = mat['gender'][0][0] if mat['gender'][0][0] == 1 else 0
 
-          adjs.append(tensor)
-          ages.append(age)
-          labels.append(gender)
+            adjs.append(tensor)
+            ages.append(age)
+            labels.append(gender)
 
-  if not os.path.exists(save_dir + dataset):
-     os.makedirs(save_dir + dataset) 
+    if not os.path.exists(save_dir + dataset):
+        os.makedirs(save_dir + dataset) 
 
-  with open(save_dir + dataset +'/'+dataset+'_edges', 'wb') as f:
-    pickle.dump(adjs, f)
-  with open(save_dir + dataset +'/'+dataset+'_labels', 'wb') as f:
-    pickle.dump(labels, f)
-  with open(save_dir + dataset +'/'+dataset+'_ages', 'wb') as f:
-    pickle.dump(ages, f)
+    with open(save_dir + dataset +'/'+dataset+'_edges', 'wb') as f:
+        pickle.dump(adjs, f)
+    with open(save_dir + dataset +'/'+dataset+'_labels', 'wb') as f:
+        pickle.dump(labels, f)
+    with open(save_dir + dataset +'/'+dataset+'_ages', 'wb') as f:
+        pickle.dump(ages, f)
 
 def new_folder(model, evaluation_method, SAVE_DIR_MODEL_DATA, backbone="gcn", dataset="gender_data"):
     """
