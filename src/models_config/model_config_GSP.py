@@ -126,7 +126,7 @@ gcn_fitnet_student_args = {
 # Ensamble method
 
 gcn_student_ensamble_2_args = {
-    "num_epochs":1, 
+    "num_epochs":50, 
     "lr": 0.0001,
     "weight_decay":5e-4, 
     "hidden_dim":64,
@@ -135,7 +135,7 @@ gcn_student_ensamble_2_args = {
     "model_name":"gcn_student_ensamble_2",
     "backbone":"gcn",
     "dataset":"gender_data",
-    "evaluation_method": "model_selection", # model selection or model assessment
+    "evaluation_method": "model_assessment", # model selection or model assessment
     "alpha": 1, # ensamble ce loss
     "beta": 2,  # ensamble kd loss
     "gamma": 2, # sum of student ce loss
@@ -145,7 +145,7 @@ gcn_student_ensamble_2_args = {
 }
 
 gcn_student_ensamble_3_args = {
-    "num_epochs":1, 
+    "num_epochs":50, 
     "lr": 0.0001, 
     "weight_decay":5e-4, 
     "hidden_dim":64,
@@ -154,7 +154,7 @@ gcn_student_ensamble_3_args = {
     "model_name":"gcn_student_ensamble_3",
     "backbone":"gcn",
     "dataset":"gender_data",
-    "evaluation_method": "model_selection", # model selection or model assessment
+    "evaluation_method": "model_assessment", # model selection or model assessment
     "alpha": 1, # ensamble ce loss
     "beta": 2,  # ensamble kd loss
     "gamma": 2, # sum of student ce loss
@@ -164,7 +164,7 @@ gcn_student_ensamble_3_args = {
 }
 
 gcn_student_ensamble_4_args = {
-    "num_epochs":1, 
+    "num_epochs":50, 
     "lr": 0.0001, # 0.0001 when training without teacher
     "weight_decay":5e-4, 
     "hidden_dim":64,
@@ -173,7 +173,7 @@ gcn_student_ensamble_4_args = {
     "model_name":"gcn_student_ensamble_4",
     "backbone":"gcn",
     "dataset":"gender_data",
-    "evaluation_method": "model_selection", # model selection or model assessment
+    "evaluation_method": "model_assessment", # model selection or model assessment
     "alpha": 1, # ensamble ce loss
     "beta": 2,  # ensamble kd loss
     "gamma": 2, # sum of student ce loss
@@ -183,7 +183,7 @@ gcn_student_ensamble_4_args = {
 }
 
 gcn_student_ensamble_5_args = {
-    "num_epochs":1, 
+    "num_epochs":50, 
     "lr": 0.0001, # 0.0001 when training without teacher
     "weight_decay":5e-4, 
     "hidden_dim":64,
@@ -192,7 +192,7 @@ gcn_student_ensamble_5_args = {
     "model_name":"gcn_student_ensamble_5",
     "backbone":"gcn",
     "dataset":"gender_data",
-    "evaluation_method": "model_selection", # model selection or model assessment
+    "evaluation_method": "model_assessment", # model selection or model assessment
     "alpha": 1, # ensamble ce loss
     "beta": 2,  # ensamble kd loss
     "gamma": 2, # sum of student ce loss

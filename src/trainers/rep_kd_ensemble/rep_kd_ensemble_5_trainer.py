@@ -148,7 +148,7 @@ def lsp_cross_validation_5(model_args, G_list, view, model_name, cv_number, n_st
                 dataset_sampler, 
                 batch_size = 1,  
                 shuffle = False) 
-            test(test_dataset, students, model_args, threshold_value, name)
+            test(test_dataset, students, model_args, threshold_value)
 
         if model_args["evaluation_method"] =='model_assessment':
             #Here we join the train and validation dataset
@@ -622,7 +622,7 @@ def validate(dataset, students, model_args, threshold_value, model_name, teacher
 
     return val_total_loss, val_loss_teacher_student, val_loss_ensamble_ce, val_ensamble_soft_ce_loss, val_loss_within_student
 
-def test(dataset, model, model_args, threshold_value, model_name):
+def test(dataset, students, model_args, threshold_value):
     """
     Parameters
     ----------
@@ -639,14 +639,21 @@ def test(dataset, model, model_args, threshold_value, model_name):
     -------
     test accuracy.
     """
-    model.eval()
-    labels = []
-    preds = []
-    total_loss = 0
+    student_model_1 = students[0].eval()
+    student_model_2 = students[1].eval()
+    student_model_3 = students[2].eval()
+    student_model_4 = students[3].eval()
+    student_model_5 = students[4].eval()
+
+    preds_ensamble, labels_ensamble  = [], []
+    preds_1, labels_1 = [], []
+    preds_2, labels_2 = [], []
+    preds_3, labels_3 = [], []
+    preds_4, labels_4 = [], []
+    preds_5, labels_5 = [], []
 
     for _, data in enumerate(dataset):
         adj = Variable(data['adj'].float(), requires_grad=False).to(device)
-        labels.append(data['label'].long().numpy())
         label = Variable(data['label'].long()).to(device)        
         
         adj = torch.squeeze(adj)
@@ -658,31 +665,44 @@ def test(dataset, model, model_args, threshold_value, model_name):
         if model_args["threshold"] in ["median", "mean"]:
             adj = torch.where(adj > threshold_value, torch.tensor([1.0]).to(device), torch.tensor([0.0]).to(device))
         
-        if model_args["model_name"] == 'diffpool':
-            batch_num_nodes=np.array([adj.shape[1]])
-            features = torch.unsqueeze(features, 0)
-            assign_input = np.identity(adj.shape[1])
-            assign_input = Variable(torch.from_numpy(assign_input).float(), requires_grad=False).to(device)
-            assign_input = torch.unsqueeze(assign_input, 0)
-            ypred= model(features, adj, batch_num_nodes, assign_x=assign_input)
-        
-        elif model_args["model_name"] == "mlp":
-            features = torch.mean(features, axis=1)
-            ypred = model(features)[1]
-        else:
-            ypred = model(features, adj)
-        
-        total_loss += model.loss(ypred, label).item()
-        _, indices = torch.max(ypred, 1)
-        preds.append(indices.cpu().data.numpy())
+        # Ground truth label 
+        y_gt = label.to(device)
 
-    labels = np.hstack(labels)
-    preds = np.hstack(preds)
+        ypred_1, node_embeddings_student_1 = student_model_1(features, adj)
+        ypred_2, node_embeddings_student_2 = student_model_2(features, adj)
+        ypred_3, node_embeddings_student_3 = student_model_3(features, adj)
+        ypred_4, node_embeddings_student_4 = student_model_4(features, adj)
+        ypred_5, node_embeddings_student_5 = student_model_5(features, adj)
+        y_pred_ensamble = torch.unsqueeze(sum(ypred_1 + ypred_2 + ypred_3 + ypred_4+ ypred_5)/5, dim=0)
 
-    simple_r = {'labels':labels,'preds':preds}
-    # Save labels and predictions of model on test set 
-    with open(SAVE_DIR_MODEL_DATA+model_args['dataset']+"/"+model_args['backbone']+"/"+model_args['evaluation_method']+"/"+model_args["model_name"]+"/labels_and_preds/"+model_name+"_test.pickle", 'wb') as f:
-      pickle.dump(simple_r, f)
+        # Get the predictions of the ensamble and the individual models
+        _, indices = torch.max(y_pred_ensamble, 1)
+        preds_ensamble.append(indices.cpu().data.numpy())
+        labels_ensamble.append(data['label'].long().numpy())
 
-    print('Held-out test set loss: {}'.format(total_loss / len(dataset)))
-    print("Test accuracy:", metrics.accuracy_score(labels, preds))    
+        _, indices = torch.max(ypred_1, 1)
+        preds_1.append(indices.cpu().data.numpy())
+        labels_1.append(data['label'].long().numpy())
+
+        _, indices = torch.max(ypred_2, 1)
+        preds_2.append(indices.cpu().data.numpy())
+        labels_2.append(data['label'].long().numpy())
+
+        _, indices = torch.max(ypred_3, 1)
+        preds_3.append(indices.cpu().data.numpy())
+        labels_3.append(data['label'].long().numpy())
+
+        _, indices = torch.max(ypred_4, 1)
+        preds_4.append(indices.cpu().data.numpy())
+        labels_4.append(data['label'].long().numpy())
+
+        _, indices = torch.max(ypred_5, 1)
+        preds_5.append(indices.cpu().data.numpy())
+        labels_5.append(data['label'].long().numpy())
+
+    print(f"Test accuracy ensamble: {metrics.accuracy_score(np.hstack(labels_ensamble), np.hstack(preds_ensamble))}")
+    print(f"Test accuracy model 1: {metrics.accuracy_score(np.hstack(labels_1), np.hstack(preds_1))}")
+    print(f"Test accuracy model 2: {metrics.accuracy_score(np.hstack(labels_2), np.hstack(preds_2))}")
+    print(f"Test accuracy model 3: {metrics.accuracy_score(np.hstack(labels_3), np.hstack(preds_3))}")
+    print(f"Test accuracy model 4: {metrics.accuracy_score(np.hstack(labels_4), np.hstack(preds_4))}")
+    print(f"Test accuracy model 5: {metrics.accuracy_score(np.hstack(labels_5), np.hstack(preds_5))}")
