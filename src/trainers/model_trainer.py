@@ -111,7 +111,7 @@ def cross_validation(model_args, G_list, view, model_name, cv_number, run=0):
                 run = run,
                 dataset = model_args["dataset"]
             ).to(device)   
-    
+
         if model_args["evaluation_method"] =='model_selection': 
             train(model_args, train_dataset, val_dataset, model, threshold_value, model_name+"_CV_"+str(i)+"_view_"+str(view), run)
             #See performance on the held-out test set 
