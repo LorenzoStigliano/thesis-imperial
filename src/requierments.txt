@@ -102,7 +102,6 @@ threadpoolctl==3.1.0
 tifffile==2023.3.21
 torch==2.0.1
 torch-geometric==2.3.1
-torch-spline-conv==1.2.2
 torchvision==0.15.2
 tornado==6.3
 tqdm==4.59.0
