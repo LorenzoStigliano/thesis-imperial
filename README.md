@@ -11,7 +11,7 @@ The method introduces a two-step framework, as depicted in the figure, comprisin
 
 - **Student Selection Process**: The second step involves selecting the final GNN student model for inference.
 
-<object data="image.pdf" type="application/pdf" width="100%"></object>
+![Screenshot](RepKD.png)
 
 ## Usage
 
