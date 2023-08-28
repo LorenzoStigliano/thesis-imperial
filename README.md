@@ -84,10 +84,10 @@ Here is an explanation of the main `main_*.py` files used to train each model, a
 |-------------------------------|--------------------------------------------------------------------------|
 | main_rep_kd.py                | Implements our proposed Reproducible Knowledge Distillation method.      |
 | main_cross_validation.py      | Used for pre-training teacher models and student models without KD distillation. |
-| main_vanilla_kd.py            | Implements the Vanilla Knowledge Distillation method.                    |
-| main_fitnet.py            | Implements the FitNet Knowledge Distillation method.                    |
-| main_lsp.py                   | Implements the LSP knowledge distillation method.                       |
-| main_mskd.py                  | Implements the MSKD (Multi-Source Knowledge Distillation) method.         |
+| main_vanilla_kd.py            | Implements the Vanilla Knowledge Distillation method. [https://arxiv.org/pdf/1503.02531.pdf]                |
+| main_fitnet.py            | Implements the FitNet Knowledge Distillation method.                 [https://arxiv.org/pdf/1412.6550.pdf]   |
+| main_lsp.py                   | Implements the LSP knowledge distillation method.   [https://arxiv.org/pdf/2003.10477.pdf]                    |
+| main_mskd.py                  | Implements the MSKD (Multi-Source Knowledge Distillation) method.  [https://github.com/NKU-IIPLab/MSKD]       |
 | main_ensemble_logits.py       | Implements an ensemble technique using logits aggregation.               |
 | main_ensemble_emb.py          | Implements an ensemble technique using embeddings aggregation.           |
 
