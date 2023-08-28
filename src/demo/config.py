@@ -31,11 +31,12 @@ Note: These paths are essential for maintaining an organized project structure.
 
 #Personal: /Users/lorenzostigliano/Documents/University/Imperial/Summer Term/thesis-imperial
 #ADD YOUR DIRECTORY HERE
-YOUR_DIR = "/Users/lorenzostigliano/Documents/University/Imperial/Summer Term/thesis-imperial/"
+YOUR_DIR = "/Users/lorenzostigliano/Documents/University/Imperial/TEST/thesis-imperial/"
 DATA_DIR = YOUR_DIR+'data_unprocessed/'
 SAVE_DIR_DATA = YOUR_DIR+'data/'
 SAVE_DIR_MODEL_DATA = YOUR_DIR+'model_data/'
 SAVE_DIR_FIGS = YOUR_DIR+'figures/'
+
 """
 #GPUs: /vol/bitbucket/ls1121/
 
