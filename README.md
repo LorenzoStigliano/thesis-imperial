@@ -7,7 +7,7 @@ At the heart of this project is our novel proposed method, **Reproducibility Awa
 RepKD is designed to transfer knowledge from a large pre-trained teacher GNN to a smaller GNN student while preserving reproducibility for graph classification tasks. 
 The method introduces a two-step framework, as depicted in the figure, comprising of two steps:
 
-- **Reproducibility Aware Knowledge Distillation Process**: This step encompasses the knowledge transfer process from the teacher to the student while ensuring the reproducibility of the learned representations.
+- **Reproducibility Aware Knowledge Distillation Process**: This step encompasses the knowledge transfer process from the teacher to the student while ensuring the reproducibility of the student models.
 
 - **Student Selection Process**: The second step involves selecting the final GNN student model for inference.
 
