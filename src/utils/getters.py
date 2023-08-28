@@ -27,7 +27,7 @@ def get_labels_and_preds(dataset, model, analysis_type, training_type, cv_n, vie
     Returns:
         labels_and_preds (dict) A dictionary containing labels and model predictions if analysis_type is "model_assessment",
         otherwise returns None.
-    """"
+    """
     if analysis_type == "model_assessment":
         if "ensamble" in model:
             alpha = str(model_args["alpha"])
