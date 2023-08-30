@@ -56,8 +56,9 @@ Once the virtual enviroement is created and activated in order to run the demo y
 Once the virtual enviroement is created and activated in order to run the demo you need:
 
 1. Update the  ```utils/config.py``` update this file such that it reflects your directory structure.
-2. Update the virtual enviroment directory in all of the bash files (.sh) in ```scripts```
-3. Once these have been updated, run the scripts sequentially, more information can be found in  ```scripts/readme.txt```
+2. Create datasets ```python utils/create_dataset.py```
+3. Update the virtual enviroment directory in all of the bash files (.sh) in ```scripts```
+4. Once these have been updated, run the scripts sequentially, more information can be found in  ```scripts/readme.txt```
 
 ## Directory Structure
 
@@ -91,7 +92,7 @@ Here is an explanation of the main `main_*.py` files used to train each model, a
 | main_ensemble_logits.py       | Implements an ensemble technique using logits aggregation.               |
 | main_ensemble_emb.py          | Implements an ensemble technique using embeddings aggregation.           |
 
-These `main_.py` files are used as the main functions to train various models in your project. They correspond to different knowledge distillation methods and ensemble techniques. Additionally, the `model_config` files are used in conjunction with these scripts to configure model architectures and training parameters.
+These `main_*.py` files are used as the main functions to train various models in your project. They correspond to different knowledge distillation methods and ensemble techniques. Additionally, the `model_config` files are used in conjunction with these scripts to configure model architectures and training parameters.
 If custom model configurations need to be defined in the one of the files in `model_config` directory, then imported into the approiriate model you want to train.
 
 Refer to the specific `main_*.py` files for detailed implementation and usage instructions.
