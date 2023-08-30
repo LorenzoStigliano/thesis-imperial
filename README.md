@@ -7,7 +7,7 @@ At the heart of this project is our novel proposed method, **Reproducibility Awa
 RepKD is designed to transfer knowledge from a large pre-trained teacher GNN to a smaller GNN student while preserving reproducibility for graph classification tasks. 
 The method introduces a two-step framework, as depicted in the figure, comprising of two steps:
 
-- **Reproducibility Aware Knowledge Distillation Process**: This step encompasses the knowledge transfer process from the teacher to the student while ensuring the reproducibility of the learned representations.
+- **Reproducibility Aware Knowledge Distillation Process**: This step encompasses the knowledge transfer process from the teacher to the student while ensuring the reproducibility of the student models.
 
 - **Student Selection Process**: The second step involves selecting the final GNN student model for inference.
 
@@ -72,6 +72,9 @@ Here is an overview of the directory and file structure of the project:
 | trainers/        | Contains training code for all knowledge distillation methods baselines (vanilla KD, FitNet, LSP and MSKD) as well as RepKD training method (rep_kd_ensemble/) for ensemble sizes of 2, 3, 4 or 5.                   |
 | utils/           | Stores utility functions and helper modules, used to create datasets and for analysis.                        |
 | demo/            | Holds a demonstration example of how to use the proposed method.     |
+| data_unprocessed/             | Holds unprocessed data to be used with ```builder.py``` |
+| data/             | Holds processed data after using ```builder.py``` or the demo (created automatically) |
+| model_data/ | Directory which holds the data of trained models for anaylsis, created with demo or replicating results (created automatically)| 
 
 ## Explanation of main_*.py Files
 
@@ -79,11 +82,12 @@ Here is an explanation of the main `main_*.py` files used to train each model, a
 
 | File Name                     | Purpose and Method                                                       |
 |-------------------------------|--------------------------------------------------------------------------|
-| main_cross_validation.py      | Used for pre-training teacher models and student models without KD distillation. |
-| main_lsp.py                   | Implements the LSP knowledge distillation method.                       |
-| main_mskd.py                  | Implements the MSKD (Multi-Source Knowledge Distillation) method.         |
-| main_vanilla_kd.py            | Implements the Vanilla Knowledge Distillation method.                    |
 | main_rep_kd.py                | Implements our proposed Reproducible Knowledge Distillation method.      |
+| main_cross_validation.py      | Used for pre-training teacher models and student models without KD distillation. |
+| main_vanilla_kd.py            | Implements the Vanilla Knowledge Distillation method. [https://arxiv.org/pdf/1503.02531.pdf]                |
+| main_fitnet.py            | Implements the FitNet Knowledge Distillation method.                 [https://arxiv.org/pdf/1412.6550.pdf]   |
+| main_lsp.py                   | Implements the LSP knowledge distillation method.   [https://arxiv.org/pdf/2003.10477.pdf]                    |
+| main_mskd.py                  | Implements the MSKD (Multi-Source Knowledge Distillation) method.  [https://github.com/NKU-IIPLab/MSKD]       |
 | main_ensemble_logits.py       | Implements an ensemble technique using logits aggregation.               |
 | main_ensemble_emb.py          | Implements an ensemble technique using embeddings aggregation.           |
 
