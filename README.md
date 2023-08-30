@@ -47,7 +47,7 @@ This project was developed and tested using Python 3.9.7. It is recommended to u
 
 Once the virtual enviroement is created and activated in order to run the demo you need:
 
-1. Update the  ```demo/config.py``` file such that it reflects your directory structure. 
+1. Update the  ```demo/utils/config.py``` file such that it reflects your directory structure. 
 
 2. Once this is done you can run the demo, which is similpy found in the following notebook: ```demo/demo.ipynb```
 
