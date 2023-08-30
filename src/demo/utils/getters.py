@@ -2,7 +2,7 @@ import torch
 import pickle
 import io
 import numpy as np 
-from config import SAVE_DIR_MODEL_DATA
+from utils.config import SAVE_DIR_MODEL_DATA
 
 ########################################################################################
 ################################## GETTERS FOR LABELS OF MODELS ########################

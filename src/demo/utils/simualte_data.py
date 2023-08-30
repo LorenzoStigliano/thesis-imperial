@@ -4,7 +4,12 @@ Created on Fri Jul 30 17:08:19 2021
 
 @author: user
 """
+
+import os
 import numpy as np
+import random
+import pickle
+from utils.config import SAVE_DIR_DATA
 
 def simulate_data(subjects, nodes, views, sigma, mu):
     edges = int(nodes*(nodes-1)/2)

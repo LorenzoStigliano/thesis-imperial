@@ -43,6 +43,76 @@ gcn_args = {
     "evaluation_method": "model_assessment" # model selection or model assessment
 }
 
+gcn_student_args = {
+    "num_epochs":1, 
+    "lr": 0.0001, 
+    "weight_decay":5e-4, 
+    "hidden_dim":64,
+    "dropout":0,
+    "threshold":"median", # Threshold the graph adjacency matrix. Possible values: no_threshold, median, mean
+    "model_name":"gcn_student",
+    "backbone":"gcn",
+    "dataset":"gender_data",
+    "evaluation_method": "model_assessment", # model selection or model assessment
+    "alpha_ce": 1, 
+    "T": 3, 
+    "alpha_soft_ce": 2
+}
+
+gcn_lsp_student_args = {
+    "num_epochs":1, 
+    "lr": 0.001, 
+    "weight_decay":5e-4, 
+    "hidden_dim":64,
+    "dropout":0,
+    "threshold":"median", # Threshold the graph adjacency matrix. Possible values: no_threshold, median, mean
+    "model_name":"lsp",
+    "backbone":"gcn",
+    'student_type':"gcn",
+    "dataset":"gender_data",
+    "evaluation_method": "model_assessment", # model selection or model assessment
+    "alpha_ce": 1, 
+    "T": 3, 
+    "alpha_soft_ce": 2,
+    "alpha_kd_lsp":2
+}
+
+gcn_mskd_student_args = {
+    "num_epochs":1, 
+    "lr": 0.001, 
+    "weight_decay":5e-4, 
+    "hidden_dim":64,
+    "dropout":0,
+    "threshold":"median", # Threshold the graph adjacency matrix. Possible values: no_threshold, median, mean
+    "model_name":"mskd",
+    'student_type':"gcn",
+    "backbone":"gcn",
+    "dataset":"gender_data",
+    "evaluation_method": "model_assessment", # model selection or model assessment
+    "alpha_ce": 1, 
+    "T": 3, 
+    "alpha_soft_ce": 4,
+    "alpha_mskd": 2
+}
+
+gcn_fitnet_student_args = {
+    "num_epochs":1, 
+    "lr": 0.001, 
+    "weight_decay":5e-4, 
+    "hidden_dim":64,
+    "dropout":0,
+    "threshold":"median", # Threshold the graph adjacency matrix. Possible values: no_threshold, median, mean
+    "model_name":"fitnet",
+    'student_type':"gcn",
+    "backbone":"gcn",
+    "dataset":"gender_data",
+    "evaluation_method": "model_assessment", # model selection or model assessment
+    "alpha_ce": 1, 
+    "T": 3, 
+    "alpha_soft_ce": 2,
+    "alpha_ht": 0.2
+}
+
 # ENSAMBLE WITH LSP PARAMS
 gcn_student_lsp_ensamble_2_args = {
     "num_epochs":1, 

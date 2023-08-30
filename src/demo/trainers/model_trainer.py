@@ -13,8 +13,8 @@ from models.gcn import GCN
 from models.gcn_3_layers import GCN3
 from models.gcn_student import GCN_STUDENT
 
-from helpers import *
-from config import SAVE_DIR_MODEL_DATA
+from utils.helpers import *
+from utils.config import SAVE_DIR_MODEL_DATA
 
 #device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 device = torch.device('cpu')

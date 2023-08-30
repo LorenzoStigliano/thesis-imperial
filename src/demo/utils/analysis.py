@@ -1,5 +1,5 @@
 import numpy as np
-from getters import *
+from utils.getters import *
 
 ########################################################################################
 ######################## ANALYSIS OF REPRODUCIBILITY FOR MODELS ########################
@@ -572,7 +572,7 @@ def reproducibility_mulitple_runs_student_specific(dataset, views, models, CV, r
             - mean_all_std (numpy.ndarray): Standard deviation of mean reproducibility scores across all runs for each view and model.
     """
     mean_all_runs = []
-    runs=[i for i in range(10)]
+    runs=runs
     for run in runs:
         view_data_mean, _ = view_reproducibility_analysis_student_specific(dataset, models, CV, views, run, students=students, model_args=model_args)
         mean_all_runs.append(view_data_mean)

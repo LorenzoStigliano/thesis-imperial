@@ -6,11 +6,11 @@ import numpy as np
 
 from trainers.model_trainer import cross_validation
 
-from model_config_GSP import * 
+from models_config.model_config_GSP import * 
 
-from builders import new_folder
-from loaders import load_data
-from config import SAVE_DIR_MODEL_DATA, SAVE_DIR_DATA
+from utils.builders import new_folder
+from utils.loaders import load_data
+from utils.config import SAVE_DIR_MODEL_DATA, SAVE_DIR_DATA
 
 import joblib
 from joblib import Parallel, delayed
@@ -42,6 +42,10 @@ def train_main_model(dataset, model, view, cv_number, model_args, run=0):
         if model_args["evaluation_method"] == "model_assessment" or  model_args["evaluation_method"] == "model_selection":
             model_name += f"_run_{run}_fixed_init"
         cross_validation(model_args, G_list, view, model_name, cv_number, run)
+    else:
+        if model_args["evaluation_method"] == "model_assessment" or  model_args["evaluation_method"] == "model_selection":
+            model_name += f"_run_{run}_fixed_init"
+        cross_validation(model_args, G_list, view, model_name, cv_number, run)
 
 def parrallel_run_A(run, dataset):
     """
@@ -54,10 +58,10 @@ def parrallel_run_A(run, dataset):
     Note:
         This function is meant to be used in parallel processing for training models.
     """
-    views = [0, 2, 4, 5] #0, 2, 4, 5
+    views = [0] #0, 2, 4, 5
     if dataset == "gender_data":
         for view_i in views:
-            models = [gcn_args] #ADD MODEL CONFIG HERE 
+            models = [gcn_args, gcn_student_args] #ADD MODEL CONFIG HERE 
             for model in models:
                 for cv in [3, 5, 10]:
                     train_main_model(dataset, model["model_name"], view_i, cv, model, run)
