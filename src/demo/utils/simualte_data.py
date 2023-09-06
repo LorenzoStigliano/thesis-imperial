@@ -12,6 +12,7 @@ import pickle
 from utils.config import SAVE_DIR_DATA
 
 def simulate_data(subjects, nodes, views, sigma, mu):
+    #Adapted from: https://github.com/basiralab/reproducibleFedGNN
     edges = int(nodes*(nodes-1)/2)
     adjs = []
     for subject in range(subjects):

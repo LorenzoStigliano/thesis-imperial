@@ -18,6 +18,8 @@ def load_data(dataset, view, SAVE_DIR_DATA, NormalizeInputGraphs=False):
 
     Returns:
         list: List of dictionaries, each containing 'adj', 'label', and 'id' keys.
+    
+    Adapted from: https://github.com/basiralab/RG-Select
     """
     if dataset =='gender_data':
         with open(SAVE_DIR_DATA+dataset+'/'+dataset+'_edges','rb') as f:
@@ -64,6 +66,8 @@ def minmax_sc(x):
 
     Returns:
         numpy.ndarray: Scaled data.
+    
+    Adapted from: https://github.com/basiralab/RG-Select
     """
     min_max_scaler = preprocessing.MinMaxScaler()
     x = min_max_scaler.fit_transform(x)
@@ -78,6 +82,8 @@ class GraphSampler(torch.utils.data.Dataset):
 
     Returns:
         dict: A dictionary containing graph adjacency, labels, and ID.
+    
+    Adapted from: https://github.com/basiralab/RG-Select
     """
     def __init__(self, G_list):
         self.adj_all = []

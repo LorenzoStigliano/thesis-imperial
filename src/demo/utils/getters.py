@@ -27,6 +27,8 @@ def get_labels_and_preds(dataset, model, analysis_type, training_type, cv_n, vie
     Returns:
         labels_and_preds (dict) A dictionary containing labels and model predictions if analysis_type is "model_assessment",
         otherwise returns None.
+    
+    Adapted from: https://github.com/basiralab/RG-Select
     """
     if analysis_type == "model_assessment":
         if "ensamble" in model:
@@ -81,6 +83,8 @@ def extract_metrics(dataset, model, analysis_type, training_type, view, run, dat
 
     Returns:
         metrics (numpy.ndarray): Array of aggregated metrics across cross-validation folds.
+    
+    Adapted from: https://github.com/basiralab/RG-Select
     """
     metrics = []
     if training_type == '3Fold':
@@ -114,6 +118,8 @@ def get_metrics(dataset, model, analysis_type, training_type, cv_n, view, run, d
     Returns:
         metrics (dict): Dictionary containing model evaluation metrics if analysis_type is "model_assessment",
             otherwise returns None.
+    
+    Adapted from: https://github.com/basiralab/RG-Select
     """
     if analysis_type == "model_assessment": 
         if "teacher" in model:
@@ -226,6 +232,8 @@ def extract_weights(dataset, view, model, training_type, run, student=0, model_a
 
     Returns:
         weights (np.ndarray): Averaged model weights.
+    
+    Adapted from: https://github.com/basiralab/RG-Select
     """
     runs = []
     if training_type == '3Fold':

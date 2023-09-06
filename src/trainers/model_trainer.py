@@ -1,3 +1,5 @@
+#Adapted from: https://github.com/basiralab/RG-Select
+
 import time
 import torch
 import pickle

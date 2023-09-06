@@ -15,6 +15,8 @@ def top_biomarkers(weights, K_i):
 
     Returns:
         list: List of indices corresponding to the top K_i biomarkers.
+    
+    Adapted from: https://github.com/basiralab/RG-Select
     """
     weights_normalized = np.abs(weights)
     return list(weights_normalized.argsort()[::-1][:K_i])
@@ -29,6 +31,8 @@ def sim(nodes1, nodes2):
 
     Returns:
         float: Similarity score between the two sets of nodes.
+    
+    Adapted from: https://github.com/basiralab/RG-Select
     """
     if len(nodes1)==len(nodes2):
         counter = 0
@@ -57,6 +61,8 @@ def view_specific_rep(dataset, view, model, CV, run, student=0, model_args=None)
     Returns:
         float: Mean reproducibility score across cross-validation folds.
         float: Standard deviation of the reproducibility scores.
+    
+    Adapted from: https://github.com/basiralab/RG-Select
     """
     Ks = [5, 10, 15, 20]
     rep = np.zeros([len(Ks), len(CV), len(CV)])

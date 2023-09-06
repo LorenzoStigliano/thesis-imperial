@@ -16,6 +16,8 @@ class GraphSampler(torch.utils.data.Dataset):
 
     Returns:
         dict: A dictionary containing graph adjacency, labels, and ID.
+    
+    Adapted from: https://github.com/basiralab/RG-Select
     """
     
     def __init__(self, G_list):
@@ -47,6 +49,8 @@ def datasets_splits(folds, args, val_idx):
 
     Returns:
         list, list, list: Lists containing train, validation, and test graphs.
+    
+    Adapted from: https://github.com/basiralab/RG-Select
     """
     train = []
     validation = []
@@ -73,6 +77,8 @@ def model_selection_split(train, validation, args):
 
     Returns:
         DataLoader, DataLoader, float: DataLoader objects for train and validation sets, and threshold value.
+    
+    Adapted from: https://github.com/basiralab/RG-Select
     """
     print('Num training graphs: ', len(train), '; Num test graphs: ', len(validation))
     
@@ -109,6 +115,8 @@ def model_assessment_split(train, validation, test, args):
 
     Returns:
         DataLoader, DataLoader, float: DataLoader objects for train and test sets, and threshold value.
+    
+    Adapted from: https://github.com/basiralab/RG-Select
     """
     
     train.extend(validation)
@@ -146,6 +154,8 @@ def stratify_splits(graphs, cv_number):
 
     Returns:
         list: List of graph folds.
+    
+    Adapted from: https://github.com/basiralab/RG-Select
     """
     graphs_0 = []
     graphs_1 = []
@@ -182,6 +192,8 @@ def get_stats(list_train):
 
     Returns:
         float, float: Mean and median of training features.
+    
+    Adapted from: https://github.com/basiralab/RG-Select
     """
     train_features = []
     for i in range(len(list_train)):

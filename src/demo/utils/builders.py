@@ -22,6 +22,8 @@ def dump_data_MEDMNIST(save_dir, dataset):
 
     Usage:
     dump_data_MEDMNIST(SAVE_DIR_DATA, 'BreastMNIST')
+
+    Adapted from: https://github.com/basiralab/reproducibleFedGNN
     """
     data_flag=dataset
     download = True
@@ -82,6 +84,8 @@ def dump_data_gender_data(data_dir, save_dir, dataset):
 
     Usage:
     dump_data_gender_data(DATA_DIR, SAVE_DIR_DATA, 'GenderData')
+    
+    Adapted from: https://github.com/basiralab/RG-Select
     """
 
     adjs, ages, labels = [], [], []
@@ -125,6 +129,8 @@ def new_folder(model, evaluation_method, SAVE_DIR_MODEL_DATA, backbone="gcn", da
 
     Usage:
     new_folder("gcn", "evaluation_method", SAVE_DIR_MODEL_DATA, backbone="gcn", dataset="gender_data")
+    
+    Adapted from: https://github.com/basiralab/RG-Select
     """
     print(SAVE_DIR_MODEL_DATA+dataset+"/"+backbone+"/"+evaluation_method+"/"+model)
     if not os.path.exists(SAVE_DIR_MODEL_DATA+dataset+"/"+backbone+"/"+evaluation_method+"/"+model):
