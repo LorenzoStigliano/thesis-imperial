@@ -57,7 +57,11 @@ GCN to GCN tables.
 
 3. Run the Scripts
 
-To run the script simply: source /path/to/script
+To run the script simply:
+1. Navigate to script directory: 
+    cd /src/script
+2. Execute the script
+    source SCRIPT_NAME.sh
 Note: run the scripts in order: setup_run_A, setup_run_B and setup_run_C, since they depend each other
 
 4. Output:
